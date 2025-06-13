@@ -15,31 +15,38 @@ private val DarkColorScheme = darkColorScheme(
     primary = Green400,
     secondary = Green200,
     tertiary = White300,
+    secondaryContainer = Green200,
+    onSecondaryContainer = Green400,
     background = White100,
     surface = White200,
+    surfaceContainer = White200,
     onPrimary = Black900,
     onSecondary = Black900,
     onBackground = Black900,
-    onSurface = Black700,
+    onSurface = Black900,
+    onSurfaceVariant = Black700
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = Green400,
     secondary = Green200,
     tertiary = White300,
+    secondaryContainer = Green200,
+    onSecondaryContainer = Green400,
     background = White100,
     surface = White200,
+    surfaceContainer = White200,
     onPrimary = Black900,
     onSecondary = Black900,
     onBackground = Black900,
-    onSurface = Black700,
+    onSurface = Black900,
+    onSurfaceVariant = Black700
 )
 
 @Composable
 fun BudgetlyTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

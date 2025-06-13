@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">Budgetly</string>
+
+    <string name="bottom_nav_label_expenses">Расходы</string>
+    <string name="bottom_nav_label_incomes">Доходы</string>
+    <string name="bottom_nav_label_score">Счет</string>
+    <string name="bottom_nav_label_articles">Статьи</string>
+    <string name="bottom_nav_label_settigns">Настройки</string>
+    <string name="expenses_top_bar_title">Расходы сегодня</string>
+    <string name="expenses_top_bar_action_description">История</string>
+    <string name="incomes_top_bar_title">Доходы сегодня</string>
+    <string name="account_top_bar_title">Мой счёт</string>
+    <string name="account_top_bar_action_description">Редактировать</string>
+    <string name="articles_top_bar_title">Мои статьи</string>
+    <string name="settings_top_bar_title">Настройки</string>
+    <string name="fab_description">Добавить</string>
 </resources>

@@ -17,6 +17,7 @@ val Black900 = Color(0xFF1D1B20)
 val Black700 = Color(0xFF49454F)
 val Black800 = Color(0x4D3C434D)
 
+val White = Color(0xFFFFFFFF)
 val White100 = Color(0xFFFEF7FF)
 val White200 = Color(0xFFF3EDF7)
 val White300 = Color(0xFFECE6F0)
