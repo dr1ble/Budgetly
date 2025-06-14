@@ -82,7 +82,7 @@ fun BaseListItem(
 
         if (showDivider) {
             HorizontalDivider(
-                modifier = Modifier.align(Alignment.BottomCenter), // Прижимаем к нижнему краю
+                modifier = Modifier.align(Alignment.BottomCenter),
                 thickness = 1.dp,
                 color = MaterialTheme.colorScheme.outlineVariant
             )

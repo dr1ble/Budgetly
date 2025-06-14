@@ -27,6 +27,8 @@ fun MainScreen() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+    val showBars = currentRoute != NavDestination.Splash.route
+
     val fabRoutes = setOf(
         NavDestination.Expenses.route,
         NavDestination.Incomes.route,
@@ -35,55 +37,63 @@ fun MainScreen() {
 
     Scaffold(
         topBar = {
-            when (currentRoute) {
-                NavDestination.Expenses.route -> AppTopBar(
-                    title = stringResource(R.string.expenses_top_bar_title),
-                    actions = {
-                        IconButton(onClick = { }) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_top_bar_history),
-                                contentDescription = stringResource(R.string.expenses_top_bar_action_description),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+            if (showBars) {
+                when (currentRoute) {
+                    NavDestination.Expenses.route -> AppTopBar(
+                        title = stringResource(R.string.expenses_top_bar_title),
+                        actions = {
+                            IconButton(onClick = { }) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_top_bar_history),
+                                    contentDescription = stringResource(R.string.expenses_top_bar_action_description),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
-                    }
-                )
+                    )
 
-                NavDestination.Incomes.route -> AppTopBar(
-                    title = stringResource(R.string.incomes_top_bar_title),
-                    actions = {
-                        IconButton(onClick = { }) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_top_bar_history),
-                                contentDescription = stringResource(R.string.expenses_top_bar_action_description),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                    NavDestination.Incomes.route -> AppTopBar(
+                        title = stringResource(R.string.incomes_top_bar_title),
+                        actions = {
+                            IconButton(onClick = { }) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_top_bar_history),
+                                    contentDescription = stringResource(R.string.expenses_top_bar_action_description),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
-                    }
-                )
+                    )
 
-                NavDestination.Account.route -> AppTopBar(
-                    title = stringResource(R.string.account_top_bar_title),
-                    actions = {
-                        IconButton(onClick = { }) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_top_bar_edit),
-                                contentDescription = stringResource(R.string.account_top_bar_action_description),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                    NavDestination.Account.route -> AppTopBar(
+                        title = stringResource(R.string.account_top_bar_title),
+                        actions = {
+                            IconButton(onClick = { }) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_top_bar_edit),
+                                    contentDescription = stringResource(R.string.account_top_bar_action_description),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
-                    }
-                )
+                    )
 
-                NavDestination.Articles.route -> AppTopBar(title = stringResource(R.string.articles_top_bar_title))
-                NavDestination.Settings.route -> AppTopBar(title = stringResource(R.string.settings_top_bar_title))
+                    NavDestination.Articles.route -> AppTopBar(title = stringResource(R.string.articles_top_bar_title))
+                    NavDestination.Settings.route -> AppTopBar(title = stringResource(R.string.settings_top_bar_title))
+                }
             }
         },
-        bottomBar = { BottomNavBar(navController) },
+        bottomBar = {
+            if (showBars) {
+                BottomNavBar(navController)
+            }
+        },
 
         floatingActionButton = {
-            if (currentRoute in fabRoutes) {
-                BaseFAB(onClick = { })
+            if (showBars) {
+                if (currentRoute in fabRoutes) {
+                    BaseFAB(onClick = { })
+                }
             }
         }
     ) { paddingValues ->

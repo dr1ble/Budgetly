@@ -9,6 +9,12 @@ sealed class NavDestination(
     @DrawableRes val icon: Int,
     @StringRes val label: Int
 ) {
+    data object Splash : NavDestination(
+        "splash",
+        R.drawable.ic_splash_screen_logo,
+        R.string.bottom_nav_label_expenses
+    )
+
     data object Expenses : NavDestination(
         "expenses",
         R.drawable.ic_bottom_nav_expenses,

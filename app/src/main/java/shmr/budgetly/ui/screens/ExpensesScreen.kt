@@ -34,7 +34,7 @@ fun ExpensesScreen(modifier: Modifier = Modifier) {
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background) // Белый/серый фон для списка
+            .background(MaterialTheme.colorScheme.background)
     ) {
 
         stickyHeader {

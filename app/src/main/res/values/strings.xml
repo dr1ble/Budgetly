@@ -6,6 +6,9 @@
     <string name="bottom_nav_label_score">Счет</string>
     <string name="bottom_nav_label_articles">Статьи</string>
     <string name="bottom_nav_label_settigns">Настройки</string>
+
+    <string name="splash_screen_label">Splash screen</string>
+
     <string name="expenses_top_bar_title">Расходы сегодня</string>
     <string name="expenses_top_bar_action_description">История</string>
     <string name="incomes_top_bar_title">Доходы сегодня</string>
