@@ -14,4 +14,6 @@
     <string name="articles_top_bar_title">Мои статьи</string>
     <string name="settings_top_bar_title">Настройки</string>
     <string name="fab_description">Добавить</string>
+    <string name="account_ic_arrow_description">Перейти</string>
+    <string name="account_currency_title">Валюта</string>
 </resources>

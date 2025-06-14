@@ -5,10 +5,10 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import shmr.budgetly.ui.screens.AccountScreen
 import shmr.budgetly.ui.screens.ArticlesScreen
 import shmr.budgetly.ui.screens.ExpensesScreen
 import shmr.budgetly.ui.screens.IncomesScreen
-import shmr.budgetly.ui.screens.ScoreScreen
 import shmr.budgetly.ui.screens.SettingsScreen
 
 @Composable
@@ -25,7 +25,7 @@ fun AppNavGraph(navController: NavHostController) {
             IncomesScreen()
         }
         composable(route = NavDestination.Account.route) {
-            ScoreScreen()
+            AccountScreen()
         }
         composable(route = NavDestination.Articles.route) {
             ArticlesScreen()

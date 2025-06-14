@@ -11,7 +11,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import shmr.budgetly.R
@@ -91,7 +90,7 @@ fun MainScreen() {
         Box(
             modifier = Modifier
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp)
+
         ) {
             AppNavGraph(navController)
         }
