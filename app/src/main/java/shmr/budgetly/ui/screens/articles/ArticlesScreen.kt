@@ -1,4 +1,4 @@
-package shmr.budgetly.ui.screens
+package shmr.budgetly.ui.screens.articles
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background

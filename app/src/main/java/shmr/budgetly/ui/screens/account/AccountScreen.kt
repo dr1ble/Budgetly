@@ -1,9 +1,10 @@
-package shmr.budgetly.ui.screens
+package shmr.budgetly.ui.screens.account
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Icon
@@ -30,7 +31,7 @@ fun AccountScreen(modifier: Modifier = Modifier) {
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         item {
             BaseListItem(
@@ -40,6 +41,7 @@ fun AccountScreen(modifier: Modifier = Modifier) {
                         backgroundColor = MaterialTheme.colorScheme.background
                     )
                 },
+                modifier = Modifier.height(56.dp),
                 title = balanceCategory.name,
                 titleTextStyle = MaterialTheme.typography.bodyLarge,
                 backgroundColor = MaterialTheme.colorScheme.secondary,
@@ -66,6 +68,8 @@ fun AccountScreen(modifier: Modifier = Modifier) {
                 title = stringResource(R.string.account_currency_title),
                 titleTextStyle = MaterialTheme.typography.bodyLarge,
                 backgroundColor = MaterialTheme.colorScheme.secondary,
+                showDivider = false,
+                modifier = Modifier.height(56.dp),
                 trail = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(

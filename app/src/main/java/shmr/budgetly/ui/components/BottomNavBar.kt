@@ -6,6 +6,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier // ДОБАВЛЕНО
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -14,19 +15,24 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import shmr.budgetly.ui.navigation.NavDestination
 
 @Composable
-fun BottomNavBar(navController: NavHostController) {
+fun BottomNavBar(
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
     val destinations = listOf(
-        NavDestination.Expenses,
-        NavDestination.Incomes,
-        NavDestination.Account,
-        NavDestination.Articles,
-        NavDestination.Settings
+        NavDestination.BottomNav.Expenses,
+        NavDestination.BottomNav.Incomes,
+        NavDestination.BottomNav.Account,
+        NavDestination.BottomNav.Articles,
+        NavDestination.BottomNav.Settings
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    NavigationBar {
+    NavigationBar(
+        modifier = modifier
+    ) {
         destinations.forEach { destination ->
             NavigationBarItem(
                 label = { Text(text = stringResource(id = destination.label)) },

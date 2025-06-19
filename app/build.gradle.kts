@@ -59,5 +59,7 @@ dependencies {
 
     implementation(libs.androidx.navigation.compose)
 
+    implementation(libs.material)
     implementation(libs.lottie.compose)
+    implementation(libs.androidx.core.splashscreen)
 }

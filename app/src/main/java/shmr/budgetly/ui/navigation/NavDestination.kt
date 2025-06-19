@@ -4,41 +4,46 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import shmr.budgetly.R
 
-sealed class NavDestination(
-    val route: String,
-    @DrawableRes val icon: Int,
-    @StringRes val label: Int
-) {
-    data object Splash : NavDestination(
-        "splash",
-        R.drawable.ic_splash_screen_logo,
-        R.string.bottom_nav_label_expenses
-    )
+sealed class NavDestination(val route: String) {
 
-    data object Expenses : NavDestination(
-        "expenses",
-        R.drawable.ic_bottom_nav_expenses,
-        R.string.bottom_nav_label_expenses
-    )
+    data object Splash : NavDestination("splash")
 
-    data object Incomes : NavDestination(
-        "incomes",
-        R.drawable.ic_bottom_nav_income,
-        R.string.bottom_nav_label_incomes
-    )
+    data object Main : NavDestination("main")
 
-    data object Account :
-        NavDestination("account", R.drawable.ic_bottom_nav_account, R.string.bottom_nav_label_score)
+    sealed class BottomNav(
+        route: String,
+        @DrawableRes val icon: Int,
+        @StringRes val label: Int
+    ) : NavDestination(route) {
 
-    data object Articles : NavDestination(
-        "articles",
-        R.drawable.ic_bottom_nav_articles,
-        R.string.bottom_nav_label_articles
-    )
+        data object Expenses : BottomNav(
+            route = "expenses",
+            icon = R.drawable.ic_bottom_nav_expenses,
+            label = R.string.bottom_nav_label_expenses
+        )
 
-    data object Settings : NavDestination(
-        "settings",
-        R.drawable.ic_bottom_nav_settings,
-        R.string.bottom_nav_label_settigns
-    )
+        data object Incomes : BottomNav(
+            route = "incomes",
+            icon = R.drawable.ic_bottom_nav_income,
+            label = R.string.bottom_nav_label_incomes
+        )
+
+        data object Account : BottomNav(
+            route = "account",
+            icon = R.drawable.ic_bottom_nav_account,
+            label = R.string.bottom_nav_label_score
+        )
+
+        data object Articles : BottomNav(
+            route = "articles",
+            icon = R.drawable.ic_bottom_nav_articles,
+            label = R.string.bottom_nav_label_articles
+        )
+
+        data object Settings : BottomNav(
+            route = "settings",
+            icon = R.drawable.ic_bottom_nav_settings,
+            label = R.string.bottom_nav_label_settigns
+        )
+    }
 }

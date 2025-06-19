@@ -5,37 +5,32 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import shmr.budgetly.ui.screens.AccountScreen
-import shmr.budgetly.ui.screens.ArticlesScreen
-import shmr.budgetly.ui.screens.ExpensesScreen
-import shmr.budgetly.ui.screens.IncomesScreen
-import shmr.budgetly.ui.screens.SettingsScreen
-import shmr.budgetly.ui.screens.SplashScreen
+import shmr.budgetly.ui.screens.account.AccountScreen
+import shmr.budgetly.ui.screens.articles.ArticlesScreen
+import shmr.budgetly.ui.screens.expenses.ExpensesScreen
+import shmr.budgetly.ui.screens.incomes.IncomesScreen
+import shmr.budgetly.ui.screens.settings.SettingsScreen
 
 @Composable
 fun AppNavGraph(navController: NavHostController) {
     NavHost(
         navController = navController,
-        startDestination = NavDestination.Splash.route,
+        startDestination = NavDestination.BottomNav.Expenses.route,
         modifier = Modifier
     ) {
-        composable(route = NavDestination.Splash.route) {
-            SplashScreen(navController = navController)
-        }
-
-        composable(route = NavDestination.Expenses.route) {
+        composable(route = NavDestination.BottomNav.Expenses.route) {
             ExpensesScreen()
         }
-        composable(route = NavDestination.Incomes.route) {
+        composable(route = NavDestination.BottomNav.Incomes.route) {
             IncomesScreen()
         }
-        composable(route = NavDestination.Account.route) {
+        composable(route = NavDestination.BottomNav.Account.route) {
             AccountScreen()
         }
-        composable(route = NavDestination.Articles.route) {
+        composable(route = NavDestination.BottomNav.Articles.route) {
             ArticlesScreen()
         }
-        composable(route = NavDestination.Settings.route) {
+        composable(route = NavDestination.BottomNav.Settings.route) {
             SettingsScreen()
         }
     }

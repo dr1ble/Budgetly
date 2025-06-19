@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Ваша основная тема приложения -->
+    <style name="Theme.Budgetly" parent="Theme.Material3.DayNight.NoActionBar" />
 
-    <style name="Theme.Budgetly" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+
+        <item name="postSplashScreenTheme">@style/Theme.Budgetly</item>
+    </style>
 </resources>

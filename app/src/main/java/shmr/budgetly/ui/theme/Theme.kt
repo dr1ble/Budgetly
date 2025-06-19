@@ -65,6 +65,8 @@ fun BudgetlyTheme(
         else -> LightColorScheme
     }
 
+    ApplySystemBars(colorScheme = colorScheme, darkTheme = darkTheme)
+
     val dimens = defaultDimens
 
     CompositionLocalProvider(LocalDimens provides dimens) {

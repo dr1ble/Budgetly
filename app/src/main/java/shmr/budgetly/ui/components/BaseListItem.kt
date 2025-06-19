@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun BaseListItem(
     title: String,
-    titleTextStyle: TextStyle = MaterialTheme.typography.bodyMedium,
+    titleTextStyle: TextStyle = MaterialTheme.typography.bodyLarge,
     subtitle: String? = null,
     modifier: Modifier = Modifier,
     defaultHeight: Dp = 70.dp,
@@ -93,7 +93,7 @@ fun BaseListItem(
 @Composable
 fun ListItemTrailText(
     text: String,
-    style: TextStyle = MaterialTheme.typography.bodyMedium
+    style: TextStyle = MaterialTheme.typography.bodyLarge
 ) {
     Text(
         text = text,
@@ -102,7 +102,7 @@ fun ListItemTrailText(
 }
 
 @Composable
-fun TotalHeader(totalAmount: String, textStyle: TextStyle) {
+fun TotalHeader(totalAmount: String, textStyle: TextStyle = MaterialTheme.typography.bodyLarge) {
     BaseListItem(
         title = "Всего",
         titleTextStyle = textStyle,

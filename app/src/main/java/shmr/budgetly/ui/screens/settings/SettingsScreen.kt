@@ -1,4 +1,4 @@
-package shmr.budgetly.ui.screens
+package shmr.budgetly.ui.screens.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,7 +30,7 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         items(
             items = settings,

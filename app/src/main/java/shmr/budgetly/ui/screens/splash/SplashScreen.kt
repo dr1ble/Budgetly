@@ -1,4 +1,4 @@
-package shmr.budgetly.ui.screens
+package shmr.budgetly.ui.screens.splash
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -9,17 +9,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavHostController
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
-import kotlinx.coroutines.delay
 import shmr.budgetly.R
-import shmr.budgetly.ui.navigation.NavDestination
 
 @Composable
-fun SplashScreen(navController: NavHostController) {
+fun SplashScreen(
+    onReady: () -> Unit,
+    onAnimationFinished: () -> Unit
+) {
     val composition by rememberLottieComposition(
         spec = LottieCompositionSpec.RawRes(R.raw.lottie_loader)
     )
@@ -27,29 +27,33 @@ fun SplashScreen(navController: NavHostController) {
     val progress by animateLottieCompositionAsState(
         composition = composition,
         iterations = 1,
-        speed = 1f
+        speed = 2f
     )
+
+    LaunchedEffect(composition) {
+        if (composition != null) {
+            onReady()
+        }
+    }
 
     LaunchedEffect(progress) {
         if (progress == 1f) {
-            delay(150)
-            navController.navigate(NavDestination.Expenses.route) {
-                popUpTo(NavDestination.Splash.route) {
-                    inclusive = true
-                }
-            }
+            onAnimationFinished()
         }
     }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
-        LottieAnimation(
-            composition = composition,
-            progress = { progress },
-            modifier = Modifier.fillMaxSize(0.75f)
-        )
+        if (composition != null) {
+            LottieAnimation(
+                composition = composition,
+                progress = { progress },
+                modifier = Modifier.fillMaxSize(0.5f)
+            )
+        }
     }
 }

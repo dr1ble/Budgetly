@@ -1,4 +1,4 @@
-package shmr.budgetly.ui.screens
+package shmr.budgetly.ui.screens.expenses
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -38,7 +38,7 @@ fun ExpensesScreen(modifier: Modifier = Modifier) {
     ) {
 
         stickyHeader {
-            TotalHeader(totalAmount = totalAmount, textStyle = MaterialTheme.typography.bodyMedium)
+            TotalHeader(totalAmount = totalAmount)
         }
 
         items(
