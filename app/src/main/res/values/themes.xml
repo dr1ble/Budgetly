@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Ваша основная тема приложения -->
     <style name="Theme.Budgetly" parent="Theme.Material3.DayNight.NoActionBar" />
 
 

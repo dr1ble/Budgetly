@@ -13,11 +13,11 @@ import androidx.compose.ui.Modifier
 @Composable
 fun AppTopBar(
     title: String,
-    modifier: Modifier = Modifier, // ДОБАВЛЕНО: Хорошая практика - всегда иметь modifier
+    modifier: Modifier = Modifier,
     actions: @Composable (RowScope.() -> Unit) = {}
 ) {
     CenterAlignedTopAppBar(
-        modifier = modifier, // ИЗМЕНЕНО
+        modifier = modifier,
         title = {
             Text(text = title)
         },
@@ -27,7 +27,6 @@ fun AppTopBar(
             actionIconContentColor = MaterialTheme.colorScheme.onPrimary
         ),
         actions = actions,
-
         windowInsets = TopAppBarDefaults.windowInsets
     )
 }
