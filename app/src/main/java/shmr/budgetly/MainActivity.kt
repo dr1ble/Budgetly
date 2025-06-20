@@ -14,14 +14,12 @@ import shmr.budgetly.ui.theme.BudgetlyTheme
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    // ViewModel все еще нужен здесь для управления системным splash-экраном
     private val viewModel: SplashViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
 
-        // Эта логика остается здесь, т.к. она привязана к Activity
         splashScreen.setKeepOnScreenCondition { !viewModel.isReady.value }
         splashScreen.setOnExitAnimationListener { splashScreenView ->
             splashScreenView.remove()

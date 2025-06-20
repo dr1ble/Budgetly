@@ -1,11 +1,14 @@
 package shmr.budgetly.ui.screens.incomes
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import shmr.budgetly.domain.entity.Transaction
 import shmr.budgetly.domain.repository.BudgetlyRepository
+import shmr.budgetly.domain.util.Result
 import javax.inject.Inject
 
 data class IncomesUiState(
@@ -27,16 +30,24 @@ class IncomesViewModel @Inject constructor(
         loadIncomes()
     }
 
-    private fun loadIncomes() {
-        _uiState.value = IncomesUiState(isLoading = true)
+    fun loadIncomes() {
+        viewModelScope.launch {
+            _uiState.value = IncomesUiState(isLoading = true)
+            when (val result = repository.getIncomeTransactions()) {
+                is Result.Success -> {
+                    val total = result.data.sumOf {
+                        it.amount.replace(Regex("[^0-9]"), "").toDoubleOrNull() ?: 0.0
+                    }
+                    _uiState.value = IncomesUiState(
+                        transactions = result.data,
+                        totalAmount = "%,.0f ₽".format(total).replace(",", " ")
+                    )
+                }
 
-        val transactions = repository.getIncomeTransactions()
-        val total = "600 000 ₽" // TODO: Implement real calculation
-
-        _uiState.value = IncomesUiState(
-            transactions = transactions,
-            totalAmount = total,
-            isLoading = false
-        )
+                is Result.Error -> {
+                    _uiState.value = IncomesUiState(error = "Failed to load incomes")
+                }
+            }
+        }
     }
 }

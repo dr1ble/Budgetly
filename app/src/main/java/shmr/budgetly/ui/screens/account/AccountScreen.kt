@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
@@ -24,6 +23,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import shmr.budgetly.R
 import shmr.budgetly.ui.components.BaseListItem
 import shmr.budgetly.ui.components.EmojiIcon
+import shmr.budgetly.ui.theme.dimens
 
 @Composable
 fun AccountScreen(
@@ -56,7 +56,7 @@ fun AccountScreen(
                         backgroundColor = MaterialTheme.colorScheme.background
                     )
                 },
-                modifier = Modifier.height(56.dp),
+                defaultHeight = MaterialTheme.dimens.heights.small,
                 title = balanceCategory.name,
                 titleTextStyle = MaterialTheme.typography.bodyLarge,
                 backgroundColor = MaterialTheme.colorScheme.secondary,
@@ -82,7 +82,7 @@ fun AccountScreen(
                 titleTextStyle = MaterialTheme.typography.bodyLarge,
                 backgroundColor = MaterialTheme.colorScheme.secondary,
                 showDivider = false,
-                modifier = Modifier.height(56.dp),
+                defaultHeight = MaterialTheme.dimens.heights.small,
                 trail = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(

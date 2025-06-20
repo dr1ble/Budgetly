@@ -3,6 +3,8 @@ package shmr.budgetly.ui.screens
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,7 +42,9 @@ fun MainScreen() {
                 NavDestination.BottomNav.Expenses.route -> AppTopBar(
                     title = stringResource(R.string.expenses_top_bar_title),
                     actions = {
-                        IconButton(onClick = { }) {
+                        IconButton(onClick = {
+                            navController.navigate(NavDestination.History.route)
+                        }) {
                             Icon(
                                 painter = painterResource(R.drawable.ic_top_bar_history),
                                 contentDescription = stringResource(R.string.expenses_top_bar_action_description),
@@ -53,10 +57,34 @@ fun MainScreen() {
                 NavDestination.BottomNav.Incomes.route -> AppTopBar(
                     title = stringResource(R.string.incomes_top_bar_title),
                     actions = {
-                        IconButton(onClick = { }) {
+                        IconButton(onClick = {
+                            navController.navigate(NavDestination.History.route)
+                        }) {
                             Icon(
                                 painter = painterResource(R.drawable.ic_top_bar_history),
                                 contentDescription = stringResource(R.string.expenses_top_bar_action_description),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                )
+
+                NavDestination.History.route -> AppTopBar(
+                    title = "Моя история",
+                    navigationIcon = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Назад"
+                        )
+                    },
+                    onNavigationClick = {
+                        navController.popBackStack()
+                    },
+                    actions = {
+                        IconButton(onClick = { /* TODO */ }) {
+                            Icon(
+                                painterResource(R.drawable.ic_history_analyze),
+                                contentDescription = "Анализ истории",
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }

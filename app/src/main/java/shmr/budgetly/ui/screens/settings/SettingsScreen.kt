@@ -13,10 +13,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import shmr.budgetly.R
 import shmr.budgetly.ui.components.BaseListItem
+import shmr.budgetly.ui.theme.dimens
 
 @Composable
 fun SettingsScreen(
@@ -35,7 +35,7 @@ fun SettingsScreen(
             key = { it }
         ) { settingTitle ->
             BaseListItem(
-                defaultHeight = 56.dp,
+                defaultHeight = MaterialTheme.dimens.heights.small,
                 title = settingTitle,
                 titleTextStyle = MaterialTheme.typography.bodyLarge,
                 showDivider = true,

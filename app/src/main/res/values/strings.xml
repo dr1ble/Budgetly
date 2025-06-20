@@ -12,6 +12,7 @@
     <string name="expenses_top_bar_title">Расходы сегодня</string>
     <string name="expenses_top_bar_action_description">История</string>
     <string name="incomes_top_bar_title">Доходы сегодня</string>
+    <string name="history_top_bar_title">Моя истори</string>
     <string name="account_top_bar_title">Мой счёт</string>
     <string name="account_top_bar_action_description">Редактировать</string>
     <string name="articles_top_bar_title">Мои статьи</string>

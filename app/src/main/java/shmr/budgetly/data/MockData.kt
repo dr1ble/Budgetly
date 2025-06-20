@@ -2,7 +2,6 @@ package shmr.budgetly.data
 
 import shmr.budgetly.domain.entity.Account
 import shmr.budgetly.domain.entity.Category
-import shmr.budgetly.domain.entity.Transaction
 
 object MockData {
 
@@ -29,21 +28,7 @@ object MockData {
     private val categorySideJob =
         Category(id = 9, name = "Подработка", emoji = "\uD83D\uDCBB", isIncome = true)
 
-    val expenseTransactions = listOf(
-        Transaction(id = 1, category = categoryRent, amount = "100 000 ₽"),
-        Transaction(id = 2, category = categoryClothes, amount = "100 000 ₽"),
-        Transaction(id = 3, category = categoryDog, amount = "100 000 ₽", comment = "Джек"),
-        Transaction(id = 4, category = categoryDog, amount = "100 000 ₽", comment = "Энни"),
-        Transaction(id = 5, category = categoryRepair, amount = "100 000 ₽"),
-        Transaction(id = 6, category = categoryFood, amount = "100 000 ₽"),
-        Transaction(id = 7, category = categorySport, amount = "100 000 ₽"),
-        Transaction(id = 8, category = categoryMedicine, amount = "100 000 ₽")
-    )
 
-    val incomeTransactions = listOf(
-        Transaction(id = 9, category = categorySalary, amount = "500 000 ₽"),
-        Transaction(id = 10, category = categorySideJob, amount = "100 000 ₽")
-    )
     val balanceCategory =
         Category(id = 99, name = "Баланс", emoji = "\uD83D\uDCB0", isIncome = false)
 

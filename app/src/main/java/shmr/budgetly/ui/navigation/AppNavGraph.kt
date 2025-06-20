@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import shmr.budgetly.ui.screens.account.AccountScreen
 import shmr.budgetly.ui.screens.articles.ArticlesScreen
 import shmr.budgetly.ui.screens.expenses.ExpensesScreen
+import shmr.budgetly.ui.screens.history.HistoryScreen
 import shmr.budgetly.ui.screens.incomes.IncomesScreen
 import shmr.budgetly.ui.screens.settings.SettingsScreen
 
@@ -21,17 +22,25 @@ fun AppNavGraph(navController: NavHostController) {
         composable(route = NavDestination.BottomNav.Expenses.route) {
             ExpensesScreen()
         }
+
         composable(route = NavDestination.BottomNav.Incomes.route) {
             IncomesScreen()
         }
+
         composable(route = NavDestination.BottomNav.Account.route) {
             AccountScreen()
         }
+
         composable(route = NavDestination.BottomNav.Articles.route) {
             ArticlesScreen()
         }
+
         composable(route = NavDestination.BottomNav.Settings.route) {
             SettingsScreen()
+        }
+
+        composable(route = NavDestination.History.route) {
+            HistoryScreen(navController = navController)
         }
     }
 }

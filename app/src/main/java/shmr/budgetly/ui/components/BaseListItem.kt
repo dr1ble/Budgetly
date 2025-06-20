@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import shmr.budgetly.ui.theme.dimens
 
 @Composable
 fun BaseListItem(
@@ -106,7 +107,7 @@ fun TotalHeader(totalAmount: String, textStyle: TextStyle = MaterialTheme.typogr
     BaseListItem(
         title = "Всего",
         titleTextStyle = textStyle,
-        modifier = Modifier.height(56.dp),
+        defaultHeight = MaterialTheme.dimens.heights.small,
         backgroundColor = MaterialTheme.colorScheme.secondary,
         showDivider = true,
         trail = {

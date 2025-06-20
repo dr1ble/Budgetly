@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.dp
 data class Dimens(
     val spacing: Spacing = Spacing(),
     val sizes: Sizes = Sizes(),
+    val heights: Heights = Heights()
 )
 
 @Immutable
@@ -18,6 +19,12 @@ data class Spacing(
     val small: Dp = 8.dp,
     val medium: Dp = 16.dp,
     val large: Dp = 24.dp,
+)
+
+@Immutable
+data class Heights(
+    val small: Dp = 56.dp,
+    val normal: Dp = 70.dp
 )
 
 @Immutable

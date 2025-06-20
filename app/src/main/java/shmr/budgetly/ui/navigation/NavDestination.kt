@@ -7,8 +7,8 @@ import shmr.budgetly.R
 sealed class NavDestination(val route: String) {
 
     data object Splash : NavDestination("splash")
-
     data object Main : NavDestination("main")
+    data object History : NavDestination("history")
 
     sealed class BottomNav(
         route: String,
