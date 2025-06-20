@@ -10,9 +10,15 @@ import kotlinx.coroutines.launch
 import shmr.budgetly.domain.entity.Transaction
 import shmr.budgetly.domain.repository.BudgetlyRepository
 import shmr.budgetly.domain.util.Result
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
+
+enum class DatePickerDialogType {
+    START_DATE, END_DATE
+}
 
 data class HistoryUiState(
     val transactionsByDate: Map<LocalDate, List<Transaction>> = emptyMap(),
@@ -20,6 +26,7 @@ data class HistoryUiState(
     val endDate: LocalDate = LocalDate.now(),
     val totalSum: String = "0 ₽",
     val isLoading: Boolean = false,
+    val openDialog: DatePickerDialogType? = null,
     val error: String? = null
 )
 
@@ -35,11 +42,53 @@ class HistoryViewModel @Inject constructor(
         loadHistoryForCurrentPeriod()
     }
 
-    fun onDatePeriodChanged(newStartDate: LocalDate, newEndDate: LocalDate) {
-        _uiState.update {
-            it.copy(startDate = newStartDate, endDate = newEndDate)
+    fun onStartDatePickerOpen() {
+        _uiState.update { it.copy(openDialog = DatePickerDialogType.START_DATE) }
+    }
+
+    fun onEndDatePickerOpen() {
+        _uiState.update { it.copy(openDialog = DatePickerDialogType.END_DATE) }
+    }
+
+    fun onDatePickerDismiss() {
+        _uiState.update { it.copy(openDialog = null) }
+    }
+
+    fun onDateSelected(dateInMillis: Long?) {
+        if (dateInMillis == null) {
+            onDatePickerDismiss()
+            return
         }
-        loadHistoryForCurrentPeriod()
+
+
+        val newDate = Instant.ofEpochMilli(dateInMillis).atZone(ZoneId.of("UTC")).toLocalDate()
+        val currentDialog = _uiState.value.openDialog
+
+        _uiState.update { currentState ->
+            when (currentDialog) {
+                DatePickerDialogType.START_DATE -> {
+                    if (newDate.isAfter(currentState.endDate)) {
+                        currentState.copy(openDialog = null)
+                    } else {
+                        currentState.copy(startDate = newDate, openDialog = null)
+                    }
+                }
+
+                DatePickerDialogType.END_DATE -> {
+                    if (newDate.isBefore(currentState.startDate)) {
+                        currentState.copy(openDialog = null)
+                    } else {
+                        currentState.copy(endDate = newDate, openDialog = null)
+                    }
+                }
+
+                null -> currentState
+            }
+        }
+
+        if (_uiState.value.openDialog == null && currentDialog != null) {
+            loadHistoryForCurrentPeriod()
+        }
     }
 
     private fun loadHistoryForCurrentPeriod() {
@@ -61,7 +110,9 @@ class HistoryViewModel @Inject constructor(
                             it.amount.replace(Regex("[^0-9.-]"), "").toDoubleOrNull() ?: 0.0
                         if (it.category.isIncome) amount else -amount
                     }
-                    val grouped = transactions.groupBy { it.transactionDate.toLocalDate() }
+                    val grouped = transactions
+                        .sortedByDescending { it.transactionDate }
+                        .groupBy { it.transactionDate.toLocalDate() }
 
                     _uiState.update {
                         it.copy(
@@ -71,9 +122,14 @@ class HistoryViewModel @Inject constructor(
                         )
                     }
                 }
-
                 is Result.Error -> {
-                    _uiState.update { it.copy(error = "Failed to load history", isLoading = false) }
+
+                    _uiState.update {
+                        it.copy(
+                            error = "Failed to load history",
+                            isLoading = false
+                        )
+                    }
                 }
             }
         }

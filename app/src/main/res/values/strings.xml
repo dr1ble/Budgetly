@@ -21,4 +21,8 @@
     <string name="account_ic_arrow_description">Перейти</string>
     <string name="account_currency_title">Валюта</string>
     <string name="screen_settings_dark_theme_label">Тёмная тема</string>
+
+    <string name="dialog_ok">ОК</string>
+    <string name="dialog_cancel">Отмена</string>
+    <string name="dialog_clear">Очистить</string>
 </resources>

@@ -27,10 +27,12 @@ import androidx.navigation.NavController
 import shmr.budgetly.R
 import shmr.budgetly.domain.entity.Transaction
 import shmr.budgetly.ui.components.BaseListItem
+import shmr.budgetly.ui.components.DatePickerModal
 import shmr.budgetly.ui.components.EmojiIcon
 import shmr.budgetly.ui.theme.dimens
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -47,8 +49,8 @@ fun HistoryScreen(
             startDate = uiState.startDate,
             endDate = uiState.endDate,
             totalSum = uiState.totalSum,
-            onStartDateClick = { /* TODO */ },
-            onEndDateClick = { /* TODO */ }
+            onStartDateClick = viewModel::onStartDatePickerOpen,
+            onEndDateClick = viewModel::onEndDatePickerOpen
         )
 
         Box(modifier = Modifier.fillMaxSize()) {
@@ -63,6 +65,20 @@ fun HistoryScreen(
                 else -> HistoryList(uiState.transactionsByDate)
             }
         }
+    }
+    if (uiState.openDialog != null) {
+        val initialDate = when (uiState.openDialog) {
+            DatePickerDialogType.START_DATE -> uiState.startDate
+            DatePickerDialogType.END_DATE -> uiState.endDate
+            null -> LocalDate.now()
+        }
+
+        DatePickerModal(
+            selectedDate = initialDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
+                .toEpochMilli(),
+            onDateSelected = viewModel::onDateSelected,
+            onDismiss = viewModel::onDatePickerDismiss
+        )
     }
 }
 
@@ -89,6 +105,34 @@ private fun formatTransactionDate(dateTime: LocalDateTime): String {
     return "$day $month $time"
 }
 
+private fun formatHeaderDate(date: LocalDate): String {
+    val monthsInGenitiveCase = mapOf(
+        1 to "января",
+        2 to "февраля",
+        3 to "марта",
+        4 to "апреля",
+        5 to "мая",
+        6 to "июня",
+        7 to "июля",
+        8 to "августа",
+        9 to "сентября",
+        10 to "октября",
+        11 to "ноября",
+        12 to "декабря"
+    )
+
+    val monthName = if (date.monthValue == 5 || date.monthValue == 8) {
+        date.month.getDisplayName(java.time.format.TextStyle.FULL, Locale("ru"))
+    } else {
+        monthsInGenitiveCase[date.monthValue] ?: ""
+    }
+
+    val day = date.dayOfMonth
+    val year = date.year
+
+    return "$day $monthName $year"
+}
+
 
 @Composable
 private fun HistoryHeader(
@@ -98,16 +142,12 @@ private fun HistoryHeader(
     onStartDateClick: () -> Unit,
     onEndDateClick: () -> Unit
 ) {
-    val monthYearFormatter = DateTimeFormatter.ofPattern("LLLL yyyy", Locale("ru"))
-
     Column(modifier = Modifier.background(MaterialTheme.colorScheme.secondary)) {
         BaseListItem(
             title = "Начало",
             defaultHeight = MaterialTheme.dimens.heights.small,
             trail = {
-                Text(
-                    text = startDate.format(monthYearFormatter)
-                        .replaceFirstChar { it.titlecase(Locale.getDefault()) })
+                Text(text = formatHeaderDate(startDate))
             },
             onClick = onStartDateClick
         )
@@ -115,9 +155,7 @@ private fun HistoryHeader(
             title = "Конец",
             defaultHeight = MaterialTheme.dimens.heights.small,
             trail = {
-                Text(
-                    text = endDate.format(monthYearFormatter)
-                        .replaceFirstChar { it.titlecase(Locale.getDefault()) })
+                Text(text = formatHeaderDate(endDate))
             },
             onClick = onEndDateClick
         )
