@@ -19,4 +19,5 @@
     <string name="fab_description">Добавить</string>
     <string name="account_ic_arrow_description">Перейти</string>
     <string name="account_currency_title">Валюта</string>
+    <string name="screen_settings_dark_theme_label">Тёмная тема</string>
 </resources>

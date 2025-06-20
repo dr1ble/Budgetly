@@ -6,10 +6,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
+import dagger.hilt.android.AndroidEntryPoint
 import shmr.budgetly.ui.navigation.RootNavGraph
 import shmr.budgetly.ui.screens.splash.SplashViewModel
 import shmr.budgetly.ui.theme.BudgetlyTheme
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     // ViewModel все еще нужен здесь для управления системным splash-экраном

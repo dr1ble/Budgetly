@@ -8,24 +8,22 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import shmr.budgetly.R
-import shmr.budgetly.data.MockData
 import shmr.budgetly.ui.components.BaseListItem
 
-@Preview
 @Composable
-fun SettingsScreen(modifier: Modifier = Modifier) {
-    var isDarkThemeEnabled by remember { mutableStateOf(false) }
-    val settings = MockData.settingsItems
+fun SettingsScreen(
+    modifier: Modifier = Modifier,
+    viewModel: SettingsViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
 
     LazyColumn(
         modifier = modifier
@@ -33,7 +31,7 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
             .background(MaterialTheme.colorScheme.background)
     ) {
         items(
-            items = settings,
+            items = uiState.settingsItems,
             key = { it }
         ) { settingTitle ->
             BaseListItem(
@@ -41,18 +39,13 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
                 title = settingTitle,
                 titleTextStyle = MaterialTheme.typography.bodyLarge,
                 showDivider = true,
-                onClick = {
-                    when {
-                        settingTitle != "Тёмная тема" -> {
-                        }
-                    }
-                },
+                onClick = {},
                 trail = {
                     when (settingTitle) {
-                        "Тёмная тема" -> {
+                        stringResource(R.string.screen_settings_dark_theme_label) -> {
                             Switch(
-                                checked = isDarkThemeEnabled,
-                                onCheckedChange = { isDarkThemeEnabled = it }
+                                checked = uiState.isDarkThemeEnabled,
+                                onCheckedChange = viewModel::onThemeChanged
                             )
                         }
 

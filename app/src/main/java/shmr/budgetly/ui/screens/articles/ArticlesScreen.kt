@@ -8,60 +8,44 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import shmr.budgetly.data.MockData
+import androidx.hilt.navigation.compose.hiltViewModel
 import shmr.budgetly.ui.components.AppSearchBar
 import shmr.budgetly.ui.components.BaseListItem
 import shmr.budgetly.ui.components.EmojiIcon
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ArticlesScreen(modifier: Modifier = Modifier) {
-    var searchQuery by remember { mutableStateOf("") }
-
-    val filteredCategories = remember(searchQuery, MockData.allCategories) {
-        if (searchQuery.isBlank()) {
-            MockData.allCategories
-        } else {
-            MockData.allCategories.filter {
-                it.name.contains(searchQuery, ignoreCase = true)
-            }
-        }
-    }
+fun ArticlesScreen(
+    modifier: Modifier = Modifier,
+    viewModel: ArticlesViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
 
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-
         stickyHeader {
             Box(modifier = Modifier.background(MaterialTheme.colorScheme.surface)) {
                 AppSearchBar(
-                    query = searchQuery,
-                    onQueryChange = { searchQuery = it },
+                    query = uiState.searchQuery,
+                    onQueryChange = viewModel::onSearchQueryChanged,
                     placeholder = "Найти статью"
                 )
             }
         }
-
-
         items(
-            items = filteredCategories,
+            items = uiState.filteredCategories,
             key = { it.id }
         ) { category ->
             BaseListItem(
                 title = category.name,
                 titleTextStyle = MaterialTheme.typography.bodyLarge,
-                lead = {
-                    EmojiIcon(
-                        emoji = category.emoji
-                    )
-                },
+                lead = { EmojiIcon(emoji = category.emoji) },
                 onClick = { }
             )
         }
