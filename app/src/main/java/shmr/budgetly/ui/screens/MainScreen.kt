@@ -1,7 +1,10 @@
 package shmr.budgetly.ui.screens
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -27,82 +30,108 @@ fun MainScreen() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val showBars = currentRoute != NavDestination.Splash.route
-
     val fabRoutes = setOf(
-        NavDestination.Expenses.route,
-        NavDestination.Incomes.route,
-        NavDestination.Account.route
+        NavDestination.BottomNav.Expenses.route,
+        NavDestination.BottomNav.Incomes.route,
+        NavDestination.BottomNav.Account.route
     )
 
     Scaffold(
         topBar = {
-            if (showBars) {
-                when (currentRoute) {
-                    NavDestination.Expenses.route -> AppTopBar(
-                        title = stringResource(R.string.expenses_top_bar_title),
-                        actions = {
-                            IconButton(onClick = { }) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_top_bar_history),
-                                    contentDescription = stringResource(R.string.expenses_top_bar_action_description),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
+            when (currentRoute) {
+                NavDestination.BottomNav.Expenses.route -> AppTopBar(
+                    title = stringResource(R.string.expenses_top_bar_title),
+                    actions = {
+                        IconButton(onClick = {
+                            navController.navigate(
+                                NavDestination.History.buildRoute(NavDestination.BottomNav.Expenses.route)
+                            )
+                        }) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_top_bar_history),
+                                contentDescription = stringResource(R.string.expenses_top_bar_action_description),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
-                    )
+                    }
+                )
 
-                    NavDestination.Incomes.route -> AppTopBar(
-                        title = stringResource(R.string.incomes_top_bar_title),
-                        actions = {
-                            IconButton(onClick = { }) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_top_bar_history),
-                                    contentDescription = stringResource(R.string.expenses_top_bar_action_description),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
+                NavDestination.BottomNav.Incomes.route -> AppTopBar(
+                    title = stringResource(R.string.incomes_top_bar_title),
+                    actions = {
+                        IconButton(onClick = {
+                            navController.navigate(
+                                NavDestination.History.buildRoute(NavDestination.BottomNav.Incomes.route)
+                            )
+                        }) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_top_bar_history),
+                                contentDescription = stringResource(R.string.expenses_top_bar_action_description),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
-                    )
+                    }
+                )
 
-                    NavDestination.Account.route -> AppTopBar(
-                        title = stringResource(R.string.account_top_bar_title),
-                        actions = {
-                            IconButton(onClick = { }) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_top_bar_edit),
-                                    contentDescription = stringResource(R.string.account_top_bar_action_description),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
+                NavDestination.History.routeWithArgument -> AppTopBar(
+                    title = "Моя история",
+                    navigationIcon = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Назад"
+                        )
+                    },
+                    onNavigationClick = {
+                        navController.popBackStack()
+                    },
+                    actions = {
+                        IconButton(onClick = { /* TODO */ }) {
+                            Icon(
+                                painterResource(R.drawable.ic_history_analyze),
+                                contentDescription = "Анализ истории",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
-                    )
+                    }
+                )
 
-                    NavDestination.Articles.route -> AppTopBar(title = stringResource(R.string.articles_top_bar_title))
-                    NavDestination.Settings.route -> AppTopBar(title = stringResource(R.string.settings_top_bar_title))
-                }
+                NavDestination.BottomNav.Account.route -> AppTopBar(
+                    title = stringResource(R.string.account_top_bar_title),
+                    actions = {
+                        IconButton(onClick = { }) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_top_bar_edit),
+                                contentDescription = stringResource(R.string.account_top_bar_action_description),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                )
+
+                NavDestination.BottomNav.Articles.route -> AppTopBar(title = stringResource(R.string.articles_top_bar_title))
+                NavDestination.BottomNav.Settings.route -> AppTopBar(title = stringResource(R.string.settings_top_bar_title))
             }
         },
         bottomBar = {
-            if (showBars) {
-                BottomNavBar(navController)
-            }
+            BottomNavBar(
+                navController = navController,
+                modifier = Modifier.navigationBarsPadding()
+            )
         },
-
         floatingActionButton = {
-            if (showBars) {
-                if (currentRoute in fabRoutes) {
-                    BaseFAB(onClick = { })
-                }
+            if (currentRoute in fabRoutes) {
+                BaseFAB(
+                    onClick = {
+                    },
+                )
             }
         }
     ) { paddingValues ->
         Box(
             modifier = Modifier
                 .padding(paddingValues)
-
         ) {
-            AppNavGraph(navController)
+            AppNavGraph(navController = navController)
         }
     }
 }

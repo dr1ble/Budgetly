@@ -1,46 +1,89 @@
-package shmr.budgetly.ui.screens
+package shmr.budgetly.ui.screens.account
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import shmr.budgetly.R
-import shmr.budgetly.data.MockData
+import shmr.budgetly.domain.entity.Account
+import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.ui.components.BaseListItem
 import shmr.budgetly.ui.components.EmojiIcon
+import shmr.budgetly.ui.components.ErrorState
+import shmr.budgetly.ui.theme.dimens
 
-@Preview
+private object AccountScreenDefaults {
+    val balanceCategoryEmoji = "💰"
+}
+
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun AccountScreen(modifier: Modifier = Modifier) {
-    val account = MockData.mainAccount
-    val balanceCategory = MockData.balanceCategory
+fun AccountScreen(
+    modifier: Modifier = Modifier,
+    viewModel: AccountViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
 
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        when {
+            uiState.isLoading -> {
+                CircularProgressIndicator()
+            }
+
+            uiState.error != null -> {
+                val errorMessage = when (uiState.error) {
+                    DomainError.NoInternet -> stringResource(R.string.error_no_internet)
+                    DomainError.ServerError -> stringResource(R.string.error_server)
+                    is DomainError.Unknown -> stringResource(R.string.error_unknown)
+                    null -> ""
+                }
+                ErrorState(
+                    message = errorMessage,
+                    onRetry = { viewModel.loadAccount() }
+                )
+            }
+
+            uiState.account != null -> {
+                AccountContent(account = uiState.account!!)
+            }
+        }
+    }
+}
+
+@Composable
+private fun AccountContent(account: Account) {
     LazyColumn(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         item {
             BaseListItem(
                 lead = {
                     EmojiIcon(
-                        balanceCategory.emoji,
+                        emoji = AccountScreenDefaults.balanceCategoryEmoji,
                         backgroundColor = MaterialTheme.colorScheme.background
                     )
                 },
-                title = balanceCategory.name,
+                defaultHeight = MaterialTheme.dimens.heights.small,
+                title = stringResource(id = R.string.account_balance_title),
                 titleTextStyle = MaterialTheme.typography.bodyLarge,
                 backgroundColor = MaterialTheme.colorScheme.secondary,
                 trail = {
@@ -48,8 +91,7 @@ fun AccountScreen(modifier: Modifier = Modifier) {
                         Text(
                             text = "${account.balance} ${account.currency}",
                             style = MaterialTheme.typography.bodyLarge,
-
-                            )
+                        )
                         Spacer(Modifier.width(16.dp))
                         Icon(
                             painterResource(R.drawable.ic_list_item_trail_arrow),
@@ -60,12 +102,13 @@ fun AccountScreen(modifier: Modifier = Modifier) {
                 onClick = { }
             )
         }
-
         item {
             BaseListItem(
                 title = stringResource(R.string.account_currency_title),
                 titleTextStyle = MaterialTheme.typography.bodyLarge,
                 backgroundColor = MaterialTheme.colorScheme.secondary,
+                showDivider = false,
+                defaultHeight = MaterialTheme.dimens.heights.small,
                 trail = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(

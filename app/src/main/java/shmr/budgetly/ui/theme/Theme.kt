@@ -27,7 +27,8 @@ private val DarkColorScheme = darkColorScheme(
     onSurface = Black900,
     onSurfaceVariant = Black700,
     outline = Grey600,
-    outlineVariant = Grey400
+    outlineVariant = Grey400,
+    error = Black700
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -46,7 +47,8 @@ private val LightColorScheme = lightColorScheme(
     onSurface = Black900,
     onSurfaceVariant = Black700,
     outline = Grey600,
-    outlineVariant = Grey400
+    outlineVariant = Grey400,
+    error = Black700
 )
 
 @Composable
@@ -64,6 +66,8 @@ fun BudgetlyTheme(
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
+
+    ApplySystemBars(colorScheme = colorScheme, darkTheme = darkTheme)
 
     val dimens = defaultDimens
 

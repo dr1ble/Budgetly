@@ -12,6 +12,7 @@
     <string name="expenses_top_bar_title">Расходы сегодня</string>
     <string name="expenses_top_bar_action_description">История</string>
     <string name="incomes_top_bar_title">Доходы сегодня</string>
+    <string name="history_top_bar_title">Моя истори</string>
     <string name="account_top_bar_title">Мой счёт</string>
     <string name="account_top_bar_action_description">Редактировать</string>
     <string name="articles_top_bar_title">Мои статьи</string>
@@ -19,4 +20,15 @@
     <string name="fab_description">Добавить</string>
     <string name="account_ic_arrow_description">Перейти</string>
     <string name="account_currency_title">Валюта</string>
+    <string name="screen_settings_dark_theme_label">Тёмная тема</string>
+
+    <string name="dialog_ok">ОК</string>
+    <string name="dialog_cancel">Отмена</string>
+    <string name="dialog_clear">Очистить</string>
+    <string name="exception_no_internet">Нет подключения к интернету</string>
+    <string name="error_no_internet">Нет интернета. Проверьте подключение сети</string>
+    <string name="error_server">Ошибка сервера. Повторите позже</string>
+    <string name="error_unknown">Неизвестная ошибка. Повторите позже</string>
+    <string name="retry_button_text">Повторить</string>
+    <string name="account_balance_title">Баланс</string>
 </resources>

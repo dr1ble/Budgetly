@@ -8,16 +8,19 @@ import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier // ДОБАВЛЕНО
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import shmr.budgetly.R
 
 @Composable
 fun BaseFAB(
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     FloatingActionButton(
         onClick = onClick,
+        modifier = modifier,
         containerColor = MaterialTheme.colorScheme.primary,
         shape = CircleShape,
         contentColor = MaterialTheme.colorScheme.background,
