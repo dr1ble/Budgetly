@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -21,30 +22,55 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import shmr.budgetly.R
+import shmr.budgetly.domain.entity.Account
+import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.ui.components.BaseListItem
 import shmr.budgetly.ui.components.EmojiIcon
+import shmr.budgetly.ui.components.ErrorState
 import shmr.budgetly.ui.theme.dimens
 
+private object AccountScreenDefaults {
+    val balanceCategoryEmoji = "💰"
+}
+
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AccountScreen(
     modifier: Modifier = Modifier,
     viewModel: AccountViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val account = uiState.account
 
-    if (uiState.isLoading || account == null) {
-        Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        when {
+            uiState.isLoading -> {
+                CircularProgressIndicator()
+            }
+
+            uiState.error != null -> {
+                val errorMessage = when (uiState.error) {
+                    DomainError.NoInternet -> stringResource(R.string.error_no_internet)
+                    DomainError.ServerError -> stringResource(R.string.error_server)
+                    is DomainError.Unknown -> stringResource(R.string.error_unknown)
+                    null -> ""
+                }
+                ErrorState(
+                    message = errorMessage,
+                    onRetry = { viewModel.loadAccount() }
+                )
+            }
+
+            uiState.account != null -> {
+                AccountContent(account = uiState.account!!)
+            }
         }
-        return
     }
+}
 
-    val balanceCategory =
-        shmr.budgetly.data.MockData.balanceCategory // This should also come from ViewModel later
-
+@Composable
+private fun AccountContent(account: Account) {
     LazyColumn(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
@@ -52,12 +78,12 @@ fun AccountScreen(
             BaseListItem(
                 lead = {
                     EmojiIcon(
-                        balanceCategory.emoji,
+                        emoji = AccountScreenDefaults.balanceCategoryEmoji,
                         backgroundColor = MaterialTheme.colorScheme.background
                     )
                 },
                 defaultHeight = MaterialTheme.dimens.heights.small,
-                title = balanceCategory.name,
+                title = stringResource(id = R.string.account_balance_title),
                 titleTextStyle = MaterialTheme.typography.bodyLarge,
                 backgroundColor = MaterialTheme.colorScheme.secondary,
                 trail = {

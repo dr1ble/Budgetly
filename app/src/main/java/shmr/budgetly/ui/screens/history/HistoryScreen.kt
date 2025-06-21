@@ -21,14 +21,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import shmr.budgetly.R
 import shmr.budgetly.domain.entity.Transaction
+import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.ui.components.BaseListItem
 import shmr.budgetly.ui.components.DatePickerModal
 import shmr.budgetly.ui.components.EmojiIcon
+import shmr.budgetly.ui.components.ErrorState
 import shmr.budgetly.ui.theme.dimens
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -56,11 +59,18 @@ fun HistoryScreen(
         Box(modifier = Modifier.fillMaxSize()) {
             when {
                 uiState.isLoading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                uiState.error != null -> Text(
-                    uiState.error!!,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                uiState.error != null -> {
+                    val errorMessage = when (uiState.error) {
+                        DomainError.NoInternet -> stringResource(R.string.error_no_internet)
+                        DomainError.ServerError -> stringResource(R.string.error_server)
+                        is DomainError.Unknown -> stringResource(R.string.error_unknown)
+                        null -> ""
+                    }
+                    ErrorState(
+                        message = errorMessage,
+                        onRetry = { viewModel.loadHistory(isInitialLoad = true) }
+                    )
+                }
 
                 else -> HistoryList(uiState.transactionsByDate)
             }
@@ -74,7 +84,7 @@ fun HistoryScreen(
         }
 
         DatePickerModal(
-            selectedDate = initialDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
+            selectedDate = initialDate.atStartOfDay(ZoneId.of("UTC")).toInstant()
                 .toEpochMilli(),
             onDateSelected = viewModel::onDateSelected,
             onDismiss = viewModel::onDatePickerDismiss
@@ -176,10 +186,12 @@ private fun HistoryHeader(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun HistoryList(transactionsByDate: Map<LocalDate, List<Transaction>>) {
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
-        transactionsByDate.onEachIndexed { index, entry ->
+    LazyColumn(modifier = Modifier
+        .fillMaxSize()
+        .background(MaterialTheme.colorScheme.background)) {
+        transactionsByDate.forEach { (date, transactions) ->
             items(
-                items = entry.value,
+                items = transactions,
                 key = { transaction -> transaction.id }
             ) { transaction ->
                 TransactionItem(transaction = transaction)

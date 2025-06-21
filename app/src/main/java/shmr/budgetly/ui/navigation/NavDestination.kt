@@ -2,13 +2,25 @@ package shmr.budgetly.ui.navigation
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import shmr.budgetly.R
 
 sealed class NavDestination(val route: String) {
 
     data object Splash : NavDestination("splash")
     data object Main : NavDestination("main")
-    data object History : NavDestination("history")
+
+    data object History : NavDestination("history/{parentRoute}") {
+        const val PARENT_ROUTE_ARG = "parentRoute"
+        val routeWithArgument = "history/{$PARENT_ROUTE_ARG}"
+        val arguments = listOf(
+            navArgument(PARENT_ROUTE_ARG) { type = NavType.StringType }
+        )
+
+        fun buildRoute(parentRoute: String) = "history/$parentRoute"
+    }
+
 
     sealed class BottomNav(
         route: String,

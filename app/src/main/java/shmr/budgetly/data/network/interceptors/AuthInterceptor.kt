@@ -1,4 +1,4 @@
-package shmr.budgetly.data.network
+package shmr.budgetly.data.network.interceptors
 
 import okhttp3.Interceptor
 import okhttp3.Response

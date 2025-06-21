@@ -39,7 +39,10 @@ fun AppNavGraph(navController: NavHostController) {
             SettingsScreen()
         }
 
-        composable(route = NavDestination.History.route) {
+        composable(
+            route = NavDestination.History.routeWithArgument,
+            arguments = NavDestination.History.arguments
+        ) {
             HistoryScreen(navController = navController)
         }
     }

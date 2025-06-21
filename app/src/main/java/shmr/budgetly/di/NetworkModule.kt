@@ -11,7 +11,9 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import shmr.budgetly.data.network.ApiService
-import shmr.budgetly.data.network.AuthInterceptor
+import shmr.budgetly.data.network.interceptors.AuthInterceptor
+import shmr.budgetly.data.network.interceptors.ConnectivityInterceptor
+import shmr.budgetly.data.network.interceptors.RetryInterceptor
 import javax.inject.Singleton
 
 @Module
@@ -26,9 +28,13 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(
-        authInterceptor: AuthInterceptor
+        authInterceptor: AuthInterceptor,
+        connectivityInterceptor: ConnectivityInterceptor,
+        retryInterceptor: RetryInterceptor
     ): OkHttpClient = OkHttpClient.Builder()
-        .addInterceptor(authInterceptor)
+        .addInterceptor(connectivityInterceptor) // 1. Проверка сети
+        .addInterceptor(retryInterceptor)        // 2. Повторные запросы
+        .addInterceptor(authInterceptor)         // 3. Добавление токена
         .addInterceptor(
             HttpLoggingInterceptor().apply {
                 level = HttpLoggingInterceptor.Level.BODY

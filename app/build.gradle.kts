@@ -16,6 +16,7 @@ try {
     println("Warning: Could not load local.properties file. ${e.message}")
 }
 val apiToken = localProperties.getProperty("API_TOKEN") ?: ""
+val useHardcodedIdOverride = localProperties.getProperty("USE_HARDCODED_ACCOUNT_ID_OVERRIDE")
 
 android {
     namespace = "shmr.budgetly"
@@ -33,6 +34,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("Boolean", "USE_HARDCODED_ACCOUNT_ID", useHardcodedIdOverride)
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -92,4 +96,6 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation(libs.androidx.material)
 }

@@ -43,7 +43,9 @@ fun MainScreen() {
                     title = stringResource(R.string.expenses_top_bar_title),
                     actions = {
                         IconButton(onClick = {
-                            navController.navigate(NavDestination.History.route)
+                            navController.navigate(
+                                NavDestination.History.buildRoute(NavDestination.BottomNav.Expenses.route)
+                            )
                         }) {
                             Icon(
                                 painter = painterResource(R.drawable.ic_top_bar_history),
@@ -58,7 +60,9 @@ fun MainScreen() {
                     title = stringResource(R.string.incomes_top_bar_title),
                     actions = {
                         IconButton(onClick = {
-                            navController.navigate(NavDestination.History.route)
+                            navController.navigate(
+                                NavDestination.History.buildRoute(NavDestination.BottomNav.Incomes.route)
+                            )
                         }) {
                             Icon(
                                 painter = painterResource(R.drawable.ic_top_bar_history),
@@ -69,7 +73,7 @@ fun MainScreen() {
                     }
                 )
 
-                NavDestination.History.route -> AppTopBar(
+                NavDestination.History.routeWithArgument -> AppTopBar(
                     title = "Моя история",
                     navigationIcon = {
                         Icon(

@@ -5,7 +5,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import shmr.budgetly.data.MockData
 import javax.inject.Inject
 
 data class SettingsUiState(
@@ -24,8 +23,19 @@ class SettingsViewModel @Inject constructor() : ViewModel() {
     }
 
     private fun loadSettings() {
+        // Данные теперь живут здесь, а не в MockData
+        val items = listOf(
+            "Тёмная тема",
+            "Основной цвет",
+            "Звуки",
+            "Хаптики",
+            "Код пароль",
+            "Синхронизация",
+            "Язык",
+            "О программе"
+        )
         _uiState.value = SettingsUiState(
-            settingsItems = MockData.settingsItems,
+            settingsItems = items,
             isDarkThemeEnabled = false
         )
     }

@@ -3,6 +3,7 @@ package shmr.budgetly.data.network
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
+import shmr.budgetly.data.network.dto.AccountDto
 import shmr.budgetly.data.network.dto.CategoryDto
 import shmr.budgetly.data.network.dto.TransactionResponseDto
 
@@ -16,4 +17,10 @@ interface ApiService {
 
     @GET("categories")
     suspend fun getAllCategories(): List<CategoryDto>
+
+    @GET("accounts/{id}")
+    suspend fun getAccountById(@Path("id") id: Int): AccountDto
+
+    @GET("accounts")
+    suspend fun getAccounts(): List<AccountDto>
 }

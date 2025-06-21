@@ -58,7 +58,6 @@ fun DatePickerModal(
                 // Цвет для выбранного года
                 selectedYearContainerColor = MaterialTheme.colorScheme.primary,
                 selectedYearContentColor = MaterialTheme.colorScheme.onPrimary,
-                // Цвет для сегодняшней даты (если она не выбрана)
                 todayContentColor = MaterialTheme.colorScheme.primary,
                 todayDateBorderColor = MaterialTheme.colorScheme.primary
             )
