@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import shmr.budgetly.domain.entity.Category
-import shmr.budgetly.domain.repository.BudgetlyRepository
+import shmr.budgetly.domain.usecase.GetAllCategoriesUseCase
 import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.domain.util.Result
 import javax.inject.Inject
@@ -21,9 +21,13 @@ data class ArticlesUiState(
     val error: DomainError? = null
 )
 
+/**
+ * ViewModel для экрана "Статьи".
+ * Отвечает за загрузку и фильтрацию списка всех категорий.
+ */
 @HiltViewModel
 class ArticlesViewModel @Inject constructor(
-    private val repository: BudgetlyRepository
+    private val getAllCategories: GetAllCategoriesUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ArticlesUiState())
@@ -37,7 +41,7 @@ class ArticlesViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = isInitialLoad, error = null) }
 
-            when (val result = repository.getAllCategories()) {
+            when (val result = getAllCategories()) {
                 is Result.Success -> {
                     _uiState.update { currentState ->
                         currentState.copy(
@@ -50,7 +54,6 @@ class ArticlesViewModel @Inject constructor(
                         )
                     }
                 }
-
                 is Result.Error -> {
                     _uiState.update { it.copy(isLoading = false, error = result.error) }
                 }

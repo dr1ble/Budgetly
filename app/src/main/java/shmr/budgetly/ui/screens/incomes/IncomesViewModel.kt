@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import shmr.budgetly.domain.entity.Transaction
-import shmr.budgetly.domain.repository.BudgetlyRepository
+import shmr.budgetly.domain.usecase.GetIncomeTransactionsUseCase
 import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.domain.util.Result
 import javax.inject.Inject
@@ -21,9 +21,14 @@ data class IncomesUiState(
     val error: DomainError? = null
 )
 
+/**
+ * ViewModel для экрана "Доходы".
+ * Отвечает за загрузку списка транзакций-доходов через GetIncomeTransactionsUseCase,
+ * управление состоянием UI и обработку pull-to-refresh.
+ */
 @HiltViewModel
 class IncomesViewModel @Inject constructor(
-    private val repository: BudgetlyRepository
+    private val getIncomeTransactions: GetIncomeTransactionsUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(IncomesUiState())
@@ -42,28 +47,29 @@ class IncomesViewModel @Inject constructor(
                     error = null
                 )
             }
-            when (val result = repository.getIncomeTransactions()) {
-                is Result.Success -> {
-                    val total = result.data.sumOf {
-                        it.amount.replace(Regex("[^0-9.-]"), "").toDoubleOrNull() ?: 0.0
-                    }
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            isRefreshing = false,
-                            transactions = result.data,
-                            totalAmount = "%,.0f ₽".format(total).replace(",", " ")
-                        )
-                    }
+            processResult(getIncomeTransactions())
+        }
+    }
+
+    private fun processResult(result: Result<List<Transaction>>) {
+        when (result) {
+            is Result.Success -> {
+                val total = result.data.sumOf {
+                    it.amount.replace(Regex("[^0-9.-]"), "").toDoubleOrNull() ?: 0.0
                 }
-                is Result.Error -> {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            isRefreshing = false,
-                            error = result.error
-                        )
-                    }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        isRefreshing = false,
+                        transactions = result.data,
+                        totalAmount = "%,.0f ₽".format(total).replace(",", " ")
+                    )
+                }
+            }
+
+            is Result.Error -> {
+                _uiState.update {
+                    it.copy(isLoading = false, isRefreshing = false, error = result.error)
                 }
             }
         }
