@@ -30,8 +30,10 @@ class AccountRepositoryImpl @Inject constructor(
 
     override suspend fun getMainAccount(): Result<Account> {
         return when (val accountIdResult = resolveCurrentAccountId()) {
-            is Result.Success -> safeApiCall {
-                remoteDataSource.getAccountById(accountIdResult.data).toDomainModel()
+            is Result.Success -> {
+                safeApiCall {
+                    remoteDataSource.getAccountById(accountIdResult.data).toDomainModel()
+                }
             }
 
             is Result.Error -> Result.Error(accountIdResult.error)

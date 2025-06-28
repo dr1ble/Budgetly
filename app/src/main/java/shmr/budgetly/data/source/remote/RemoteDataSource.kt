@@ -1,6 +1,7 @@
 package shmr.budgetly.data.source.remote
 
 import shmr.budgetly.data.network.dto.AccountDto
+import shmr.budgetly.data.network.dto.AccountResponseDto
 import shmr.budgetly.data.network.dto.CategoryDto
 import shmr.budgetly.data.network.dto.TransactionResponseDto
 
@@ -27,7 +28,7 @@ interface RemoteDataSource {
     /**
      * Получает DTO счета по его ID.
      */
-    suspend fun getAccountById(id: Int): AccountDto
+    suspend fun getAccountById(id: Int): AccountResponseDto
 
     /**
      * Получает список DTO всех доступных счетов.

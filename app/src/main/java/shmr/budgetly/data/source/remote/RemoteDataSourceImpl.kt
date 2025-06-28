@@ -2,6 +2,7 @@ package shmr.budgetly.data.source.remote
 
 import shmr.budgetly.data.network.ApiService
 import shmr.budgetly.data.network.dto.AccountDto
+import shmr.budgetly.data.network.dto.AccountResponseDto
 import shmr.budgetly.data.network.dto.CategoryDto
 import shmr.budgetly.data.network.dto.TransactionResponseDto
 import javax.inject.Inject
@@ -28,8 +29,7 @@ class RemoteDataSourceImpl @Inject constructor(
     override suspend fun getAllCategories(): List<CategoryDto> =
         apiService.getAllCategories()
 
-    override suspend fun getAccountById(id: Int): AccountDto =
-        apiService.getAccountById(id)
+    override suspend fun getAccountById(id: Int): AccountResponseDto = apiService.getAccountById(id)
 
     override suspend fun getAccounts(): List<AccountDto> =
         apiService.getAccounts()

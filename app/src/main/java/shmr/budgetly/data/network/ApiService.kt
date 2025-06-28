@@ -4,6 +4,7 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 import shmr.budgetly.data.network.dto.AccountDto
+import shmr.budgetly.data.network.dto.AccountResponseDto
 import shmr.budgetly.data.network.dto.CategoryDto
 import shmr.budgetly.data.network.dto.TransactionResponseDto
 
@@ -32,7 +33,7 @@ interface ApiService {
      * Получает информацию о счете по его идентификатору.
      */
     @GET("accounts/{id}")
-    suspend fun getAccountById(@Path("id") id: Int): AccountDto
+    suspend fun getAccountById(@Path("id") id: Int): AccountResponseDto
 
     /**
      * Получает список всех счетов, доступных пользователю.

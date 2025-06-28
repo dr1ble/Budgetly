@@ -1,6 +1,7 @@
 package shmr.budgetly.data.mapper
 
 import shmr.budgetly.data.network.dto.AccountDto
+import shmr.budgetly.data.network.dto.AccountResponseDto
 import shmr.budgetly.data.network.dto.CategoryDto
 import shmr.budgetly.data.network.dto.TransactionResponseDto
 import shmr.budgetly.domain.entity.Account
@@ -16,7 +17,8 @@ fun TransactionResponseDto.toDomainModel(): Transaction {
     return Transaction(
         id = this.id,
         category = this.category.toDomainModel(),
-        amount = "${this.amount} ₽", // Форматирование должно быть в UI, но сохранено для консистентности
+        amount = this.amount,
+        currency = this.account.currency,
         transactionDate = LocalDateTime.parse(
             this.transactionDate,
             DateTimeFormatter.ISO_DATE_TIME
@@ -28,7 +30,7 @@ fun TransactionResponseDto.toDomainModel(): Transaction {
 /**
  * Преобразует [AccountDto] в доменную сущность [Account].
  */
-fun AccountDto.toDomainModel(): Account {
+fun AccountResponseDto.toDomainModel(): Account {
     return Account(
         id = this.id,
         name = this.name,
@@ -36,6 +38,7 @@ fun AccountDto.toDomainModel(): Account {
         currency = this.currency
     )
 }
+
 
 /**
  * Преобразует [CategoryDto] в доменную сущность [Category].

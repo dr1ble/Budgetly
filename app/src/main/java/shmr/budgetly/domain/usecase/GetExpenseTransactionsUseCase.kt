@@ -17,9 +17,8 @@ class GetExpenseTransactionsUseCase @Inject constructor(
 
     suspend operator fun invoke(): Result<List<Transaction>> {
         val today = LocalDate.now()
-        val startOfMonth = today.withDayOfMonth(1)
 
-        return when (val result = repository.getTransactions(startOfMonth, today)) {
+        return when (val result = repository.getTransactions(today, today)) {
             is Result.Success -> Result.Success(result.data.filter { !it.category.isIncome })
             is Result.Error -> result
         }
