@@ -12,6 +12,12 @@ import shmr.budgetly.ui.screens.history.HistoryScreen
 import shmr.budgetly.ui.screens.incomes.IncomesScreen
 import shmr.budgetly.ui.screens.settings.SettingsScreen
 
+/**
+ * Основной навигационный граф приложения, определяющий переходы между экранами,
+ * доступными из нижней навигационной панели.
+ *
+ * @param navController Контроллер навигации, управляющий стеком экранов.
+ */
 @Composable
 fun AppNavGraph(navController: NavHostController) {
     NavHost(
@@ -43,7 +49,7 @@ fun AppNavGraph(navController: NavHostController) {
             route = NavDestination.History.routeWithArgument,
             arguments = NavDestination.History.arguments
         ) {
-            HistoryScreen(navController = navController)
+            HistoryScreen()
         }
     }
 }

@@ -9,19 +9,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import shmr.budgetly.domain.entity.Transaction
-import shmr.budgetly.domain.repository.BudgetlyRepository
+import shmr.budgetly.domain.model.TransactionFilterType
+import shmr.budgetly.domain.usecase.GetHistoryUseCase
 import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.domain.util.Result
 import shmr.budgetly.ui.navigation.NavDestination
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
-enum class DatePickerDialogType {
-    START_DATE, END_DATE
-}
+enum class DatePickerDialogType { START_DATE, END_DATE }
 
 data class HistoryUiState(
     val transactionsByDate: Map<LocalDate, List<Transaction>> = emptyMap(),
@@ -29,126 +27,108 @@ data class HistoryUiState(
     val endDate: LocalDate = LocalDate.now(),
     val totalSum: String = "0 ₽",
     val isLoading: Boolean = false,
-    val isRefreshing: Boolean = false,
-    val openDialog: DatePickerDialogType? = null,
+    val datePickerType: DatePickerDialogType? = null,
     val error: DomainError? = null
-)
+) {
+    val isDatePickerVisible: Boolean get() = datePickerType != null
+}
 
+/**
+ * ViewModel для экрана "История".
+ * Отвечает за:
+ * 1. Загрузку истории транзакций за выбранный период через [GetHistoryUseCase].
+ * 2. Фильтрацию по типу (доходы/расходы) на основе родительского маршрута.
+ * 3. Обработку выбора дат в DatePicker'е.
+ * 4. Управление состоянием UI ([HistoryUiState]).
+ */
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
-    private val repository: BudgetlyRepository,
-    private val savedStateHandle: SavedStateHandle
+    private val getHistory: GetHistoryUseCase,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HistoryUiState())
     val uiState = _uiState.asStateFlow()
 
-    private val parentRoute: String? = savedStateHandle.get(NavDestination.History.PARENT_ROUTE_ARG)
+    private val parentRoute: String? = savedStateHandle[NavDestination.History.PARENT_ROUTE_ARG]
+    private val filterType: TransactionFilterType = when (parentRoute) {
+        NavDestination.BottomNav.Expenses.route -> TransactionFilterType.EXPENSE
+        NavDestination.BottomNav.Incomes.route -> TransactionFilterType.INCOME
+        else -> TransactionFilterType.ALL
+    }
 
     init {
         loadHistory(isInitialLoad = true)
     }
 
-    fun onStartDatePickerOpen() {
-        _uiState.update { it.copy(openDialog = DatePickerDialogType.START_DATE) }
-    }
+    fun onStartDatePickerOpen() =
+        _uiState.update { it.copy(datePickerType = DatePickerDialogType.START_DATE) }
 
-    fun onEndDatePickerOpen() {
-        _uiState.update { it.copy(openDialog = DatePickerDialogType.END_DATE) }
-    }
+    fun onEndDatePickerOpen() =
+        _uiState.update { it.copy(datePickerType = DatePickerDialogType.END_DATE) }
 
-    fun onDatePickerDismiss() {
-        _uiState.update { it.copy(openDialog = null) }
-    }
+    fun onDatePickerDismiss() = _uiState.update { it.copy(datePickerType = null) }
 
     fun onDateSelected(dateInMillis: Long?) {
-        if (dateInMillis == null) {
-            onDatePickerDismiss()
-            return
-        }
+        val selectedDate = dateInMillis?.let {
+            Instant.ofEpochMilli(it).atZone(ZoneId.of("UTC")).toLocalDate()
+        } ?: return onDatePickerDismiss()
 
-        val newDate = Instant.ofEpochMilli(dateInMillis).atZone(ZoneId.of("UTC")).toLocalDate()
-        val currentDialog = _uiState.value.openDialog
+        val currentDialog = _uiState.value.datePickerType
+        var dateChanged = false
 
-        _uiState.update { currentState ->
+        _uiState.update { state ->
             when (currentDialog) {
-                DatePickerDialogType.START_DATE -> {
-                    if (newDate.isAfter(currentState.endDate)) {
-                        currentState.copy(openDialog = null)
-                    } else {
-                        currentState.copy(startDate = newDate, openDialog = null)
-                    }
-                }
+                DatePickerDialogType.START_DATE -> if (!selectedDate.isAfter(state.endDate)) {
+                    dateChanged = true
+                    state.copy(startDate = selectedDate)
+                } else state
 
-                DatePickerDialogType.END_DATE -> {
-                    if (newDate.isBefore(currentState.startDate)) {
-                        currentState.copy(openDialog = null)
-                    } else {
-                        currentState.copy(endDate = newDate, openDialog = null)
-                    }
-                }
+                DatePickerDialogType.END_DATE -> if (!selectedDate.isBefore(state.startDate)) {
+                    dateChanged = true
+                    state.copy(endDate = selectedDate)
+                } else state
 
-                null -> currentState
+                null -> state
             }
         }
 
-        if (_uiState.value.openDialog == null && currentDialog != null) {
+        onDatePickerDismiss()
+        if (dateChanged) {
             loadHistory(isInitialLoad = true)
         }
     }
 
     fun loadHistory(isInitialLoad: Boolean = false) {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(
-                    isLoading = isInitialLoad,
-                    isRefreshing = !isInitialLoad,
-                    error = null
-                )
-            }
+            _uiState.update { it.copy(isLoading = isInitialLoad, error = null) }
+            val result = getHistory(
+                startDate = _uiState.value.startDate,
+                endDate = _uiState.value.endDate,
+                filterType = filterType
+            )
+            processResult(result)
+        }
+    }
 
-            val currentState = _uiState.value
-            val formatter = DateTimeFormatter.ISO_LOCAL_DATE
-
-            when (val result = repository.getHistory(
-                startDate = currentState.startDate.format(formatter),
-                endDate = currentState.endDate.format(formatter)
-            )) {
-                is Result.Success -> {
-                    val filteredTransactions = when (parentRoute) {
-                        NavDestination.BottomNav.Expenses.route -> result.data.filter { !it.category.isIncome }
-                        NavDestination.BottomNav.Incomes.route -> result.data.filter { it.category.isIncome }
-                        else -> result.data
-                    }
-
-                    val total = filteredTransactions.sumOf {
-                        val amount =
-                            it.amount.replace(Regex("[^0-9.-]"), "").toDoubleOrNull() ?: 0.0
-                        amount
-                    }
-                    val grouped = filteredTransactions
-                        .sortedByDescending { it.transactionDate }
-                        .groupBy { it.transactionDate.toLocalDate() }
-
-                    _uiState.update {
-                        it.copy(
-                            transactionsByDate = grouped,
-                            totalSum = "%,.0f ₽".format(total).replace(",", " "),
-                            isLoading = false,
-                            isRefreshing = false
-                        )
-                    }
+    private fun processResult(result: Result<List<Transaction>>) {
+        when (result) {
+            is Result.Success -> {
+                val total = result.data.sumOf {
+                    it.amount.replace(Regex("[^0-9.-]"), "").toDoubleOrNull() ?: 0.0
                 }
-                is Result.Error -> {
-                    _uiState.update {
-                        it.copy(
-                            error = result.error,
-                            isLoading = false,
-                            isRefreshing = false
-                        )
-                    }
+                val grouped = result.data
+                    .sortedByDescending { it.transactionDate }
+                    .groupBy { it.transactionDate.toLocalDate() }
+                _uiState.update {
+                    it.copy(
+                        transactionsByDate = grouped,
+                        totalSum = "%,.0f ₽".format(total).replace(",", " "),
+                        isLoading = false
+                    )
                 }
             }
+            is Result.Error -> _uiState.update { it.copy(error = result.error, isLoading = false) }
         }
     }
 }

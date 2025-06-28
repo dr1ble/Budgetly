@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -24,7 +23,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import shmr.budgetly.R
 import shmr.budgetly.domain.entity.Transaction
 import shmr.budgetly.domain.util.DomainError
@@ -33,19 +31,23 @@ import shmr.budgetly.ui.components.DatePickerModal
 import shmr.budgetly.ui.components.EmojiIcon
 import shmr.budgetly.ui.components.ErrorState
 import shmr.budgetly.ui.theme.dimens
+import shmr.budgetly.ui.util.HistoryDateFormatter
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Экран "История", отображающий список транзакций за выбранный период.
+ * Позволяет пользователю выбирать начальную и конечную даты.
+ *
+ * @param viewModel ViewModel для управления состоянием экрана.
+ */
 @Composable
-fun HistoryScreen(
-    navController: NavController,
-    viewModel: HistoryViewModel = hiltViewModel()
-) {
+fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsState()
+
+    if (uiState.isDatePickerVisible) {
+        DatePickerDialog(uiState, viewModel)
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         HistoryHeader(
@@ -55,95 +57,58 @@ fun HistoryScreen(
             onStartDateClick = viewModel::onStartDatePickerOpen,
             onEndDateClick = viewModel::onEndDatePickerOpen
         )
+        HistoryContent(uiState, onRetry = { viewModel.loadHistory(isInitialLoad = true) })
+    }
+}
 
-        Box(modifier = Modifier.fillMaxSize()) {
-            when {
-                uiState.isLoading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                uiState.error != null -> {
-                    val errorMessage = when (uiState.error) {
-                        DomainError.NoInternet -> stringResource(R.string.error_no_internet)
-                        DomainError.ServerError -> stringResource(R.string.error_server)
-                        is DomainError.Unknown -> stringResource(R.string.error_unknown)
-                        null -> ""
-                    }
-                    ErrorState(
-                        message = errorMessage,
-                        onRetry = { viewModel.loadHistory(isInitialLoad = true) }
-                    )
-                }
-
-                else -> HistoryList(uiState.transactionsByDate)
-            }
+/**
+ * Отображает контент экрана: индикатор загрузки, ошибку или список транзакций.
+ */
+@Composable
+private fun HistoryContent(uiState: HistoryUiState, onRetry: () -> Unit) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        when {
+            uiState.isLoading -> CircularProgressIndicator()
+            uiState.error != null -> ErrorContent(uiState.error, onRetry)
+            else -> HistoryList(uiState.transactionsByDate)
         }
     }
-    if (uiState.openDialog != null) {
-        val initialDate = when (uiState.openDialog) {
-            DatePickerDialogType.START_DATE -> uiState.startDate
-            DatePickerDialogType.END_DATE -> uiState.endDate
-            null -> LocalDate.now()
-        }
+}
 
-        DatePickerModal(
-            selectedDate = initialDate.atStartOfDay(ZoneId.of("UTC")).toInstant()
-                .toEpochMilli(),
-            onDateSelected = viewModel::onDateSelected,
-            onDismiss = viewModel::onDatePickerDismiss
-        )
+/**
+ * Отображает модальное окно выбора даты.
+ */
+@Composable
+private fun DatePickerDialog(uiState: HistoryUiState, viewModel: HistoryViewModel) {
+    val datePickerType = uiState.datePickerType ?: return
+
+    val initialDate = when (datePickerType) {
+        DatePickerDialogType.START_DATE -> uiState.startDate
+        DatePickerDialogType.END_DATE -> uiState.endDate
     }
+    DatePickerModal(
+        selectedDate = initialDate.atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli(),
+        onDateSelected = viewModel::onDateSelected,
+        onDismiss = viewModel::onDatePickerDismiss
+    )
 }
 
-private fun formatTransactionDate(dateTime: LocalDateTime): String {
-    val monthsInGenitiveCase = mapOf(
-        1 to "января",
-        2 to "февраля",
-        3 to "марта",
-        4 to "апреля",
-        5 to "мая",
-        6 to "июня",
-        7 to "июля",
-        8 to "августа",
-        9 to "сентября",
-        10 to "октября",
-        11 to "ноября",
-        12 to "декабря"
-    )
-
-    val day = dateTime.dayOfMonth
-    val month = monthsInGenitiveCase[dateTime.monthValue] ?: ""
-    val time = dateTime.format(DateTimeFormatter.ofPattern("HH:mm"))
-
-    return "$day $month $time"
-}
-
-private fun formatHeaderDate(date: LocalDate): String {
-    val monthsInGenitiveCase = mapOf(
-        1 to "января",
-        2 to "февраля",
-        3 to "марта",
-        4 to "апреля",
-        5 to "мая",
-        6 to "июня",
-        7 to "июля",
-        8 to "августа",
-        9 to "сентября",
-        10 to "октября",
-        11 to "ноября",
-        12 to "декабря"
-    )
-
-    val monthName = if (date.monthValue == 5 || date.monthValue == 8) {
-        date.month.getDisplayName(java.time.format.TextStyle.FULL, Locale("ru"))
-    } else {
-        monthsInGenitiveCase[date.monthValue] ?: ""
+/**
+ * Отображает сообщение об ошибке с кнопкой "Повторить".
+ */
+@Composable
+private fun ErrorContent(error: DomainError, onRetry: () -> Unit) {
+    val errorMessage = when (error) {
+        DomainError.NoInternet -> stringResource(R.string.error_no_internet)
+        DomainError.ServerError -> stringResource(R.string.error_server)
+        is DomainError.Unknown -> stringResource(R.string.error_unknown)
     }
-
-    val day = date.dayOfMonth
-    val year = date.year
-
-    return "$day $monthName $year"
+    ErrorState(message = errorMessage, onRetry = onRetry)
 }
 
-
+/**
+ * Отображает заголовок с выбором периода и общей суммой.
+ */
 @Composable
 private fun HistoryHeader(
     startDate: LocalDate,
@@ -154,60 +119,52 @@ private fun HistoryHeader(
 ) {
     Column(modifier = Modifier.background(MaterialTheme.colorScheme.secondary)) {
         BaseListItem(
-            title = "Начало",
+            title = stringResource(R.string.history_start_date),
             defaultHeight = MaterialTheme.dimens.heights.small,
-            trail = {
-                Text(text = formatHeaderDate(startDate))
-            },
+            trail = { Text(text = HistoryDateFormatter.formatHeaderDate(startDate)) },
             onClick = onStartDateClick
         )
         BaseListItem(
-            title = "Конец",
+            title = stringResource(R.string.history_end_date),
             defaultHeight = MaterialTheme.dimens.heights.small,
-            trail = {
-                Text(text = formatHeaderDate(endDate))
-            },
+            trail = { Text(text = HistoryDateFormatter.formatHeaderDate(endDate)) },
             onClick = onEndDateClick
         )
         BaseListItem(
-            title = "Сумма",
+            title = stringResource(R.string.history_total_sum),
             defaultHeight = MaterialTheme.dimens.heights.small,
-            trail = {
-                Text(
-                    text = totalSum
-                )
-            },
+            trail = { Text(text = totalSum) },
             showDivider = false
         )
     }
 }
 
-
+/**
+ * Отображает список транзакций, сгруппированных по дате.
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun HistoryList(transactionsByDate: Map<LocalDate, List<Transaction>>) {
     LazyColumn(modifier = Modifier
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.background)) {
-        transactionsByDate.forEach { (date, transactions) ->
-            items(
-                items = transactions,
-                key = { transaction -> transaction.id }
-            ) { transaction ->
+        transactionsByDate.forEach { (_, transactions) ->
+            items(items = transactions, key = { it.id }) { transaction ->
                 TransactionItem(transaction = transaction)
             }
         }
     }
 }
 
-
+/**
+ * Отображает один элемент списка транзакций.
+ */
 @Composable
 private fun TransactionItem(transaction: Transaction) {
-
     BaseListItem(
         lead = { EmojiIcon(emoji = transaction.category.emoji) },
         title = transaction.category.name,
-        subtitle = transaction.comment?.takeIf { it.isNotBlank() },
+        subtitle = transaction.comment.takeIf { it.isNotBlank() },
         trail = {
             Column(
                 horizontalAlignment = Alignment.End,
@@ -215,19 +172,18 @@ private fun TransactionItem(transaction: Transaction) {
             ) {
                 Text(
                     text = transaction.amount,
-                    color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Text(
-                    text = formatTransactionDate(transaction.transactionDate),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.bodyLarge
+                    text = HistoryDateFormatter.formatTransactionDate(transaction.transactionDate),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Spacer(modifier = Modifier.width(16.dp))
             Icon(
                 painterResource(R.drawable.ic_list_item_trail_arrow),
-                contentDescription = ("")
+                contentDescription = null // Декоративный элемент
             )
         }
     )

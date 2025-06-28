@@ -6,10 +6,15 @@ import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Перехватчик OkHttp, который автоматически повторяет неудавшиеся запросы.
+ * Повторные попытки выполняются при возникновении [IOException] (ошибки сети)
+ * или при получении ответа с кодом 5xx (ошибки сервера).
+ */
 @Singleton
 class RetryInterceptor @Inject constructor() : Interceptor {
 
-    companion object {
+    private companion object {
         private const val MAX_RETRIES = 3
         private const val RETRY_DELAY_MS = 2000L
     }
@@ -17,37 +22,49 @@ class RetryInterceptor @Inject constructor() : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
         var response: Response? = null
-        var exception: IOException? = null
+        var lastException: IOException? = null
         var tryCount = 0
 
-        while (tryCount < MAX_RETRIES && (response == null || !response.isSuccessful && response.code >= 500)) {
-            // Закрываем предыдущий неудачный ответ, если он есть, чтобы избежать утечки ресурсов
+        while (tryCount < MAX_RETRIES && !isSuccessful(response)) {
+            // Закрываем предыдущий неудачный ответ, чтобы избежать утечки ресурсов
             response?.close()
-
             try {
-                response = chain.proceed(request)
-                // Если ответ успешный или ошибка не 5xx, выходим из цикла
-                if (response.isSuccessful || response.code < 500) {
-                    return response
-                }
+                response = chain.proceed(
+                    request.newBuilder().build()
+                ) // Используем newBuilder, чтобы запрос был свежим
+                if (isSuccessful(response)) return response
             } catch (e: IOException) {
-                exception = e
-                // Если произошла ошибка сети (например, таймаут), тоже пробуем снова
+                lastException = e
             }
 
             tryCount++
-
             if (tryCount < MAX_RETRIES) {
-                try {
-                    Thread.sleep(RETRY_DELAY_MS)
-                } catch (e: InterruptedException) {
-                    Thread.currentThread().interrupt()
-                    throw IOException(e)
-                }
+                sleep()
             }
         }
 
-        // Если все попытки провалились, возвращаем последний неудачный ответ или пробрасываем исключение
-        return response ?: throw exception ?: IOException("Unknown error")
+        // Если все попытки провалились, возвращаем последний неудачный ответ
+        // или пробрасываем последнее пойманное исключение.
+        return response ?: throw lastException
+            ?: IOException("Unknown error after $MAX_RETRIES retries")
+    }
+
+    /**
+     * Проверяет, является ли ответ успешным (2xx) или ошибкой, не требующей повтора (не 5xx).
+     */
+    private fun isSuccessful(response: Response?): Boolean {
+        return response != null && (response.isSuccessful || response.code < 500)
+    }
+
+    /**
+     * Выполняет задержку перед следующей попыткой.
+     */
+    private fun sleep() {
+        try {
+            Thread.sleep(RETRY_DELAY_MS)
+        } catch (e: InterruptedException) {
+            Thread.currentThread().interrupt()
+            throw IOException("Retry interrupted", e)
+        }
     }
 }

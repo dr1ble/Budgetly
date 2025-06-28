@@ -16,6 +16,10 @@ import shmr.budgetly.data.network.interceptors.ConnectivityInterceptor
 import shmr.budgetly.data.network.interceptors.RetryInterceptor
 import javax.inject.Singleton
 
+/**
+ * Модуль Hilt для предоставления зависимостей сетевого слоя.
+ * Отвечает за конфигурацию и создание [OkHttpClient], [Retrofit] и [ApiService].
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
@@ -23,7 +27,10 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideJson(): Json = Json { ignoreUnknownKeys = true; coerceInputValues = true }
+    fun provideJson(): Json = Json {
+        ignoreUnknownKeys = true
+        coerceInputValues = true
+    }
 
     @Provides
     @Singleton
@@ -35,20 +42,22 @@ object NetworkModule {
         .addInterceptor(connectivityInterceptor) // 1. Проверка сети
         .addInterceptor(retryInterceptor)        // 2. Повторные запросы
         .addInterceptor(authInterceptor)         // 3. Добавление токена
-        .addInterceptor(
-            HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BODY
-            }
-        )
+        .addInterceptor(HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        })
         .build()
 
     @Provides
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient, json: Json): Retrofit =
-        Retrofit.Builder().baseUrl(BASE_URL).client(okHttpClient)
-            .addConverterFactory(json.asConverterFactory("application/json".toMediaType())).build()
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
 
     @Provides
     @Singleton
-    fun provideApiService(retrofit: Retrofit): ApiService = retrofit.create(ApiService::class.java)
+    fun provideApiService(retrofit: Retrofit): ApiService =
+        retrofit.create(ApiService::class.java)
 }

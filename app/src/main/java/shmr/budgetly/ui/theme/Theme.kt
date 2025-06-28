@@ -13,44 +13,51 @@ import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
     primary = Green400,
+    onPrimary = Black900,
     secondary = Green200,
+    onSecondary = Black900,
     tertiary = White300,
+    background = White100,
+    onBackground = Black900,
+    surface = White200,
+    onSurface = Black900,
+    surfaceVariant = Grey200,
+    onSurfaceVariant = Black700,
     secondaryContainer = Green200,
     onSecondaryContainer = Green400,
-    background = White100,
-    surface = White200,
-    surfaceContainer = White200,
-    surfaceVariant = Grey200,
-    onPrimary = Black900,
-    onSecondary = Black900,
-    onBackground = Black900,
-    onSurface = Black900,
-    onSurfaceVariant = Black700,
     outline = Grey600,
     outlineVariant = Grey400,
     error = Black700
 )
 
+// LightColorScheme сейчас идентичен Dark, можно настроить разные цвета
 private val LightColorScheme = lightColorScheme(
     primary = Green400,
+    onPrimary = Black900,
     secondary = Green200,
+    onSecondary = Black900,
     tertiary = White300,
+    background = White100,
+    onBackground = Black900,
+    surface = White200,
+    onSurface = Black900,
+    surfaceVariant = Grey200,
+    onSurfaceVariant = Black700,
     secondaryContainer = Green200,
     onSecondaryContainer = Green400,
-    background = White100,
-    surface = White200,
-    surfaceContainer = White200,
-    surfaceVariant = Grey200,
-    onPrimary = Black900,
-    onSecondary = Black900,
-    onBackground = Black900,
-    onSurface = Black900,
-    onSurfaceVariant = Black700,
     outline = Grey600,
     outlineVariant = Grey400,
     error = Black700
 )
 
+/**
+ * Основная тема приложения Budgetly.
+ * Применяет цветовые схемы, типографику, формы и настраивает системные бары.
+ *
+ * @param darkTheme Использовать ли темную тему. По умолчанию определяется системой.
+ * @param dynamicColor Использовать ли динамические цвета (Material You). Доступно на Android 12+.
+ * @param content Контент, к которому применяется тема.
+ */
 @Composable
 fun BudgetlyTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -62,16 +69,13 @@ fun BudgetlyTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
 
     ApplySystemBars(colorScheme = colorScheme, darkTheme = darkTheme)
 
-    val dimens = defaultDimens
-
-    CompositionLocalProvider(LocalDimens provides dimens) {
+    CompositionLocalProvider(LocalDimens provides defaultDimens) {
         MaterialTheme(
             colorScheme = colorScheme,
             typography = AppTypography,
