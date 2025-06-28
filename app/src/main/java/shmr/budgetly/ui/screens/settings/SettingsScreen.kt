@@ -18,6 +18,14 @@ import shmr.budgetly.R
 import shmr.budgetly.ui.components.BaseListItem
 import shmr.budgetly.ui.theme.dimens
 
+/**
+ * Экран настроек приложения.
+ * Отображает список доступных настроек, таких как переключение темы,
+ * и позволяет пользователю взаимодействовать с ними.
+ *
+ * @param modifier Модификатор для настройки внешнего вида и поведения.
+ * @param viewModel ViewModel для управления состоянием экрана.
+ */
 @Composable
 fun SettingsScreen(
     modifier: Modifier = Modifier,
@@ -32,32 +40,48 @@ fun SettingsScreen(
     ) {
         items(
             items = uiState.settingsItems,
-            key = { it }
-        ) { settingTitle ->
-            BaseListItem(
-                defaultHeight = MaterialTheme.dimens.heights.small,
-                title = settingTitle,
-                titleTextStyle = MaterialTheme.typography.bodyLarge,
-                showDivider = true,
-                onClick = {},
-                trail = {
-                    when (settingTitle) {
-                        stringResource(R.string.screen_settings_dark_theme_label) -> {
-                            Switch(
-                                checked = uiState.isDarkThemeEnabled,
-                                onCheckedChange = viewModel::onThemeChanged
-                            )
-                        }
-
-                        else -> {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_list_item_settings_arrow_right),
-                                contentDescription = stringResource(R.string.account_ic_arrow_description)
-                            )
-                        }
-                    }
-                }
+            key = { it.id }
+        ) { settingItem ->
+            SettingsItem(
+                item = settingItem,
+                isDarkThemeEnabled = uiState.isDarkThemeEnabled,
+                onThemeChanged = viewModel::onThemeChanged
             )
         }
     }
+}
+
+/**
+ * Отображает один элемент списка настроек.
+ */
+@Composable
+private fun SettingsItem(
+    item: SettingItem,
+    isDarkThemeEnabled: Boolean,
+    onThemeChanged: (Boolean) -> Unit
+) {
+    BaseListItem(
+        defaultHeight = MaterialTheme.dimens.heights.small,
+        title = stringResource(id = item.titleRes),
+        titleTextStyle = MaterialTheme.typography.bodyLarge,
+        showDivider = true,
+        onClick = {}, // TODO
+        trail = {
+            when (item.type) {
+                SettingType.THEME_SWITCH -> {
+                    Switch(
+                        checked = isDarkThemeEnabled,
+                        onCheckedChange = onThemeChanged
+                    )
+                }
+
+                SettingType.NAVIGATION -> {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_list_item_settings_arrow_right),
+                        contentDescription = stringResource(R.string.navigate_action_description)
+                    )
+                }
+            }
+        }
+    )
 }

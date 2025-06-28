@@ -28,6 +28,7 @@ import shmr.budgetly.ui.components.BaseListItem
 import shmr.budgetly.ui.components.EmojiIcon
 import shmr.budgetly.ui.components.ErrorState
 import shmr.budgetly.ui.theme.dimens
+import shmr.budgetly.ui.util.formatCurrencySymbol
 
 private object AccountScreenDefaults {
     val balanceCategoryEmoji = "💰"
@@ -69,6 +70,9 @@ fun AccountScreen(
 
 @Composable
 private fun AccountContent(account: Account) {
+
+    val currencySymbol = formatCurrencySymbol(account.currency)
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -89,7 +93,7 @@ private fun AccountContent(account: Account) {
                 trail = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = "${account.balance} ${account.currency}",
+                            text = "${account.balance} $currencySymbol",
                             style = MaterialTheme.typography.bodyLarge,
                         )
                         Spacer(Modifier.width(16.dp))
@@ -112,7 +116,7 @@ private fun AccountContent(account: Account) {
                 trail = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = account.currency,
+                            text = currencySymbol,
                             style = MaterialTheme.typography.bodyLarge
                         )
                         Spacer(Modifier.width(16.dp))

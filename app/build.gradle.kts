@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
+    alias(libs.plugins.detekt)
 }
 
 val localProperties = Properties()
@@ -16,7 +17,8 @@ try {
     println("Warning: Could not load local.properties file. ${e.message}")
 }
 val apiToken = localProperties.getProperty("API_TOKEN") ?: ""
-val useHardcodedIdOverride = localProperties.getProperty("USE_HARDCODED_ACCOUNT_ID_OVERRIDE")
+val useHardcodedIdOverride =
+    localProperties.getProperty("USE_HARDCODED_ACCOUNT_ID_OVERRIDE", "false")
 
 android {
     namespace = "shmr.budgetly"
@@ -39,6 +41,7 @@ android {
         }
         release {
             isMinifyEnabled = false
+            buildConfigField("Boolean", "USE_HARDCODED_ACCOUNT_ID", "false")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -59,6 +62,22 @@ android {
         compose = true
         buildConfig = true
     }
+}
+
+detekt {
+    config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
+
+    autoCorrect = true
+
+    parallel = true
+
+    source.setFrom(
+        files(
+            "src/main/java",
+            "src/test/java",
+            "src/androidTest/java"
+        )
+    )
 }
 
 dependencies {

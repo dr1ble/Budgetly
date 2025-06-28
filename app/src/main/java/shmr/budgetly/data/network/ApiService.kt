@@ -7,7 +7,14 @@ import shmr.budgetly.data.network.dto.AccountDto
 import shmr.budgetly.data.network.dto.CategoryDto
 import shmr.budgetly.data.network.dto.TransactionResponseDto
 
+/**
+ * Определяет конечные точки API для взаимодействия с сервером с помощью Retrofit.
+ * Каждый метод соответствует конкретному запросу к API.
+ */
 interface ApiService {
+    /**
+     * Получает список транзакций для указанного счета за определенный период.
+     */
     @GET("transactions/account/{accountId}/period")
     suspend fun getTransactionsForPeriod(
         @Path("accountId") accountId: Int,
@@ -15,12 +22,21 @@ interface ApiService {
         @Query("endDate") endDate: String
     ): List<TransactionResponseDto>
 
+    /**
+     * Получает список всех доступных категорий.
+     */
     @GET("categories")
     suspend fun getAllCategories(): List<CategoryDto>
 
+    /**
+     * Получает информацию о счете по его идентификатору.
+     */
     @GET("accounts/{id}")
     suspend fun getAccountById(@Path("id") id: Int): AccountDto
 
+    /**
+     * Получает список всех счетов, доступных пользователю.
+     */
     @GET("accounts")
     suspend fun getAccounts(): List<AccountDto>
 }

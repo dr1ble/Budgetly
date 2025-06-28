@@ -22,8 +22,11 @@ data class ArticlesUiState(
 )
 
 /**
- * ViewModel для экрана "Статьи".
- * Отвечает за загрузку и фильтрацию списка всех категорий.
+ * ViewModel для экрана "Статьи" (Категории).
+ * Отвечает за:
+ * 1. Загрузку списка всех категорий через [GetAllCategoriesUseCase].
+ * 2. Фильтрацию списка категорий на основе поискового запроса пользователя.
+ * 3. Управление состоянием UI ([ArticlesUiState]).
  */
 @HiltViewModel
 class ArticlesViewModel @Inject constructor(
@@ -37,30 +40,38 @@ class ArticlesViewModel @Inject constructor(
         loadCategories(isInitialLoad = true)
     }
 
+    /**
+     * Инициирует загрузку списка категорий.
+     */
     fun loadCategories(isInitialLoad: Boolean = false) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = isInitialLoad, error = null) }
+            processResult(getAllCategories())
+        }
+    }
 
-            when (val result = getAllCategories()) {
-                is Result.Success -> {
-                    _uiState.update { currentState ->
-                        currentState.copy(
-                            isLoading = false,
-                            allCategories = result.data,
-                            filteredCategories = filterCategories(
-                                result.data,
-                                currentState.searchQuery
-                            )
-                        )
-                    }
-                }
-                is Result.Error -> {
-                    _uiState.update { it.copy(isLoading = false, error = result.error) }
-                }
+    /**
+     * Обрабатывает результат загрузки категорий.
+     */
+    private fun processResult(result: Result<List<Category>>) {
+        when (result) {
+            is Result.Success -> _uiState.update { currentState ->
+                currentState.copy(
+                    isLoading = false,
+                    allCategories = result.data,
+                    filteredCategories = filterCategories(result.data, currentState.searchQuery)
+                )
+            }
+
+            is Result.Error -> _uiState.update {
+                it.copy(isLoading = false, error = result.error)
             }
         }
     }
 
+    /**
+     * Обновляет состояние при изменении поискового запроса.
+     */
     fun onSearchQueryChanged(query: String) {
         _uiState.update { currentState ->
             currentState.copy(
@@ -70,13 +81,14 @@ class ArticlesViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Фильтрует категории по имени на основе поискового запроса.
+     */
     private fun filterCategories(categories: List<Category>, query: String): List<Category> {
         return if (query.isBlank()) {
             categories
         } else {
-            categories.filter { category ->
-                category.name.contains(query, ignoreCase = true)
-            }
+            categories.filter { it.name.contains(query, ignoreCase = true) }
         }
     }
 }

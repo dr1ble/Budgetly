@@ -14,31 +14,37 @@ import shmr.budgetly.domain.usecase.GetHistoryUseCase
 import shmr.budgetly.domain.usecase.GetIncomeTransactionsUseCase
 import shmr.budgetly.domain.usecase.GetMainAccountUseCase
 
+/**
+ * Модуль Hilt для предоставления зависимостей доменного слоя.
+ * Отвечает за создание экземпляров UseCase'ов, предоставляя им необходимые репозитории.
+ * Зависимости имеют скоуп [ViewModelScoped], так как используются только во ViewModel.
+ */
 @Module
 @InstallIn(ViewModelComponent::class)
 object DomainModule {
 
     @Provides
     @ViewModelScoped
-    fun provideGetMainAccountUseCase(repository: AccountRepository) =
+    fun provideGetMainAccountUseCase(repository: AccountRepository): GetMainAccountUseCase =
         GetMainAccountUseCase(repository)
 
     @Provides
     @ViewModelScoped
-    fun provideGetExpenseTransactionsUseCase(repository: TransactionRepository) =
+    fun provideGetExpenseTransactionsUseCase(repository: TransactionRepository): GetExpenseTransactionsUseCase =
         GetExpenseTransactionsUseCase(repository)
 
     @Provides
     @ViewModelScoped
-    fun provideGetIncomeTransactionsUseCase(repository: TransactionRepository) =
+    fun provideGetIncomeTransactionsUseCase(repository: TransactionRepository): GetIncomeTransactionsUseCase =
         GetIncomeTransactionsUseCase(repository)
 
     @Provides
     @ViewModelScoped
-    fun provideGetHistoryUseCase(repository: TransactionRepository) = GetHistoryUseCase(repository)
+    fun provideGetHistoryUseCase(repository: TransactionRepository): GetHistoryUseCase =
+        GetHistoryUseCase(repository)
 
     @Provides
     @ViewModelScoped
-    fun provideGetAllCategoriesUseCase(repository: CategoryRepository) =
+    fun provideGetAllCategoriesUseCase(repository: CategoryRepository): GetAllCategoriesUseCase =
         GetAllCategoriesUseCase(repository)
 }

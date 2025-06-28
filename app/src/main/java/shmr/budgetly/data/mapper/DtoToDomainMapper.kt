@@ -10,13 +10,13 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 /**
- * Преобразует DTO транзакции в доменную сущность Transaction.
+ * Преобразует [TransactionResponseDto] в доменную сущность [Transaction].
  */
 fun TransactionResponseDto.toDomainModel(): Transaction {
     return Transaction(
         id = this.id,
         category = this.category.toDomainModel(),
-        amount = "${this.amount} ₽",
+        amount = "${this.amount} ₽", // Форматирование должно быть в UI, но сохранено для консистентности
         transactionDate = LocalDateTime.parse(
             this.transactionDate,
             DateTimeFormatter.ISO_DATE_TIME
@@ -26,7 +26,7 @@ fun TransactionResponseDto.toDomainModel(): Transaction {
 }
 
 /**
- * Преобразует DTO счета в доменную сущность Account.
+ * Преобразует [AccountDto] в доменную сущность [Account].
  */
 fun AccountDto.toDomainModel(): Account {
     return Account(
@@ -38,7 +38,7 @@ fun AccountDto.toDomainModel(): Account {
 }
 
 /**
- * Преобразует DTO категории в доменную сущность Category.
+ * Преобразует [CategoryDto] в доменную сущность [Category].
  */
 fun CategoryDto.toDomainModel(): Category {
     return Category(

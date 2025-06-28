@@ -9,19 +9,25 @@ import javax.inject.Named
 import javax.inject.Singleton
 
 /**
- * Модуль для предоставления зависимостей, специфичных для приложения,
- * таких как ключи API и флаги конфигурации из BuildConfig.
- * Это позволяет отвязать компоненты от прямого доступа к BuildConfig.
+ * Модуль Hilt для предоставления зависимостей, специфичных для приложения.
+ * Отвечает за поставку конфигурационных значений из [BuildConfig],
+ * таких как API-токен и флаги, отвязывая компоненты от прямого доступа к нему.
  */
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
+    /**
+     * Предоставляет API-токен как именованную зависимость.
+     */
     @Provides
     @Singleton
     @Named("apiToken")
     fun provideApiToken(): String = BuildConfig.API_TOKEN
 
+    /**
+     * Предоставляет флаг для использования захардкоженного ID счета.
+     */
     @Provides
     @Singleton
     @Named("useHardcodedAccountId")

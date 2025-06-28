@@ -23,8 +23,10 @@ data class IncomesUiState(
 
 /**
  * ViewModel для экрана "Доходы".
- * Отвечает за загрузку списка транзакций-доходов через GetIncomeTransactionsUseCase,
- * управление состоянием UI и обработку pull-to-refresh.
+ * Отвечает за:
+ * 1. Загрузку списка транзакций-доходов за текущий месяц через [GetIncomeTransactionsUseCase].
+ * 2. Управление состоянием UI ([IncomesUiState]), включая флаги для первоначальной загрузки и pull-to-refresh.
+ * 3. Расчет и форматирование общей суммы доходов.
  */
 @HiltViewModel
 class IncomesViewModel @Inject constructor(
@@ -38,6 +40,10 @@ class IncomesViewModel @Inject constructor(
         loadIncomes(isInitialLoad = true)
     }
 
+    /**
+     * Инициирует загрузку доходов.
+     * @param isInitialLoad true для первоначальной загрузки, false для pull-to-refresh.
+     */
     fun loadIncomes(isInitialLoad: Boolean = false) {
         viewModelScope.launch {
             _uiState.update {
@@ -51,6 +57,9 @@ class IncomesViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Обрабатывает результат загрузки и обновляет UI state.
+     */
     private fun processResult(result: Result<List<Transaction>>) {
         when (result) {
             is Result.Success -> {
@@ -66,11 +75,8 @@ class IncomesViewModel @Inject constructor(
                     )
                 }
             }
-
-            is Result.Error -> {
-                _uiState.update {
-                    it.copy(isLoading = false, isRefreshing = false, error = result.error)
-                }
+            is Result.Error -> _uiState.update {
+                it.copy(isLoading = false, isRefreshing = false, error = result.error)
             }
         }
     }

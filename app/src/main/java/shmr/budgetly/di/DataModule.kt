@@ -14,6 +14,11 @@ import shmr.budgetly.domain.repository.CategoryRepository
 import shmr.budgetly.domain.repository.TransactionRepository
 import javax.inject.Singleton
 
+/**
+ * Модуль Hilt для предоставления зависимостей слоя данных.
+ * Отвечает за связывание (binding) интерфейсов репозиториев и источников данных
+ * с их конкретными реализациями.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class DataModule {
@@ -32,7 +37,5 @@ abstract class DataModule {
 
     @Binds
     @Singleton
-    abstract fun bindRemoteDataSource(
-        remoteDataSourceImpl: RemoteDataSourceImpl
-    ): RemoteDataSource
+    abstract fun bindRemoteDataSource(impl: RemoteDataSourceImpl): RemoteDataSource
 }

@@ -2,6 +2,14 @@ package shmr.budgetly.domain.entity
 
 import java.time.LocalDateTime
 
+/**
+ * Представляет транзакцию в доменном слое.
+ * @param id Уникальный идентификатор транзакции.
+ * @param category Категория, к которой относится транзакция.
+ * @param amount Сумма транзакции в виде строки.
+ * @param transactionDate Дата и время совершения транзакции.
+ * @param comment Комментарий к транзакции.
+ */
 data class Transaction(
     val id: Int,
     val category: Category,

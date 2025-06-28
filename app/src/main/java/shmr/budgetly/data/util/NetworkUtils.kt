@@ -8,20 +8,23 @@ import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.domain.util.Result
 
 /**
- * Выполняет предоставленный suspend-блок [apiCall] в IO-контексте
- * и оборачивает результат в [Result], обрабатывая стандартные исключения.
- * Эта функция вынесена для переиспользования во всех репозиториях.
+ * Выполняет предоставленный suspend-блок [apiCall] в IO-контексте.
+ * Оборачивает результат в [Result], обрабатывая стандартные исключения сети и HTTP,
+ * и преобразуя их в типизированные [DomainError].
  */
 suspend fun <T> safeApiCall(apiCall: suspend () -> T): Result<T> {
     return withContext(Dispatchers.IO) {
         try {
-            Result.Success(apiCall.invoke())
+            Result.Success(apiCall())
         } catch (e: Exception) {
             Result.Error(mapExceptionToDomainError(e))
         }
     }
 }
 
+/**
+ * Преобразует исключение в соответствующую доменную ошибку [DomainError].
+ */
 private fun mapExceptionToDomainError(e: Exception): DomainError {
     return when (e) {
         is NoConnectivityException -> DomainError.NoInternet

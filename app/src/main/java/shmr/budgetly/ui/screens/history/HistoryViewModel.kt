@@ -19,9 +19,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
 
-enum class DatePickerDialogType {
-    START_DATE, END_DATE
-}
+enum class DatePickerDialogType { START_DATE, END_DATE }
 
 data class HistoryUiState(
     val transactionsByDate: Map<LocalDate, List<Transaction>> = emptyMap(),
@@ -29,14 +27,19 @@ data class HistoryUiState(
     val endDate: LocalDate = LocalDate.now(),
     val totalSum: String = "0 ₽",
     val isLoading: Boolean = false,
-    val openDialog: DatePickerDialogType? = null,
+    val datePickerType: DatePickerDialogType? = null,
     val error: DomainError? = null
-)
+) {
+    val isDatePickerVisible: Boolean get() = datePickerType != null
+}
 
 /**
  * ViewModel для экрана "История".
- * Отвечает за загрузку истории транзакций за выбранный период через GetHistoryUseCase,
- * фильтрацию по типу (доходы/расходы) и обработку выбора дат.
+ * Отвечает за:
+ * 1. Загрузку истории транзакций за выбранный период через [GetHistoryUseCase].
+ * 2. Фильтрацию по типу (доходы/расходы) на основе родительского маршрута.
+ * 3. Обработку выбора дат в DatePicker'е.
+ * 4. Управление состоянием UI ([HistoryUiState]).
  */
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
@@ -48,44 +51,50 @@ class HistoryViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
 
     private val parentRoute: String? = savedStateHandle[NavDestination.History.PARENT_ROUTE_ARG]
+    private val filterType: TransactionFilterType = when (parentRoute) {
+        NavDestination.BottomNav.Expenses.route -> TransactionFilterType.EXPENSE
+        NavDestination.BottomNav.Incomes.route -> TransactionFilterType.INCOME
+        else -> TransactionFilterType.ALL
+    }
 
     init {
         loadHistory(isInitialLoad = true)
     }
 
     fun onStartDatePickerOpen() =
-        _uiState.update { it.copy(openDialog = DatePickerDialogType.START_DATE) }
+        _uiState.update { it.copy(datePickerType = DatePickerDialogType.START_DATE) }
 
     fun onEndDatePickerOpen() =
-        _uiState.update { it.copy(openDialog = DatePickerDialogType.END_DATE) }
+        _uiState.update { it.copy(datePickerType = DatePickerDialogType.END_DATE) }
 
-    fun onDatePickerDismiss() = _uiState.update { it.copy(openDialog = null) }
+    fun onDatePickerDismiss() = _uiState.update { it.copy(datePickerType = null) }
 
     fun onDateSelected(dateInMillis: Long?) {
-        if (dateInMillis == null) {
-            onDatePickerDismiss()
-            return
-        }
+        val selectedDate = dateInMillis?.let {
+            Instant.ofEpochMilli(it).atZone(ZoneId.of("UTC")).toLocalDate()
+        } ?: return onDatePickerDismiss()
 
-        val newDate = Instant.ofEpochMilli(dateInMillis).atZone(ZoneId.of("UTC")).toLocalDate()
-        val currentDialog = _uiState.value.openDialog
+        val currentDialog = _uiState.value.datePickerType
+        var dateChanged = false
 
-        _uiState.update { currentState ->
+        _uiState.update { state ->
             when (currentDialog) {
-                DatePickerDialogType.START_DATE -> if (newDate.isAfter(currentState.endDate)) currentState else currentState.copy(
-                    startDate = newDate
-                )
+                DatePickerDialogType.START_DATE -> if (!selectedDate.isAfter(state.endDate)) {
+                    dateChanged = true
+                    state.copy(startDate = selectedDate)
+                } else state
 
-                DatePickerDialogType.END_DATE -> if (newDate.isBefore(currentState.startDate)) currentState else currentState.copy(
-                    endDate = newDate
-                )
-                null -> currentState
+                DatePickerDialogType.END_DATE -> if (!selectedDate.isBefore(state.startDate)) {
+                    dateChanged = true
+                    state.copy(endDate = selectedDate)
+                } else state
+
+                null -> state
             }
         }
 
         onDatePickerDismiss()
-        // Если дата действительно изменилась, инициируем перезагрузку
-        if (currentDialog != null) {
+        if (dateChanged) {
             loadHistory(isInitialLoad = true)
         }
     }
@@ -93,13 +102,6 @@ class HistoryViewModel @Inject constructor(
     fun loadHistory(isInitialLoad: Boolean = false) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = isInitialLoad, error = null) }
-
-            val filterType = when (parentRoute) {
-                NavDestination.BottomNav.Expenses.route -> TransactionFilterType.EXPENSE
-                NavDestination.BottomNav.Incomes.route -> TransactionFilterType.INCOME
-                else -> TransactionFilterType.ALL
-            }
-
             val result = getHistory(
                 startDate = _uiState.value.startDate,
                 endDate = _uiState.value.endDate,
@@ -118,7 +120,6 @@ class HistoryViewModel @Inject constructor(
                 val grouped = result.data
                     .sortedByDescending { it.transactionDate }
                     .groupBy { it.transactionDate.toLocalDate() }
-
                 _uiState.update {
                     it.copy(
                         transactionsByDate = grouped,
@@ -127,10 +128,7 @@ class HistoryViewModel @Inject constructor(
                     )
                 }
             }
-
-            is Result.Error -> {
-                _uiState.update { it.copy(error = result.error, isLoading = false) }
-            }
+            is Result.Error -> _uiState.update { it.copy(error = result.error, isLoading = false) }
         }
     }
 }

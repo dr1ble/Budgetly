@@ -12,7 +12,7 @@
     <string name="expenses_top_bar_title">Расходы сегодня</string>
     <string name="expenses_top_bar_action_description">История</string>
     <string name="incomes_top_bar_title">Доходы сегодня</string>
-    <string name="history_top_bar_title">Моя истори</string>
+    <string name="history_top_bar_title">Моя история</string>
     <string name="account_top_bar_title">Мой счёт</string>
     <string name="account_top_bar_action_description">Редактировать</string>
     <string name="articles_top_bar_title">Мои статьи</string>
@@ -31,4 +31,22 @@
     <string name="error_unknown">Неизвестная ошибка. Повторите позже</string>
     <string name="retry_button_text">Повторить</string>
     <string name="account_balance_title">Баланс</string>
+    <string name="history_action_description">История</string>
+    <string name="analyze_action_description">Анализ</string>
+    <string name="edit_action_description">Редактировать</string>
+    <string name="back_action_description">Назад</string>
+    <string name="history_start_date">Начало</string>
+    <string name="history_end_date">Конец</string>
+    <string name="history_total_sum">Сумма</string>
+    <string name="navigate_action_description">Перейти к настройке</string>
+
+    <string name="setting_dark_theme">Тёмная тема</string>
+    <string name="setting_primary_color">Основной цвет</string>
+    <string name="setting_sounds">Звуки</string>
+    <string name="setting_haptics">Хаптики</string>
+    <string name="setting_passcode">Код пароль</string>
+    <string name="setting_sync">Синхронизация</string>
+    <string name="setting_language">Язык</string>
+    <string name="setting_about">О программе</string>
+
 </resources>

@@ -8,8 +8,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Реализация удаленного источника данных.
- * Отвечает за выполнение конкретных сетевых запросов через ApiService.
+ * Реализация [RemoteDataSource] с использованием Retrofit.
+ * Отвечает за выполнение конкретных сетевых запросов через [ApiService].
  *
  * @param apiService Retrofit-сервис для взаимодействия с API.
  */
@@ -25,9 +25,12 @@ class RemoteDataSourceImpl @Inject constructor(
     ): List<TransactionResponseDto> =
         apiService.getTransactionsForPeriod(accountId, startDate, endDate)
 
-    override suspend fun getAllCategories(): List<CategoryDto> = apiService.getAllCategories()
+    override suspend fun getAllCategories(): List<CategoryDto> =
+        apiService.getAllCategories()
 
-    override suspend fun getAccountById(id: Int): AccountDto = apiService.getAccountById(id)
+    override suspend fun getAccountById(id: Int): AccountDto =
+        apiService.getAccountById(id)
 
-    override suspend fun getAccounts(): List<AccountDto> = apiService.getAccounts()
+    override suspend fun getAccounts(): List<AccountDto> =
+        apiService.getAccounts()
 }

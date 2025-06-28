@@ -6,22 +6,39 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import shmr.budgetly.R
 
+/**
+ * Определяет все возможные навигационные маршруты в приложении в виде
+ * типизированного sealed-класса.
+ * @param route Строковый идентификатор маршрута.
+ */
 sealed class NavDestination(val route: String) {
 
+    /** Сплэш-экран. */
     data object Splash : NavDestination("splash")
+
+    /** Главный экран с нижней навигацией. */
     data object Main : NavDestination("main")
 
-    data object History : NavDestination("history/{parentRoute}") {
+    /**
+     * Экран истории, принимающий родительский маршрут в качестве аргумента.
+     */
+    data object History : NavDestination("history") {
         const val PARENT_ROUTE_ARG = "parentRoute"
-        val routeWithArgument = "history/{$PARENT_ROUTE_ARG}"
+        val routeWithArgument = "$route/{$PARENT_ROUTE_ARG}"
         val arguments = listOf(
             navArgument(PARENT_ROUTE_ARG) { type = NavType.StringType }
         )
 
-        fun buildRoute(parentRoute: String) = "history/$parentRoute"
+        /** Строит маршрут к экрану истории, указывая, с какого экрана был совершен переход. */
+        fun buildRoute(parentRoute: String) = "$route/$parentRoute"
     }
 
-
+    /**
+     * Определяет пункты нижней навигационной панели.
+     * @param route Строковый идентификатор маршрута.
+     * @param icon Ресурс иконки для вкладки.
+     * @param label Ресурс строки для названия вкладки.
+     */
     sealed class BottomNav(
         route: String,
         @DrawableRes val icon: Int,

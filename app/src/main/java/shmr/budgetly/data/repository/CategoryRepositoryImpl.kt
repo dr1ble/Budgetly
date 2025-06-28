@@ -9,6 +9,10 @@ import shmr.budgetly.domain.util.Result
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Реализация [CategoryRepository], отвечающая за получение данных о категориях.
+ * Делегирует сетевые вызовы удаленному источнику данных и преобразует DTO в доменные сущности.
+ */
 @Singleton
 class CategoryRepositoryImpl @Inject constructor(
     private val remoteDataSource: RemoteDataSource

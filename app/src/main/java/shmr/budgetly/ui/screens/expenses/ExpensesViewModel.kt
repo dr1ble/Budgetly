@@ -23,8 +23,10 @@ data class ExpensesUiState(
 
 /**
  * ViewModel для экрана "Расходы".
- * Отвечает за загрузку списка транзакций-расходов через GetExpenseTransactionsUseCase,
- * управление состоянием UI и обработку pull-to-refresh.
+ * Отвечает за:
+ * 1. Загрузку списка транзакций-расходов за текущий месяц через [GetExpenseTransactionsUseCase].
+ * 2. Управление состоянием UI ([ExpensesUiState]), включая флаги для первоначальной загрузки и pull-to-refresh.
+ * 3. Расчет и форматирование общей суммы расходов.
  */
 @HiltViewModel
 class ExpensesViewModel @Inject constructor(
@@ -38,6 +40,10 @@ class ExpensesViewModel @Inject constructor(
         loadExpenses(isInitialLoad = true)
     }
 
+    /**
+     * Инициирует загрузку расходов.
+     * @param isInitialLoad true для первоначальной загрузки, false для pull-to-refresh.
+     */
     fun loadExpenses(isInitialLoad: Boolean = false) {
         viewModelScope.launch {
             _uiState.update {
@@ -51,6 +57,9 @@ class ExpensesViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Обрабатывает результат загрузки и обновляет UI state.
+     */
     private fun processResult(result: Result<List<Transaction>>) {
         when (result) {
             is Result.Success -> {
@@ -66,11 +75,8 @@ class ExpensesViewModel @Inject constructor(
                     )
                 }
             }
-
-            is Result.Error -> {
-                _uiState.update {
-                    it.copy(isLoading = false, isRefreshing = false, error = result.error)
-                }
+            is Result.Error -> _uiState.update {
+                it.copy(isLoading = false, isRefreshing = false, error = result.error)
             }
         }
     }
