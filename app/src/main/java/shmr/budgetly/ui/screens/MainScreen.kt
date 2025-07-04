@@ -13,6 +13,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -27,6 +28,7 @@ import shmr.budgetly.ui.components.BaseFAB
 import shmr.budgetly.ui.components.BottomNavBar
 import shmr.budgetly.ui.navigation.AppNavGraph
 import shmr.budgetly.ui.navigation.NavDestination
+import shmr.budgetly.ui.screens.account.AccountViewModel
 import shmr.budgetly.ui.screens.account.edit.EditAccountViewModel
 
 /**
@@ -99,19 +101,28 @@ private fun MainTopAppBar(navController: NavController) {
             onNavigationClick = { navController.popBackStack() },
             actions = { AnalyzeActionButton { /* TODO */ } }
         )
-        NavDestination.BottomNav.Account.route -> AppTopBar(
-            title = stringResource(R.string.account_top_bar_title),
-            actions = { EditActionButton { navController.navigate(NavDestination.EditAccount.route) } }
-        )
-        NavDestination.BottomNav.Articles.route -> AppTopBar(
-            title = stringResource(R.string.articles_top_bar_title)
-        )
-        NavDestination.BottomNav.Settings.route -> AppTopBar(
-            title = stringResource(R.string.settings_top_bar_title)
-        )
+        NavDestination.BottomNav.Account.route -> {
+            val parentEntry = remember(navBackStackEntry) {
+                navController.getBackStackEntry(NavDestination.BottomNav.Account.route)
+            }
+            val accountViewModel: AccountViewModel = hiltViewModel(parentEntry)
+            val accountUiState by accountViewModel.uiState.collectAsState()
+
+            AppTopBar(
+                title = accountUiState.account?.name
+                    ?: stringResource(R.string.account_top_bar_title),
+                actions = { EditActionButton { navController.navigate(NavDestination.EditAccount.route) } }
+            )
+        }
+
         NavDestination.EditAccount.route -> {
-            val viewModel: EditAccountViewModel = hiltViewModel()
+            val editAccountBackStackEntry = remember(navBackStackEntry) {
+                navController.getBackStackEntry(NavDestination.EditAccount.route)
+            }
+            val viewModel: EditAccountViewModel = hiltViewModel(editAccountBackStackEntry)
             val uiState by viewModel.uiState.collectAsState()
+
+
             AppTopBar(
                 title = stringResource(R.string.edit_account_top_bar_title),
                 navigationIcon = { BackArrowIcon() },
@@ -119,9 +130,9 @@ private fun MainTopAppBar(navController: NavController) {
                 actions = {
                     if (uiState.isLoading) {
                         CircularProgressIndicator(
-                            modifier = Modifier.padding(end = 16.dp),
+                            modifier = Modifier.padding(horizontal = 16.dp),
                             color = MaterialTheme.colorScheme.onPrimary,
-                            strokeWidth = 2.dp
+                            strokeWidth = 2.5.dp
                         )
                     } else {
                         IconButton(
@@ -129,7 +140,7 @@ private fun MainTopAppBar(navController: NavController) {
                             enabled = uiState.isSaveEnabled
                         ) {
                             Icon(
-                                painter = painterResource(R.drawable.ic_top_bar_confirm),
+                                painter = painterResource(id = R.drawable.ic_top_bar_confirm),
                                 contentDescription = stringResource(R.string.save_action_description)
                             )
                         }
@@ -137,6 +148,12 @@ private fun MainTopAppBar(navController: NavController) {
                 }
             )
         }
+        NavDestination.BottomNav.Articles.route -> AppTopBar(
+            title = stringResource(R.string.articles_top_bar_title)
+        )
+        NavDestination.BottomNav.Settings.route -> AppTopBar(
+            title = stringResource(R.string.settings_top_bar_title)
+        )
     }
 }
 

@@ -12,14 +12,15 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import shmr.budgetly.R
 import shmr.budgetly.domain.entity.Account
 import shmr.budgetly.domain.util.DomainError
@@ -38,9 +39,16 @@ private object AccountScreenDefaults {
 fun AccountScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    viewModel: AccountViewModel = hiltViewModel()
+    viewModel: AccountViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+
+    LaunchedEffect(navBackStackEntry) {
+        if (navBackStackEntry?.savedStateHandle?.remove<Boolean>("account_updated") == true) {
+            viewModel.loadAccount(isInitialLoad = true)
+        }
+    }
 
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         when {

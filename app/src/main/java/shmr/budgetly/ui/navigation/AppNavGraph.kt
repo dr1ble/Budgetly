@@ -1,11 +1,15 @@
 package shmr.budgetly.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import shmr.budgetly.ui.screens.account.AccountScreen
+import shmr.budgetly.ui.screens.account.AccountViewModel
 import shmr.budgetly.ui.screens.account.edit.EditAccountScreen
+import shmr.budgetly.ui.screens.account.edit.EditAccountViewModel
 import shmr.budgetly.ui.screens.articles.ArticlesScreen
 import shmr.budgetly.ui.screens.expenses.ExpensesScreen
 import shmr.budgetly.ui.screens.history.HistoryScreen
@@ -30,9 +34,7 @@ fun AppNavGraph(navController: NavHostController) {
         composable(route = NavDestination.BottomNav.Incomes.route) {
             IncomesScreen()
         }
-        composable(route = NavDestination.BottomNav.Account.route) {
-            AccountScreen(navController = navController)
-        }
+
         composable(route = NavDestination.BottomNav.Articles.route) {
             ArticlesScreen()
         }
@@ -45,8 +47,21 @@ fun AppNavGraph(navController: NavHostController) {
         ) {
             HistoryScreen()
         }
-        composable(route = NavDestination.EditAccount.route) {
+        composable(NavDestination.BottomNav.Account.route) { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(NavDestination.BottomNav.Account.route)
+            }
+            val viewModel: AccountViewModel = hiltViewModel(parentEntry)
+            AccountScreen(
+                viewModel = viewModel,
+                navController = navController
+            )
+        }
+
+        composable(NavDestination.EditAccount.route) { backStackEntry ->
+            val viewModel: EditAccountViewModel = hiltViewModel(backStackEntry)
             EditAccountScreen(
+                viewModel = viewModel,
                 onSaveSuccess = {
                     navController.previousBackStackEntry
                         ?.savedStateHandle

@@ -15,22 +15,18 @@ import shmr.budgetly.domain.util.Result
 import javax.inject.Inject
 
 data class EditAccountUiState(
-    val isInitialLoading: Boolean = false,
+    val isInitialLoading: Boolean = true,
     val isLoading: Boolean = false,
     val error: DomainError? = null,
     val isSaveSuccess: Boolean = false,
-    val name: String = "",
-    val balance: String = "",
-    val currency: String = "",
+    val name: String? = null,
+    val balance: String? = null,
+    val currency: String? = null,
     val isBottomSheetVisible: Boolean = false,
     private val initialAccount: Account? = null
 ) {
-    /**
-     * Определяет, активна ли кнопка сохранения.
-     * Кнопка активна, если не идет загрузка и хотя бы одно поле было изменено.
-     */
     val isSaveEnabled: Boolean
-        get() = !isLoading && initialAccount != null && (
+        get() = !isLoading && initialAccount != null && name != null && balance != null && currency != null && (
                 name != initialAccount.name ||
                         balance != initialAccount.balance ||
                         currency != initialAccount.currency
@@ -65,7 +61,6 @@ class EditAccountViewModel @Inject constructor(
                         )
                     }
                 }
-
                 is Result.Error -> {
                     _uiState.update { it.copy(isInitialLoading = false, error = result.error) }
                 }
@@ -94,6 +89,31 @@ class EditAccountViewModel @Inject constructor(
     }
 
     fun saveAccount() {
+        val currentState = _uiState.value
+        if (currentState.isLoading || currentState.name == null || currentState.balance == null || currentState.currency == null) {
+            return
+        }
 
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            val result = updateAccount(
+                name = currentState.name,
+                balance = currentState.balance,
+                currency = currentState.currency
+            )
+            when (result) {
+                is Result.Success -> {
+                    _uiState.update { it.copy(isLoading = false, isSaveSuccess = true) }
+                }
+
+                is Result.Error -> {
+                    _uiState.update { it.copy(isLoading = false, error = result.error) }
+                }
+            }
+        }
+    }
+
+    fun resetSaveSuccessFlag() {
+        _uiState.update { it.copy(isSaveSuccess = false) }
     }
 }

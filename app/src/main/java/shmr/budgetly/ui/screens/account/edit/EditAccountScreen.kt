@@ -34,7 +34,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import shmr.budgetly.R
 import shmr.budgetly.ui.components.BaseListItem
 import shmr.budgetly.ui.components.EmojiIcon
@@ -44,7 +43,7 @@ import shmr.budgetly.ui.util.formatCurrencySymbol
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditAccountScreen(
-    viewModel: EditAccountViewModel = hiltViewModel(),
+    viewModel: EditAccountViewModel,
     onSaveSuccess: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -76,8 +75,9 @@ fun EditAccountScreen(
                 message = stringResource(R.string.error_unknown),
                 onRetry = viewModel::loadInitialData
             )
-
-            else -> EditAccountContent(uiState = uiState, viewModel = viewModel)
+            uiState.name != null && uiState.balance != null && uiState.currency != null -> {
+                EditAccountContent(uiState = uiState, viewModel = viewModel)
+            }
         }
     }
 }
@@ -92,19 +92,19 @@ private fun EditAccountContent(
     ) {
         item {
             NameItem(
-                name = uiState.name,
+                name = uiState.name!!,
                 onNameChange = viewModel::onNameChange
             )
         }
         item {
             BalanceItem(
-                balance = uiState.balance,
+                balance = uiState.balance!!,
                 onBalanceChange = viewModel::onBalanceChange
             )
         }
         item {
             CurrencyItem(
-                currency = uiState.currency,
+                currency = uiState.currency!!,
                 onClick = viewModel::onCurrencyPickerShow
             )
         }
@@ -162,7 +162,7 @@ private fun BalanceItem(balance: String, onBalanceChange: (String) -> Unit) {
                 textAlign = TextAlign.End
             ),
             singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
             modifier = Modifier.weight(1f)
         )
