@@ -19,6 +19,8 @@ sealed class NavDestination(val route: String) {
     /** Главный экран с нижней навигацией. */
     data object Main : NavDestination("main")
 
+    data object EditAccount : NavDestination("edit_account")
+
     /**
      * Экран истории, принимающий родительский маршрут в качестве аргумента.
      */

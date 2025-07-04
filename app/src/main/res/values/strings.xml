@@ -48,5 +48,11 @@
     <string name="setting_sync">Синхронизация</string>
     <string name="setting_language">Язык</string>
     <string name="setting_about">О программе</string>
+    <string name="edit_account_name_label">Название счёта</string>
+    <string name="edit_account_balance_label">Баланс</string>
+    <string name="edit_account_top_bar_title">Редактирование счета</string>
+    <string name="save_action_description">Сохранить</string>
+    <string name="edit_account_currency_label">Валюта</string>
+    <string name="edit_account_currency_change_cancel">Отмена выбора валюты</string>
 
 </resources>
