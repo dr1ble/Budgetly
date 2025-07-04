@@ -13,6 +13,7 @@ import shmr.budgetly.domain.usecase.GetExpenseTransactionsUseCase
 import shmr.budgetly.domain.usecase.GetHistoryUseCase
 import shmr.budgetly.domain.usecase.GetIncomeTransactionsUseCase
 import shmr.budgetly.domain.usecase.GetMainAccountUseCase
+import shmr.budgetly.domain.usecase.UpdateAccountUseCase
 
 /**
  * Модуль Hilt для предоставления зависимостей доменного слоя.
@@ -47,4 +48,9 @@ object DomainModule {
     @ViewModelScoped
     fun provideGetAllCategoriesUseCase(repository: CategoryRepository): GetAllCategoriesUseCase =
         GetAllCategoriesUseCase(repository)
+
+    @Provides
+    @ViewModelScoped
+    fun provideUpdateAccountUseCase(repository: AccountRepository): UpdateAccountUseCase =
+        UpdateAccountUseCase(repository)
 }
