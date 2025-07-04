@@ -27,8 +27,21 @@ fun TransactionResponseDto.toDomainModel(): Transaction {
     )
 }
 
+
 /**
  * Преобразует [AccountDto] в доменную сущность [Account].
+ */
+fun AccountDto.toDomainModel(): Account {
+    return Account(
+        id = this.id,
+        name = this.name,
+        balance = this.balance,
+        currency = this.currency
+    )
+}
+
+/**
+ * Преобразует [AccountResponseDto] в доменную сущность [Account].
  */
 fun AccountResponseDto.toDomainModel(): Account {
     return Account(
@@ -38,6 +51,7 @@ fun AccountResponseDto.toDomainModel(): Account {
         currency = this.currency
     )
 }
+
 
 
 /**

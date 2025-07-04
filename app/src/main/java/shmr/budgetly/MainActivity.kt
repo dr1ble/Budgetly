@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
         setupWindow()
 
         setContent {
-            BudgetlyTheme {
+            BudgetlyTheme(darkTheme = false) {
                 RootNavGraph()
             }
         }

@@ -5,6 +5,7 @@ import shmr.budgetly.data.network.dto.AccountDto
 import shmr.budgetly.data.network.dto.AccountResponseDto
 import shmr.budgetly.data.network.dto.CategoryDto
 import shmr.budgetly.data.network.dto.TransactionResponseDto
+import shmr.budgetly.data.network.dto.UpdateAccountRequestDto
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -33,4 +34,7 @@ class RemoteDataSourceImpl @Inject constructor(
 
     override suspend fun getAccounts(): List<AccountDto> =
         apiService.getAccounts()
+
+    override suspend fun updateAccount(id: Int, request: UpdateAccountRequestDto): AccountDto =
+        apiService.updateAccount(id, request)
 }
