@@ -4,6 +4,7 @@ import shmr.budgetly.data.network.dto.AccountDto
 import shmr.budgetly.data.network.dto.AccountResponseDto
 import shmr.budgetly.data.network.dto.CategoryDto
 import shmr.budgetly.data.network.dto.TransactionResponseDto
+import shmr.budgetly.data.network.dto.UpdateAccountRequestDto
 
 /**
  * Интерфейс для удаленного источника данных.
@@ -34,4 +35,9 @@ interface RemoteDataSource {
      * Получает список DTO всех доступных счетов.
      */
     suspend fun getAccounts(): List<AccountDto>
+
+    /**
+     * Обновляет DTO счета по его ID.
+     */
+    suspend fun updateAccount(id: Int, request: UpdateAccountRequestDto): AccountDto
 }

@@ -3,6 +3,7 @@ package shmr.budgetly.data.repository
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import shmr.budgetly.data.mapper.toDomainModel
+import shmr.budgetly.data.network.dto.UpdateAccountRequestDto
 import shmr.budgetly.data.source.remote.RemoteDataSource
 import shmr.budgetly.data.util.safeApiCall
 import shmr.budgetly.domain.entity.Account
@@ -36,6 +37,22 @@ class AccountRepositoryImpl @Inject constructor(
                 }
             }
 
+            is Result.Error -> Result.Error(accountIdResult.error)
+        }
+    }
+
+    override suspend fun updateAccount(
+        name: String,
+        balance: String,
+        currency: String
+    ): Result<Account> {
+        return when (val accountIdResult = resolveCurrentAccountId()) {
+            is Result.Success -> {
+                safeApiCall {
+                    val request = UpdateAccountRequestDto(name, balance, currency)
+                    remoteDataSource.updateAccount(accountIdResult.data, request).toDomainModel()
+                }
+            }
             is Result.Error -> Result.Error(accountIdResult.error)
         }
     }

@@ -27,7 +27,9 @@ private val DarkColorScheme = darkColorScheme(
     onSecondaryContainer = Green400,
     outline = Grey600,
     outlineVariant = Grey400,
-    error = Black700
+    error = Black700,
+    errorContainer = Red400,
+    onErrorContainer = White100
 )
 
 // LightColorScheme сейчас идентичен Dark, можно настроить разные цвета
@@ -47,7 +49,9 @@ private val LightColorScheme = lightColorScheme(
     onSecondaryContainer = Green400,
     outline = Grey600,
     outlineVariant = Grey400,
-    error = Black700
+    error = Black700,
+    errorContainer = Red400,
+    onErrorContainer = White100
 )
 
 /**

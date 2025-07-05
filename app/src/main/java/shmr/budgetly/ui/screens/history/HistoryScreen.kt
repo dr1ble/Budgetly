@@ -15,7 +15,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import shmr.budgetly.R
 import shmr.budgetly.domain.entity.Transaction
 import shmr.budgetly.domain.util.DomainError
@@ -32,6 +32,7 @@ import shmr.budgetly.ui.components.EmojiIcon
 import shmr.budgetly.ui.components.ErrorState
 import shmr.budgetly.ui.theme.dimens
 import shmr.budgetly.ui.util.HistoryDateFormatter
+import shmr.budgetly.ui.util.formatCurrencySymbol
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -43,7 +44,7 @@ import java.time.ZoneId
  */
 @Composable
 fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel()) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     if (uiState.isDatePickerVisible) {
         DatePickerDialog(uiState, viewModel)
@@ -166,12 +167,13 @@ private fun TransactionItem(transaction: Transaction) {
         title = transaction.category.name,
         subtitle = transaction.comment.takeIf { it.isNotBlank() },
         trail = {
+            val currencySymbol = formatCurrencySymbol(transaction.currency)
             Column(
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 Text(
-                    text = transaction.amount,
+                    text = "${transaction.amount} $currencySymbol",
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Text(

@@ -3,19 +3,22 @@ package shmr.budgetly.ui.screens.incomes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import shmr.budgetly.domain.entity.Transaction
 import shmr.budgetly.domain.usecase.GetIncomeTransactionsUseCase
+import shmr.budgetly.domain.usecase.GetMainAccountUseCase
 import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.domain.util.Result
+import shmr.budgetly.ui.util.formatCurrencySymbol
 import javax.inject.Inject
 
 data class IncomesUiState(
     val transactions: List<Transaction> = emptyList(),
-    val totalAmount: String = "0 ₽",
+    val totalAmount: String = "0",
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val error: DomainError? = null
@@ -30,7 +33,8 @@ data class IncomesUiState(
  */
 @HiltViewModel
 class IncomesViewModel @Inject constructor(
-    private val getIncomeTransactions: GetIncomeTransactionsUseCase
+    private val getIncomeTransactions: GetIncomeTransactionsUseCase,
+    private val getMainAccount: GetMainAccountUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(IncomesUiState())
@@ -53,30 +57,39 @@ class IncomesViewModel @Inject constructor(
                     error = null
                 )
             }
-            processResult(getIncomeTransactions())
-        }
-    }
 
-    /**
-     * Обрабатывает результат загрузки и обновляет UI state.
-     */
-    private fun processResult(result: Result<List<Transaction>>) {
-        when (result) {
-            is Result.Success -> {
-                val total = result.data.sumOf {
-                    it.amount.replace(Regex("[^0-9.-]"), "").toDoubleOrNull() ?: 0.0
-                }
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        isRefreshing = false,
-                        transactions = result.data,
-                        totalAmount = "%,.0f ₽".format(total).replace(",", " ")
-                    )
-                }
+            // Параллельно запрашиваем счет и транзакции
+            val accountResultDeferred = async { getMainAccount() }
+            val transactionsResultDeferred = async { getIncomeTransactions() }
+
+            val accountResult = accountResultDeferred.await()
+            val transactionsResult = transactionsResultDeferred.await()
+
+            // Обрабатываем ошибки в первую очередь
+            val error = (accountResult as? Result.Error)?.error
+                ?: (transactionsResult as? Result.Error)?.error
+
+            if (error != null) {
+                _uiState.update { it.copy(isLoading = false, isRefreshing = false, error = error) }
+                return@launch
             }
-            is Result.Error -> _uiState.update {
-                it.copy(isLoading = false, isRefreshing = false, error = result.error)
+
+            // Если ошибок нет, данные гарантированно есть
+            val account = (accountResult as Result.Success).data
+            val transactions = (transactionsResult as Result.Success).data
+
+            val currencySymbol = formatCurrencySymbol(account.currency)
+            val total = transactions.sumOf {
+                it.amount.replace(Regex("[^0-9.-]"), "").toDoubleOrNull() ?: 0.0
+            }
+
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    isRefreshing = false,
+                    transactions = transactions,
+                    totalAmount = "%,.0f %s".format(total, currencySymbol).replace(",", " ")
+                )
             }
         }
     }
