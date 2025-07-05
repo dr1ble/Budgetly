@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -11,9 +12,11 @@ import kotlinx.coroutines.launch
 import shmr.budgetly.domain.entity.Transaction
 import shmr.budgetly.domain.model.TransactionFilterType
 import shmr.budgetly.domain.usecase.GetHistoryUseCase
+import shmr.budgetly.domain.usecase.GetMainAccountUseCase
 import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.domain.util.Result
 import shmr.budgetly.ui.navigation.NavDestination
+import shmr.budgetly.ui.util.formatCurrencySymbol
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -25,7 +28,7 @@ data class HistoryUiState(
     val transactionsByDate: Map<LocalDate, List<Transaction>> = emptyMap(),
     val startDate: LocalDate = LocalDate.now().withDayOfMonth(1),
     val endDate: LocalDate = LocalDate.now(),
-    val totalSum: String = "0 ₽",
+    val totalSum: String = "0",
     val isLoading: Boolean = false,
     val datePickerType: DatePickerDialogType? = null,
     val error: DomainError? = null
@@ -44,6 +47,7 @@ data class HistoryUiState(
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
     private val getHistory: GetHistoryUseCase,
+    private val getMainAccount: GetMainAccountUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -102,33 +106,46 @@ class HistoryViewModel @Inject constructor(
     fun loadHistory(isInitialLoad: Boolean = false) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = isInitialLoad, error = null) }
-            val result = getHistory(
-                startDate = _uiState.value.startDate,
-                endDate = _uiState.value.endDate,
-                filterType = filterType
-            )
-            processResult(result)
-        }
-    }
 
-    private fun processResult(result: Result<List<Transaction>>) {
-        when (result) {
-            is Result.Success -> {
-                val total = result.data.sumOf {
-                    it.amount.replace(Regex("[^0-9.-]"), "").toDoubleOrNull() ?: 0.0
-                }
-                val grouped = result.data
-                    .sortedByDescending { it.transactionDate }
-                    .groupBy { it.transactionDate.toLocalDate() }
-                _uiState.update {
-                    it.copy(
-                        transactionsByDate = grouped,
-                        totalSum = "%,.0f ₽".format(total).replace(",", " "),
-                        isLoading = false
-                    )
-                }
+            val accountResultDeferred = async { getMainAccount() }
+            val historyResultDeferred = async {
+                getHistory(
+                    startDate = _uiState.value.startDate,
+                    endDate = _uiState.value.endDate,
+                    filterType = filterType
+                )
             }
-            is Result.Error -> _uiState.update { it.copy(error = result.error, isLoading = false) }
+
+            val accountResult = accountResultDeferred.await()
+            val historyResult = historyResultDeferred.await()
+
+            val error = (accountResult as? Result.Error)?.error
+                ?: (historyResult as? Result.Error)?.error
+
+            if (error != null) {
+                _uiState.update { it.copy(isLoading = false, error = error) }
+                return@launch
+            }
+
+            val account = (accountResult as Result.Success).data
+            val transactions = (historyResult as Result.Success).data
+
+            val currencySymbol = formatCurrencySymbol(account.currency)
+            val total = transactions.sumOf {
+                it.amount.replace(Regex("[^0-9.-]"), "").toDoubleOrNull() ?: 0.0
+            }
+
+            val grouped = transactions
+                .sortedByDescending { it.transactionDate }
+                .groupBy { it.transactionDate.toLocalDate() }
+
+            _uiState.update {
+                it.copy(
+                    transactionsByDate = grouped,
+                    totalSum = "%,.0f %s".format(total, currencySymbol).replace(",", " "),
+                    isLoading = false
+                )
+            }
         }
     }
 }

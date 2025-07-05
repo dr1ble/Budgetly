@@ -62,8 +62,7 @@ fun MainScreen() {
             val currentRoute = navBackStackEntry?.destination?.route
             val fabRoutes = setOf(
                 NavDestination.BottomNav.Expenses.route,
-                NavDestination.BottomNav.Incomes.route,
-                NavDestination.BottomNav.Account.route
+                NavDestination.BottomNav.Incomes.route
             )
             if (currentRoute in fabRoutes) {
                 BaseFAB(onClick = { /* TODO */ })

@@ -17,6 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,14 +26,22 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import shmr.budgetly.R
 import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.ui.components.BaseListItem
 import shmr.budgetly.ui.components.EmojiIcon
 import shmr.budgetly.ui.components.ErrorState
 import shmr.budgetly.ui.components.TotalHeader
+import shmr.budgetly.ui.util.formatCurrencySymbol
 
+
+/*
+* Экран "Расходы". Отображает список транзакций-расходов пользователя за текущий день.
+*
+*/
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun ExpensesScreen(
@@ -40,9 +49,20 @@ fun ExpensesScreen(
     viewModel: ExpensesViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            viewModel.loadExpenses(
+                isInitialLoad = uiState.transactions.isEmpty(),
+                forceRefresh = true
+            )
+        }
+    }
+
     val pullRefreshState = rememberPullRefreshState(
         refreshing = uiState.isRefreshing,
-        onRefresh = { viewModel.loadExpenses() }
+        onRefresh = { viewModel.loadExpenses(forceRefresh = true) }
     )
 
     Box(modifier = modifier
@@ -62,7 +82,7 @@ fun ExpensesScreen(
                 }
                 ErrorState(
                     message = errorMessage,
-                    onRetry = { viewModel.loadExpenses(isInitialLoad = true) }
+                    onRetry = { viewModel.loadExpenses(isInitialLoad = true, forceRefresh = true) }
                 )
             }
 
@@ -84,8 +104,9 @@ fun ExpensesScreen(
                             title = transaction.category.name,
                             subtitle = if (transaction.comment.isNotBlank()) transaction.comment else null,
                             trail = {
+                                val currencySymbol = formatCurrencySymbol(transaction.currency)
                                 Text(
-                                    text = transaction.amount,
+                                    text = "${transaction.amount} $currencySymbol",
                                     fontWeight = FontWeight.Normal
                                 )
                                 Spacer(modifier = Modifier.width(16.dp))

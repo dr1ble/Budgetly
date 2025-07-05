@@ -31,7 +31,12 @@ import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.ui.components.BaseListItem
 import shmr.budgetly.ui.components.ErrorState
 import shmr.budgetly.ui.components.TotalHeader
+import shmr.budgetly.ui.util.formatCurrencySymbol
 
+/*
+* Экран "Доходы". Отображает список транзакций-расходов пользователя за текущий день.
+*
+*/
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun IncomesScreen(
@@ -85,8 +90,9 @@ fun IncomesScreen(
                             title = transaction.category.name,
                             titleTextStyle = MaterialTheme.typography.bodyLarge,
                             trail = {
+                                val currencySymbol = formatCurrencySymbol(transaction.currency)
                                 Text(
-                                    text = transaction.amount,
+                                    text = "${transaction.amount} $currencySymbol",
                                     fontWeight = FontWeight.Normal
                                 )
                                 Spacer(modifier = Modifier.width(16.dp))

@@ -3,19 +3,21 @@ package shmr.budgetly.ui.screens.expenses
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import shmr.budgetly.domain.entity.Transaction
 import shmr.budgetly.domain.usecase.GetExpenseTransactionsUseCase
+import shmr.budgetly.domain.usecase.GetMainAccountUseCase
 import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.domain.util.Result
+import shmr.budgetly.ui.util.formatCurrencySymbol
 import javax.inject.Inject
 
 data class ExpensesUiState(
-    val transactions: List<Transaction> = emptyList(),
-    val totalAmount: String = "0 ₽",
+    val transactions: List<shmr.budgetly.domain.entity.Transaction> = emptyList(),
+    val totalAmount: String = "0",
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val error: DomainError? = null
@@ -30,21 +32,25 @@ data class ExpensesUiState(
  */
 @HiltViewModel
 class ExpensesViewModel @Inject constructor(
-    private val getExpenseTransactions: GetExpenseTransactionsUseCase
+    private val getExpenseTransactions: GetExpenseTransactionsUseCase,
+    private val getMainAccount: GetMainAccountUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ExpensesUiState())
     val uiState = _uiState.asStateFlow()
 
-    init {
-        loadExpenses(isInitialLoad = true)
-    }
-
     /**
      * Инициирует загрузку расходов.
-     * @param isInitialLoad true для первоначальной загрузки, false для pull-to-refresh.
+     * @param isInitialLoad true для первоначальной загрузки (показывает полноэкранный индикатор).
+     * @param forceRefresh true, чтобы принудительно обновить данные, даже если они уже есть.
      */
-    fun loadExpenses(isInitialLoad: Boolean = false) {
+    fun loadExpenses(isInitialLoad: Boolean = false, forceRefresh: Boolean = false) {
+        val state = _uiState.value
+
+        if (state.isLoading || state.isRefreshing || (!forceRefresh && state.transactions.isNotEmpty())) {
+            return
+        }
+
         viewModelScope.launch {
             _uiState.update {
                 it.copy(
@@ -53,30 +59,38 @@ class ExpensesViewModel @Inject constructor(
                     error = null
                 )
             }
-            processResult(getExpenseTransactions())
-        }
-    }
 
-    /**
-     * Обрабатывает результат загрузки и обновляет UI state.
-     */
-    private fun processResult(result: Result<List<Transaction>>) {
-        when (result) {
-            is Result.Success -> {
-                val total = result.data.sumOf {
-                    it.amount.replace(Regex("[^0-9.-]"), "").toDoubleOrNull() ?: 0.0
-                }
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        isRefreshing = false,
-                        transactions = result.data,
-                        totalAmount = "%,.0f ₽".format(total).replace(",", " ")
-                    )
-                }
+            // Параллельно запрашиваем счет и транзакции
+            val accountResultDeferred = async { getMainAccount() }
+            val transactionsResultDeferred = async { getExpenseTransactions() }
+
+            val accountResult = accountResultDeferred.await()
+            val transactionsResult = transactionsResultDeferred.await()
+
+            // Обрабатываем ошибки в первую очередь
+            val error = (accountResult as? Result.Error)?.error
+                ?: (transactionsResult as? Result.Error)?.error
+
+            if (error != null) {
+                _uiState.update { it.copy(isLoading = false, isRefreshing = false, error = error) }
+                return@launch
             }
-            is Result.Error -> _uiState.update {
-                it.copy(isLoading = false, isRefreshing = false, error = result.error)
+
+            val account = (accountResult as Result.Success).data
+            val transactions = (transactionsResult as Result.Success).data
+
+            val currencySymbol = formatCurrencySymbol(account.currency)
+            val total = transactions.sumOf {
+                it.amount.replace(Regex("[^0-9.-]"), "").toDoubleOrNull() ?: 0.0
+            }
+
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    isRefreshing = false,
+                    transactions = transactions,
+                    totalAmount = "%,.0f %s".format(total, currencySymbol).replace(",", " ")
+                )
             }
         }
     }

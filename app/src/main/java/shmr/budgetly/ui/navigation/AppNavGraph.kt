@@ -58,8 +58,8 @@ fun AppNavGraph(navController: NavHostController) {
             )
         }
 
-        composable(NavDestination.EditAccount.route) { backStackEntry ->
-            val viewModel: EditAccountViewModel = hiltViewModel(backStackEntry)
+        composable(NavDestination.EditAccount.route) {
+            val viewModel: EditAccountViewModel = hiltViewModel()
             EditAccountScreen(
                 viewModel = viewModel,
                 onSaveSuccess = {
@@ -67,6 +67,7 @@ fun AppNavGraph(navController: NavHostController) {
                         ?.savedStateHandle
                         ?.set("account_updated", true)
                     navController.popBackStack()
+                    viewModel.resetSaveSuccessFlag()
                 }
             )
         }
