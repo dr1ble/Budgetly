@@ -1,5 +1,6 @@
 package shmr.budgetly.data.network.dto
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -9,10 +10,10 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class AccountResponseDto(
-    val id: Int,
-    val name: String,
-    val balance: String,
-    val currency: String,
-    val incomeStats: List<StatItemDto>,
-    val expenseStats: List<StatItemDto>
+    @SerialName("id") val id: Int,
+    @SerialName("name") val name: String,
+    @SerialName("balance") val balance: String,
+    @SerialName("currency") val currency: String,
+    @SerialName("incomeStats") val incomeStats: List<StatItemDto>,
+    @SerialName("expenseStats") val expenseStats: List<StatItemDto>
 )
