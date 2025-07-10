@@ -27,6 +27,7 @@ import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.ui.components.BaseListItem
 import shmr.budgetly.ui.components.EmojiIcon
 import shmr.budgetly.ui.components.ErrorState
+import shmr.budgetly.ui.navigation.ACCOUNT_UPDATED_RESULT_KEY
 import shmr.budgetly.ui.theme.dimens
 import shmr.budgetly.ui.util.formatCurrencySymbol
 
@@ -45,7 +46,7 @@ fun AccountScreen(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
     LaunchedEffect(navBackStackEntry) {
-        if (navBackStackEntry?.savedStateHandle?.remove<Boolean>("account_updated") == true) {
+        if (navBackStackEntry?.savedStateHandle?.remove<Boolean>(ACCOUNT_UPDATED_RESULT_KEY) == true) {
             viewModel.loadAccount(isInitialLoad = true)
         }
     }
@@ -57,17 +58,18 @@ fun AccountScreen(
             }
 
             uiState.error != null -> {
-                val errorMessage = when (uiState.error) {
+                val currentError = uiState.error!! // Безопасное утверждение non-null, так как мы уже проверили
+                val errorMessage = when (currentError) {
                     DomainError.NoInternet -> stringResource(R.string.error_no_internet)
                     DomainError.ServerError -> stringResource(R.string.error_server)
                     is DomainError.Unknown -> stringResource(R.string.error_unknown)
-                    null -> ""
                 }
                 ErrorState(
                     message = errorMessage,
                     onRetry = { viewModel.loadAccount() }
                 )
             }
+
 
             uiState.account != null -> {
                 AccountContent(account = uiState.account!!)

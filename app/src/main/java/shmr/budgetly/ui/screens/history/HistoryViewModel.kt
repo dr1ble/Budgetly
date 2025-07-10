@@ -3,6 +3,7 @@ package shmr.budgetly.ui.screens.history
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +16,9 @@ import shmr.budgetly.domain.usecase.GetHistoryUseCase
 import shmr.budgetly.domain.usecase.GetMainAccountUseCase
 import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.domain.util.Result
-import shmr.budgetly.ui.navigation.NavDestination
+import shmr.budgetly.ui.navigation.Expenses
+import shmr.budgetly.ui.navigation.History
+import shmr.budgetly.ui.navigation.Incomes
 import shmr.budgetly.ui.util.formatCurrencySymbol
 import java.time.Instant
 import java.time.LocalDate
@@ -54,10 +57,11 @@ class HistoryViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(HistoryUiState())
     val uiState = _uiState.asStateFlow()
 
-    private val parentRoute: String? = savedStateHandle[NavDestination.History.PARENT_ROUTE_ARG]
-    private val filterType: TransactionFilterType = when (parentRoute) {
-        NavDestination.BottomNav.Expenses.route -> TransactionFilterType.EXPENSE
-        NavDestination.BottomNav.Incomes.route -> TransactionFilterType.INCOME
+    private val navArgs: History = savedStateHandle.toRoute()
+
+    private val filterType: TransactionFilterType = when (navArgs.parentRoute) {
+        Expenses::class.qualifiedName -> TransactionFilterType.EXPENSE
+        Incomes::class.qualifiedName -> TransactionFilterType.INCOME
         else -> TransactionFilterType.ALL
     }
 
