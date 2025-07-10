@@ -10,18 +10,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import shmr.budgetly.domain.usecase.GetExpenseTransactionsUseCase
 import shmr.budgetly.domain.usecase.GetMainAccountUseCase
-import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.domain.util.Result
 import shmr.budgetly.ui.util.formatCurrencySymbol
 import javax.inject.Inject
-
-data class ExpensesUiState(
-    val transactions: List<shmr.budgetly.domain.entity.Transaction> = emptyList(),
-    val totalAmount: String = "0",
-    val isLoading: Boolean = false,
-    val isRefreshing: Boolean = false,
-    val error: DomainError? = null
-)
 
 /**
  * ViewModel для экрана "Расходы".
@@ -39,6 +30,11 @@ class ExpensesViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ExpensesUiState())
     val uiState = _uiState.asStateFlow()
 
+    init {
+        // Добавим начальную загрузку при инициализации ViewModel
+        loadExpenses(isInitialLoad = true)
+    }
+
     /**
      * Инициирует загрузку расходов.
      * @param isInitialLoad true для первоначальной загрузки (показывает полноэкранный индикатор).
@@ -47,7 +43,8 @@ class ExpensesViewModel @Inject constructor(
     fun loadExpenses(isInitialLoad: Boolean = false, forceRefresh: Boolean = false) {
         val state = _uiState.value
 
-        if (state.isLoading || state.isRefreshing || (!forceRefresh && state.transactions.isNotEmpty())) {
+        // Улучшенная защита от лишних вызовов
+        if ((state.isLoading || state.isRefreshing) && !forceRefresh) {
             return
         }
 
@@ -60,14 +57,12 @@ class ExpensesViewModel @Inject constructor(
                 )
             }
 
-            // Параллельно запрашиваем счет и транзакции
             val accountResultDeferred = async { getMainAccount() }
             val transactionsResultDeferred = async { getExpenseTransactions() }
 
             val accountResult = accountResultDeferred.await()
             val transactionsResult = transactionsResultDeferred.await()
 
-            // Обрабатываем ошибки в первую очередь
             val error = (accountResult as? Result.Error)?.error
                 ?: (transactionsResult as? Result.Error)?.error
 
