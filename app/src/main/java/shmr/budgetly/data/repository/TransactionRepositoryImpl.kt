@@ -1,7 +1,7 @@
 package shmr.budgetly.data.repository
 
 import shmr.budgetly.data.mapper.toDomainModel
-import shmr.budgetly.data.source.remote.RemoteDataSource
+import shmr.budgetly.data.source.remote.transaction.TransactionRemoteDataSource
 import shmr.budgetly.data.util.safeApiCall
 import shmr.budgetly.domain.entity.Transaction
 import shmr.budgetly.domain.repository.AccountRepository
@@ -18,7 +18,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class TransactionRepositoryImpl @Inject constructor(
-    private val remoteDataSource: RemoteDataSource,
+    private val remoteDataSource: TransactionRemoteDataSource,
     private val accountRepository: AccountRepository
 ) : TransactionRepository {
 

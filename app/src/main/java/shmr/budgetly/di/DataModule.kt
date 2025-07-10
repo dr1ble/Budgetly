@@ -9,6 +9,12 @@ import shmr.budgetly.data.repository.CategoryRepositoryImpl
 import shmr.budgetly.data.repository.TransactionRepositoryImpl
 import shmr.budgetly.data.source.remote.RemoteDataSource
 import shmr.budgetly.data.source.remote.RemoteDataSourceImpl
+import shmr.budgetly.data.source.remote.account.AccountRemoteDataSource
+import shmr.budgetly.data.source.remote.account.AccountRemoteDataSourceImpl
+import shmr.budgetly.data.source.remote.category.CategoryRemoteDataSource
+import shmr.budgetly.data.source.remote.category.CategoryRemoteDataSourceImpl
+import shmr.budgetly.data.source.remote.transaction.TransactionRemoteDataSource
+import shmr.budgetly.data.source.remote.transaction.TransactionRemoteDataSourceImpl
 import shmr.budgetly.domain.repository.AccountRepository
 import shmr.budgetly.domain.repository.CategoryRepository
 import shmr.budgetly.domain.repository.TransactionRepository
@@ -38,4 +44,16 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindRemoteDataSource(impl: RemoteDataSourceImpl): RemoteDataSource
+
+    @Binds
+    @Singleton
+    abstract fun bindAccountRemoteDataSource(impl: AccountRemoteDataSourceImpl): AccountRemoteDataSource
+
+    @Binds
+    @Singleton
+    abstract fun bindTransactionRemoteDataSource(impl: TransactionRemoteDataSourceImpl): TransactionRemoteDataSource
+
+    @Binds
+    @Singleton
+    abstract fun bindCategoryRemoteDataSource(impl: CategoryRemoteDataSourceImpl): CategoryRemoteDataSource
 }
