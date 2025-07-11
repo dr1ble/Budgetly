@@ -67,7 +67,7 @@ fun EditAccountScreen(
                         CircularProgressIndicator(
                             modifier = Modifier.padding(horizontal = 16.dp),
                             color = MaterialTheme.colorScheme.onPrimary,
-                            strokeWidth = 2.5.dp
+                            strokeWidth = 2.dp
                         )
                     } else {
                         IconButton(
