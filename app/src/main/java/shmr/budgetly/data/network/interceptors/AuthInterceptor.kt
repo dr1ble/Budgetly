@@ -2,15 +2,15 @@ package shmr.budgetly.data.network.interceptors
 
 import okhttp3.Interceptor
 import okhttp3.Response
+import shmr.budgetly.di.scope.AppScope
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Singleton
 
 /**
  * Перехватчик OkHttp, который добавляет заголовок "Authorization" с Bearer-токеном
  * ко всем исходящим сетевым запросам.
  */
-@Singleton
+@AppScope
 class AuthInterceptor @Inject constructor(
     @Named("apiToken") private val authToken: String?
 ) : Interceptor {

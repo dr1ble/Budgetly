@@ -2,7 +2,6 @@ package shmr.budgetly.ui.screens.expenses
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,7 +20,7 @@ import javax.inject.Inject
  * 2. Управление состоянием UI ([ExpensesUiState]), включая флаги для первоначальной загрузки и pull-to-refresh.
  * 3. Расчет и форматирование общей суммы расходов.
  */
-@HiltViewModel
+
 class ExpensesViewModel @Inject constructor(
     private val getExpenseTransactions: GetExpenseTransactionsUseCase,
     private val getMainAccount: GetMainAccountUseCase

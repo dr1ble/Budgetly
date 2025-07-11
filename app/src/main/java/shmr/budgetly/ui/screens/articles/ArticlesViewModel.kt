@@ -2,7 +2,6 @@ package shmr.budgetly.ui.screens.articles
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -18,7 +17,7 @@ import javax.inject.Inject
  * 2. Обработку поискового запроса от пользователя.
  * 3. Управление состоянием UI ([ArticlesUiState]).
  */
-@HiltViewModel
+
 class ArticlesViewModel @Inject constructor(
     private val getAllCategories: GetAllCategoriesUseCase
 ) : ViewModel() {

@@ -3,6 +3,7 @@ package shmr.budgetly.data.repository
 import shmr.budgetly.data.mapper.toDomainModel
 import shmr.budgetly.data.source.remote.transaction.TransactionRemoteDataSource
 import shmr.budgetly.data.util.safeApiCall
+import shmr.budgetly.di.scope.AppScope
 import shmr.budgetly.domain.entity.Transaction
 import shmr.budgetly.domain.repository.AccountRepository
 import shmr.budgetly.domain.repository.TransactionRepository
@@ -10,13 +11,12 @@ import shmr.budgetly.domain.util.Result
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Реализация [TransactionRepository], отвечающая за получение данных о транзакциях.
  * Зависит от [AccountRepository] для получения ID текущего счета перед запросом транзакций.
  */
-@Singleton
+@AppScope
 class TransactionRepositoryImpl @Inject constructor(
     private val remoteDataSource: TransactionRemoteDataSource,
     private val accountRepository: AccountRepository

@@ -2,16 +2,16 @@ package shmr.budgetly.data.network.interceptors
 
 import okhttp3.Interceptor
 import okhttp3.Response
+import shmr.budgetly.di.scope.AppScope
 import java.io.IOException
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Перехватчик OkHttp, который автоматически повторяет неудавшиеся запросы.
  * Повторные попытки выполняются при возникновении [IOException] (ошибки сети)
  * или при получении ответа с кодом 5xx (ошибки сервера).
  */
-@Singleton
+@AppScope
 class RetryInterceptor @Inject constructor() : Interceptor {
 
     private companion object {

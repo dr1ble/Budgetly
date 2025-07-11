@@ -6,20 +6,20 @@ import shmr.budgetly.data.mapper.toDomainModel
 import shmr.budgetly.data.network.dto.UpdateAccountRequestDto
 import shmr.budgetly.data.source.remote.account.AccountRemoteDataSource
 import shmr.budgetly.data.util.safeApiCall
+import shmr.budgetly.di.scope.AppScope
 import shmr.budgetly.domain.entity.Account
 import shmr.budgetly.domain.repository.AccountRepository
 import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.domain.util.Result
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Singleton
 
 /**
  * Реализация [AccountRepository], отвечающая за получение данных о счетах.
  * Управляет логикой определения текущего счета пользователя (захардкоженный или первый с сервера)
  * и кэширует его ID для последующих запросов.
  */
-@Singleton
+@AppScope
 class AccountRepositoryImpl @Inject constructor(
     private val remoteDataSource: AccountRemoteDataSource, // <-- ИЗМЕНЕНИЕ
     @Named("useHardcodedAccountId") private val useHardcodedAccountId: Boolean
