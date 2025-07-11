@@ -1,6 +1,7 @@
 package shmr.budgetly.data.repository
 
 import shmr.budgetly.data.mapper.toDomainModel
+import shmr.budgetly.data.network.dto.TransactionRequestDto
 import shmr.budgetly.data.source.remote.transaction.TransactionRemoteDataSource
 import shmr.budgetly.data.util.safeApiCall
 import shmr.budgetly.di.scope.AppScope
@@ -9,6 +10,7 @@ import shmr.budgetly.domain.repository.AccountRepository
 import shmr.budgetly.domain.repository.TransactionRepository
 import shmr.budgetly.domain.util.Result
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
@@ -22,7 +24,8 @@ class TransactionRepositoryImpl @Inject constructor(
     private val accountRepository: AccountRepository
 ) : TransactionRepository {
 
-    private val dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE
+    private val isoLocalDateFormatter = DateTimeFormatter.ISO_LOCAL_DATE
+    private val isoDateTimeFormatter = DateTimeFormatter.ISO_DATE_TIME
 
     override suspend fun getTransactions(
         startDate: LocalDate,
@@ -39,6 +42,57 @@ class TransactionRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getTransactionById(id: Int): Result<Transaction> {
+        return safeApiCall {
+            remoteDataSource.getTransactionById(id).toDomainModel()
+        }
+    }
+
+    override suspend fun createTransaction(
+        accountId: Int,
+        categoryId: Int,
+        amount: String,
+        transactionDate: LocalDateTime,
+        comment: String?
+    ): Result<Transaction> {
+        val request = TransactionRequestDto(
+            accountId = accountId,
+            categoryId = categoryId,
+            amount = amount,
+            transactionDate = transactionDate.format(isoDateTimeFormatter),
+            comment = comment
+        )
+        return safeApiCall {
+            remoteDataSource.createTransaction(request).toDomainModel()
+        }
+    }
+
+    override suspend fun updateTransaction(
+        id: Int,
+        accountId: Int,
+        categoryId: Int,
+        amount: String,
+        transactionDate: LocalDateTime,
+        comment: String?
+    ): Result<Transaction> {
+        val request = TransactionRequestDto(
+            accountId = accountId,
+            categoryId = categoryId,
+            amount = amount,
+            transactionDate = transactionDate.format(isoDateTimeFormatter),
+            comment = comment
+        )
+        return safeApiCall {
+            remoteDataSource.updateTransaction(id, request).toDomainModel()
+        }
+    }
+
+    override suspend fun deleteTransaction(id: Int): Result<Unit> {
+        return safeApiCall {
+            remoteDataSource.deleteTransaction(id)
+        }
+    }
+
     /**
      * Выполняет сетевой запрос для получения транзакций по ID счета и периоду.
      */
@@ -50,8 +104,8 @@ class TransactionRepositoryImpl @Inject constructor(
         return safeApiCall {
             remoteDataSource.getTransactionsForPeriod(
                 accountId = accountId,
-                startDate = startDate.format(dateFormatter),
-                endDate = endDate.format(dateFormatter)
+                startDate = startDate.format(isoLocalDateFormatter),
+                endDate = endDate.format(isoLocalDateFormatter)
             ).map { it.toDomainModel() }
         }
     }
