@@ -54,6 +54,7 @@
     <string name="save_action_description">Сохранить</string>
     <string name="edit_account_currency_label">Валюта</string>
     <string name="edit_account_currency_change_cancel">Отмена выбора валюты</string>
+    <string name="edit_account_cancel_button">Отмена редактирования счета</string>
     <string name="transaction_details_account">Счет</string>
     <string name="transaction_details_category">Статья</string>
     <string name="transaction_details_date">Дата</string>
@@ -71,5 +72,6 @@
     <string name="dialog_delete">Удалить</string>
     <string name="transaction_details_delete_income_button">Удалить доход</string>
     <string name="transaction_details_delete_expense_button">Удалить расход</string>
+    <string name="transaction_details_edit_cancel_button">Отмена добавления/редактирования операции</string>
 
 </resources>

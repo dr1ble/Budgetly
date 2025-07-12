@@ -16,7 +16,7 @@ class UpdateTransactionUseCase @Inject constructor(
         categoryId: Int,
         amount: String,
         transactionDate: LocalDateTime,
-        comment: String?
+        comment: String
     ) = repository.updateTransaction(
         id,
         accountId,

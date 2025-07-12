@@ -14,7 +14,12 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.toRoute
-import shmr.budgetly.ui.navigation.*
+import shmr.budgetly.ui.navigation.Account
+import shmr.budgetly.ui.navigation.BottomNavItem
+import shmr.budgetly.ui.navigation.EditAccount
+import shmr.budgetly.ui.navigation.History
+import shmr.budgetly.ui.navigation.TransactionDetails
+import shmr.budgetly.ui.navigation.bottomNavItems
 
 /**
  * Компонент нижней навигационной панели (Bottom Navigation Bar).
@@ -61,10 +66,15 @@ private fun isDestinationSelected(
 
     val historyRouteBase = History::class.qualifiedName!!
     val editAccountRouteBase = EditAccount::class.qualifiedName!!
+    val transactionDetailsRouteBase = TransactionDetails::class.qualifiedName!!
 
     val activeTabRouteName: String? = when {
         currentRoute.startsWith(historyRouteBase) -> {
             navBackStackEntry.toRoute<History>().parentRoute
+        }
+
+        currentRoute.startsWith(transactionDetailsRouteBase) -> {
+            navBackStackEntry.toRoute<TransactionDetails>().parentRoute
         }
 
         currentRoute == editAccountRouteBase -> {

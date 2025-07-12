@@ -3,6 +3,7 @@ package shmr.budgetly.ui.screens.transactiondetails
 import shmr.budgetly.domain.entity.Account
 import shmr.budgetly.domain.entity.Category
 import shmr.budgetly.domain.util.DomainError
+import shmr.budgetly.ui.navigation.Expenses
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -36,13 +37,16 @@ data class TransactionDetailsUiState(
     val isAccountPickerVisible: Boolean = false,
     val isCategoryPickerVisible: Boolean = false,
     val showDeleteConfirmDialog: Boolean = false,
+
+    // Навигационные данные
+    val parentRoute: String = Expenses::class.qualifiedName!!
 ) {
     /**
      * Вычисляемое свойство, определяющее, активна ли кнопка сохранения.
      */
     val isSaveEnabled: Boolean
         get() = amount.isNotBlank() &&
-                (amount.toDoubleOrNull() ?: 0.0) > 0.0 &&
+                (amount.replace(',', '.').toDoubleOrNull() ?: 0.0) > 0.0 &&
                 selectedAccount != null &&
                 selectedCategory != null &&
                 !isLoading &&

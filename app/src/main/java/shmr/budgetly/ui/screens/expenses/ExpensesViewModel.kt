@@ -10,7 +10,9 @@ import kotlinx.coroutines.launch
 import shmr.budgetly.domain.usecase.GetExpenseTransactionsUseCase
 import shmr.budgetly.domain.usecase.GetMainAccountUseCase
 import shmr.budgetly.domain.util.Result
+import shmr.budgetly.ui.util.formatAmount
 import shmr.budgetly.ui.util.formatCurrencySymbol
+import java.math.BigDecimal
 import javax.inject.Inject
 
 /**
@@ -75,7 +77,11 @@ class ExpensesViewModel @Inject constructor(
 
             val currencySymbol = formatCurrencySymbol(account.currency)
             val total = transactions.sumOf {
-                it.amount.replace(Regex("[^0-9.-]"), "").toDoubleOrNull() ?: 0.0
+                try {
+                    BigDecimal(it.amount)
+                } catch (_: NumberFormatException) {
+                    BigDecimal.ZERO
+                }
             }
 
             _uiState.update {
@@ -83,7 +89,7 @@ class ExpensesViewModel @Inject constructor(
                     isLoading = false,
                     isRefreshing = false,
                     transactions = transactions,
-                    totalAmount = "%,.0f %s".format(total, currencySymbol).replace(",", " ")
+                    totalAmount = formatAmount(total, currencySymbol)
                 )
             }
         }

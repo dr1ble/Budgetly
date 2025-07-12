@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -43,17 +44,25 @@ fun TimePickerModal(
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Surface(
-            modifier = Modifier.padding(24.dp),
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 72.dp),
             shape = RoundedCornerShape(28.dp),
-            color = MaterialTheme.colorScheme.surface
+            color = MaterialTheme.colorScheme.secondary
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                modifier = Modifier.padding(top = 24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 TimePicker(
                     state = timePickerState,
                     colors = TimePickerDefaults.colors(
-                        clockDialColor = MaterialTheme.colorScheme.secondary,
+                        containerColor = MaterialTheme.colorScheme.secondary,
                         selectorColor = MaterialTheme.colorScheme.primary,
-                        periodSelectorSelectedContainerColor = MaterialTheme.colorScheme.primary
+                        clockDialColor = MaterialTheme.colorScheme.surface,
+                        clockDialSelectedContentColor = MaterialTheme.colorScheme.onPrimary,
+                        timeSelectorSelectedContainerColor = MaterialTheme.colorScheme.primary,
+                        timeSelectorSelectedContentColor = MaterialTheme.colorScheme.onPrimary,
+                        periodSelectorSelectedContainerColor = MaterialTheme.colorScheme.primary,
+                        periodSelectorSelectedContentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 )
 
@@ -65,7 +74,7 @@ fun TimePickerModal(
                 ) {
                     TextButton(
                         onClick = onDismiss,
-                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSecondary)
                     ) {
                         Text(stringResource(id = R.string.dialog_cancel))
                     }
@@ -78,7 +87,7 @@ fun TimePickerModal(
                                 )
                             )
                         },
-                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSecondary)
                     ) {
                         Text(stringResource(id = R.string.dialog_ok))
                     }
@@ -86,4 +95,15 @@ fun TimePickerModal(
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview
+@Composable
+fun TimePickerModalPreview() {
+    TimePickerModal(
+        time = LocalTime.now(),
+        onTimeSelected = {},
+        onDismiss = {}
+    )
 }

@@ -17,7 +17,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -25,14 +24,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import shmr.budgetly.R
+import shmr.budgetly.ui.components.AmountText
 import shmr.budgetly.ui.components.AppTopBar
 import shmr.budgetly.ui.components.BaseListItem
+import shmr.budgetly.ui.components.EmojiIcon
 import shmr.budgetly.ui.components.ErrorState
 import shmr.budgetly.ui.components.TotalHeader
 import shmr.budgetly.ui.navigation.History
@@ -40,8 +40,10 @@ import shmr.budgetly.ui.navigation.Incomes
 import shmr.budgetly.ui.navigation.TRANSACTION_SAVED_RESULT_KEY
 import shmr.budgetly.ui.navigation.TransactionDetails
 import shmr.budgetly.ui.util.LocalTopAppBarSetter
+import shmr.budgetly.ui.util.formatAmount
 import shmr.budgetly.ui.util.formatCurrencySymbol
 import shmr.budgetly.ui.util.getErrorMessage
+
 
 /**
  * Экран "Доходы". Отображает список транзакций-доходов пользователя за текущий месяц.
@@ -95,7 +97,8 @@ fun IncomesScreen(
                 navController.navigate(
                     TransactionDetails(
                         transactionId = transactionId,
-                        isIncome = true
+                        isIncome = true,
+                        parentRoute = Incomes::class.qualifiedName!!
                     )
                 )
             }
@@ -145,13 +148,15 @@ private fun BoxScope.ScreenContent(
                     key = { it.id }
                 ) { transaction ->
                     BaseListItem(
+                        lead = { EmojiIcon(emoji = transaction.category.emoji) },
                         title = transaction.category.name,
+                        truncateSubtitle = true,
                         titleTextStyle = MaterialTheme.typography.bodyLarge,
+                        subtitle = transaction.comment.ifBlank { null },
                         trail = {
                             val currencySymbol = formatCurrencySymbol(transaction.currency)
-                            Text(
-                                text = "${transaction.amount} $currencySymbol",
-                                fontWeight = FontWeight.Normal
+                            AmountText(
+                                text = formatAmount(transaction.amount, currencySymbol)
                             )
                             Spacer(modifier = Modifier.width(16.dp))
                             Icon(
