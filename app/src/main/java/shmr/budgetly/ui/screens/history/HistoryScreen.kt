@@ -10,22 +10,27 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import shmr.budgetly.R
 import shmr.budgetly.domain.entity.Transaction
 import shmr.budgetly.domain.util.DomainError
+import shmr.budgetly.ui.components.AppTopBar
 import shmr.budgetly.ui.components.BaseListItem
 import shmr.budgetly.ui.components.DatePickerModal
 import shmr.budgetly.ui.components.EmojiIcon
@@ -33,6 +38,7 @@ import shmr.budgetly.ui.components.ErrorState
 import shmr.budgetly.ui.theme.dimens
 import shmr.budgetly.ui.util.DatePickerDialogType
 import shmr.budgetly.ui.util.HistoryDateFormatter
+import shmr.budgetly.ui.util.LocalTopAppBarSetter
 import shmr.budgetly.ui.util.formatCurrencySymbol
 import java.time.LocalDate
 import java.time.ZoneId
@@ -40,11 +46,32 @@ import java.time.ZoneId
 /**
  * Экран "История", отображающий список транзакций за выбранный период.
  * Позволяет пользователю выбирать начальную и конечную даты.
- *
- * @param viewModel ViewModel для управления состоянием экрана.
  */
 @Composable
-fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel()) {
+fun HistoryScreen(
+    viewModel: HistoryViewModel,
+    navController: NavController
+) {
+    val topAppBarSetter = LocalTopAppBarSetter.current
+    LaunchedEffect(Unit) {
+        topAppBarSetter {
+            AppTopBar(
+                title = stringResource(R.string.history_top_bar_title),
+                navigationIcon = { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) },
+                onNavigationClick = { navController.popBackStack() },
+                actions = {
+                    IconButton(onClick = { /* TODO */ }) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_history_analyze),
+                            contentDescription = stringResource(R.string.analyze_action_description),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            )
+        }
+    }
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     if (uiState.isDatePickerVisible) {

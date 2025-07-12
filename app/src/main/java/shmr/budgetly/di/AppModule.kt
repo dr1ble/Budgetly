@@ -1,35 +1,33 @@
 package shmr.budgetly.di
 
+
 import dagger.Module
 import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import shmr.budgetly.BuildConfig
+import shmr.budgetly.di.scope.AppScope
 import javax.inject.Named
-import javax.inject.Singleton
 
 /**
- * Модуль Hilt для предоставления зависимостей, специфичных для приложения.
- * Отвечает за поставку конфигурационных значений из [BuildConfig],
- * таких как API-токен и флаги, отвязывая компоненты от прямого доступа к нему.
+ * Модуль Dagger, предоставляющий зависимости уровня приложения,
+ * такие как конфигурационные значения из BuildConfig и контекст приложения.
  */
 @Module
-@InstallIn(SingletonComponent::class)
 object AppModule {
 
     /**
-     * Предоставляет API-токен как именованную зависимость.
+     * Предоставляет API-токен для авторизации в сети.
      */
     @Provides
-    @Singleton
+    @AppScope
     @Named("apiToken")
     fun provideApiToken(): String = BuildConfig.API_TOKEN
 
     /**
-     * Предоставляет флаг для использования захардкоженного ID счета.
+     * Предоставляет флаг, указывающий, следует ли использовать
+     * захардкоженный ID аккаунта для отладки.
      */
     @Provides
-    @Singleton
+    @AppScope
     @Named("useHardcodedAccountId")
     fun provideUseHardcodedAccountId(): Boolean = BuildConfig.USE_HARDCODED_ACCOUNT_ID
 }

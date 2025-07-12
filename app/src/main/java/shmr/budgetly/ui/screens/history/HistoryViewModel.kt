@@ -1,10 +1,7 @@
 package shmr.budgetly.ui.screens.history
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,8 +14,8 @@ import shmr.budgetly.domain.util.Result
 import shmr.budgetly.ui.navigation.Expenses
 import shmr.budgetly.ui.navigation.History
 import shmr.budgetly.ui.navigation.Incomes
-import shmr.budgetly.ui.util.formatCurrencySymbol
 import shmr.budgetly.ui.util.DatePickerDialogType
+import shmr.budgetly.ui.util.formatCurrencySymbol
 import java.time.Instant
 import java.time.ZoneId
 import javax.inject.Inject
@@ -32,25 +29,30 @@ import javax.inject.Inject
  * 3. Обработку выбора дат в DatePicker'е.
  * 4. Управление состоянием UI ([HistoryUiState]).
  */
-@HiltViewModel
+
 class HistoryViewModel @Inject constructor(
     private val getHistory: GetHistoryUseCase,
     private val getMainAccount: GetMainAccountUseCase,
-    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HistoryUiState())
     val uiState = _uiState.asStateFlow()
 
-    private val navArgs: History = savedStateHandle.toRoute()
+    private lateinit var filterType: TransactionFilterType
 
-    private val filterType: TransactionFilterType = when (navArgs.parentRoute) {
-        Expenses::class.qualifiedName -> TransactionFilterType.EXPENSE
-        Incomes::class.qualifiedName -> TransactionFilterType.INCOME
-        else -> TransactionFilterType.ALL
-    }
+    /**
+     * Инициализирует ViewModel с необходимыми аргументами навигации.
+     * Этот метод должен быть вызван сразу после создания ViewModel.
+     */
+    fun init(navArgs: History) {
+        // Если ViewModel уже инициализирована, ничего не делаем
+        if (this::filterType.isInitialized) return
 
-    init {
+        this.filterType = when (navArgs.parentRoute) {
+            Expenses::class.qualifiedName -> TransactionFilterType.EXPENSE
+            Incomes::class.qualifiedName -> TransactionFilterType.INCOME
+            else -> TransactionFilterType.ALL
+        }
         loadHistory(isInitialLoad = true)
     }
 
@@ -93,6 +95,10 @@ class HistoryViewModel @Inject constructor(
     }
 
     fun loadHistory(isInitialLoad: Boolean = false) {
+        if (!this::filterType.isInitialized) {
+            return
+        }
+
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = isInitialLoad, error = null) }
 

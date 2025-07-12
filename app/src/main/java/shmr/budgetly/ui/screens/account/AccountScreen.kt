@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,6 +18,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -24,11 +27,14 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import shmr.budgetly.R
 import shmr.budgetly.domain.entity.Account
 import shmr.budgetly.domain.util.DomainError
+import shmr.budgetly.ui.components.AppTopBar
 import shmr.budgetly.ui.components.BaseListItem
 import shmr.budgetly.ui.components.EmojiIcon
 import shmr.budgetly.ui.components.ErrorState
 import shmr.budgetly.ui.navigation.ACCOUNT_UPDATED_RESULT_KEY
+import shmr.budgetly.ui.navigation.EditAccount
 import shmr.budgetly.ui.theme.dimens
+import shmr.budgetly.ui.util.LocalTopAppBarSetter
 import shmr.budgetly.ui.util.formatCurrencySymbol
 
 private object AccountScreenDefaults {
@@ -43,8 +49,32 @@ fun AccountScreen(
     viewModel: AccountViewModel
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val topAppBarSetter = LocalTopAppBarSetter.current
 
+    LaunchedEffect(uiState) {
+        topAppBarSetter {
+            val title = if (uiState.isLoading) "" else {
+                uiState.account?.name ?: stringResource(R.string.account_top_bar_title)
+            }
+
+            AppTopBar(
+                title = title,
+                actions = {
+                    if (uiState.account != null && !uiState.isLoading) {
+                        IconButton(onClick = { navController.navigate(EditAccount) }) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_top_bar_edit),
+                                contentDescription = stringResource(R.string.edit_action_description),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            )
+        }
+    }
+
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
     LaunchedEffect(navBackStackEntry) {
         if (navBackStackEntry?.savedStateHandle?.remove<Boolean>(ACCOUNT_UPDATED_RESULT_KEY) == true) {
             viewModel.loadAccount(isInitialLoad = true)
@@ -53,12 +83,12 @@ fun AccountScreen(
 
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         when {
-            uiState.isLoading -> {
+            uiState.isLoading && uiState.account == null -> {
                 CircularProgressIndicator()
             }
 
             uiState.error != null -> {
-                val currentError = uiState.error!! // Безопасное утверждение non-null, так как мы уже проверили
+                val currentError = uiState.error!!
                 val errorMessage = when (currentError) {
                     DomainError.NoInternet -> stringResource(R.string.error_no_internet)
                     DomainError.ServerError -> stringResource(R.string.error_server)
@@ -66,10 +96,9 @@ fun AccountScreen(
                 }
                 ErrorState(
                     message = errorMessage,
-                    onRetry = { viewModel.loadAccount() }
+                    onRetry = { viewModel.loadAccount(isInitialLoad = true) }
                 )
             }
-
 
             uiState.account != null -> {
                 AccountContent(account = uiState.account!!)

@@ -4,10 +4,10 @@ import shmr.budgetly.data.network.ApiService
 import shmr.budgetly.data.network.dto.AccountDto
 import shmr.budgetly.data.network.dto.AccountResponseDto
 import shmr.budgetly.data.network.dto.UpdateAccountRequestDto
+import shmr.budgetly.di.scope.AppScope
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@AppScope
 class AccountRemoteDataSourceImpl @Inject constructor(
     private val apiService: ApiService
 ) : AccountRemoteDataSource {

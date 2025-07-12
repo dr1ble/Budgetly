@@ -2,7 +2,6 @@ package shmr.budgetly.ui.screens.incomes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,7 +20,7 @@ import javax.inject.Inject
  * 2. Управление состоянием UI ([IncomesUiState]), включая флаги для первоначальной загрузки и pull-to-refresh.
  * 3. Расчет и форматирование общей суммы доходов.
  */
-@HiltViewModel
+
 class IncomesViewModel @Inject constructor(
     private val getIncomeTransactions: GetIncomeTransactionsUseCase,
     private val getMainAccount: GetMainAccountUseCase

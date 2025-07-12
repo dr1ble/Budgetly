@@ -5,7 +5,6 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
-    id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
     alias(libs.plugins.detekt)
 }
@@ -58,6 +57,12 @@ android {
         jvmTarget = "11"
     }
 
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+        compilerOptions {
+            freeCompilerArgs.add("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
+        }
+    }
+
     buildFeatures {
         compose = true
         buildConfig = true
@@ -95,10 +100,9 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.material)
 
-    // Dependency Injection (Hilt)
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.android.compiler)
-    implementation(libs.androidx.hilt.navigation.compose)
+    // Dependency Injection (Dagger 2)
+    implementation(libs.dagger)
+    ksp(libs.dagger.compiler)
 
     // Network (Retrofit + OkHttp + Kotlinx Serialization)
     implementation(libs.retrofit)

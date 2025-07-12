@@ -2,10 +2,10 @@ package shmr.budgetly.data.source.remote.transaction
 
 import shmr.budgetly.data.network.ApiService
 import shmr.budgetly.data.network.dto.TransactionResponseDto
+import shmr.budgetly.di.scope.AppScope
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@AppScope
 class TransactionRemoteDataSourceImpl @Inject constructor(
     private val apiService: ApiService
 ) : TransactionRemoteDataSource {

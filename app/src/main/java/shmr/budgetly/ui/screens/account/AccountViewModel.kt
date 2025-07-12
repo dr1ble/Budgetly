@@ -2,7 +2,6 @@ package shmr.budgetly.ui.screens.account
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -19,7 +18,7 @@ import javax.inject.Inject
  * 2. Управление состоянием UI ([AccountUiState]), включая состояния загрузки и ошибок.
  * 3. Обработку действий пользователя, таких как повторная загрузка данных.
  */
-@HiltViewModel
+
 class AccountViewModel @Inject constructor(
     private val getMainAccount: GetMainAccountUseCase
 ) : ViewModel() {

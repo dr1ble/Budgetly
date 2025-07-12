@@ -1,8 +1,8 @@
 package shmr.budgetly.ui.screens.account.edit
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -12,7 +12,6 @@ import shmr.budgetly.domain.usecase.UpdateAccountUseCase
 import shmr.budgetly.domain.util.Result
 import javax.inject.Inject
 
-@HiltViewModel
 class EditAccountViewModel @Inject constructor(
     private val getMainAccount: GetMainAccountUseCase,
     private val updateAccount: UpdateAccountUseCase
@@ -52,7 +51,10 @@ class EditAccountViewModel @Inject constructor(
     }
 
     fun onBalanceChange(newBalance: String) {
-        _uiState.update { it.copy(balance = newBalance) }
+        Log.d("EditAccountDebug", "onBalanceChange called with: '$newBalance'") // <-- ДОБАВЛЕНО
+        // Очищаем ввод от всего, кроме цифр и одной точки
+        val cleanedBalance = newBalance.filter { it.isDigit() || it == '.' }
+        _uiState.update { it.copy(balance = cleanedBalance) }
     }
 
     fun onCurrencyChange(newCurrency: String) {
