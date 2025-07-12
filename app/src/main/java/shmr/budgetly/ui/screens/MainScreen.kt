@@ -3,6 +3,7 @@ package shmr.budgetly.ui.screens
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -36,7 +37,7 @@ fun MainScreen() {
     }
 
     CompositionLocalProvider(LocalTopAppBarSetter provides topAppBarSetter) {
-        androidx.compose.material3.Scaffold(
+        Scaffold(
             topBar = {
                 topAppBar()
             },
@@ -55,7 +56,17 @@ fun MainScreen() {
 
                 if (isIncomeScreen || isExpenseScreen) {
                     BaseFAB(onClick = {
-                        navController.navigate(TransactionDetails(isIncome = isIncomeScreen))
+                        val parentRoute = if (isIncomeScreen) {
+                            Incomes::class.qualifiedName!!
+                        } else {
+                            Expenses::class.qualifiedName!!
+                        }
+                        navController.navigate(
+                            TransactionDetails(
+                                isIncome = isIncomeScreen,
+                                parentRoute = parentRoute
+                            )
+                        )
                     })
                 }
             }

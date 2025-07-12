@@ -11,7 +11,9 @@ import shmr.budgetly.domain.repository.TransactionRepository
 import shmr.budgetly.domain.util.Result
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 import javax.inject.Inject
 
 /**
@@ -25,7 +27,10 @@ class TransactionRepositoryImpl @Inject constructor(
 ) : TransactionRepository {
 
     private val isoLocalDateFormatter = DateTimeFormatter.ISO_LOCAL_DATE
-    private val isoDateTimeFormatter = DateTimeFormatter.ISO_DATE_TIME
+
+    // Кастомный форматер, который гарантирует формат "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+    private val apiDateTimeFormatter =
+        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
 
     override suspend fun getTransactions(
         startDate: LocalDate,
@@ -53,17 +58,25 @@ class TransactionRepositoryImpl @Inject constructor(
         categoryId: Int,
         amount: String,
         transactionDate: LocalDateTime,
-        comment: String?
+        comment: String
     ): Result<Transaction> {
         val request = TransactionRequestDto(
             accountId = accountId,
             categoryId = categoryId,
             amount = amount,
-            transactionDate = transactionDate.format(isoDateTimeFormatter),
+            transactionDate = transactionDate.atZone(ZoneOffset.UTC).format(apiDateTimeFormatter),
             comment = comment
         )
-        return safeApiCall {
-            remoteDataSource.createTransaction(request).toDomainModel()
+        val createResult = safeApiCall {
+            remoteDataSource.createTransaction(request)
+        }
+
+        return when (createResult) {
+            is Result.Success -> {
+                getTransactionById(createResult.data.id)
+            }
+
+            is Result.Error -> createResult
         }
     }
 
@@ -73,13 +86,13 @@ class TransactionRepositoryImpl @Inject constructor(
         categoryId: Int,
         amount: String,
         transactionDate: LocalDateTime,
-        comment: String?
+        comment: String
     ): Result<Transaction> {
         val request = TransactionRequestDto(
             accountId = accountId,
             categoryId = categoryId,
             amount = amount,
-            transactionDate = transactionDate.format(isoDateTimeFormatter),
+            transactionDate = transactionDate.atZone(ZoneOffset.UTC).format(apiDateTimeFormatter),
             comment = comment
         )
         return safeApiCall {
@@ -93,9 +106,6 @@ class TransactionRepositoryImpl @Inject constructor(
         }
     }
 
-    /**
-     * Выполняет сетевой запрос для получения транзакций по ID счета и периоду.
-     */
     private suspend fun fetchTransactionsForAccount(
         accountId: Int,
         startDate: LocalDate,

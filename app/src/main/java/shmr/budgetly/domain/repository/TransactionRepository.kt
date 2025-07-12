@@ -1,6 +1,7 @@
 package shmr.budgetly.domain.repository
 
 import shmr.budgetly.domain.entity.Transaction
+import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.domain.util.Result
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -31,7 +32,7 @@ interface TransactionRepository {
         categoryId: Int,
         amount: String,
         transactionDate: LocalDateTime,
-        comment: String?
+        comment: String
     ): Result<Transaction>
 
     /**
@@ -43,7 +44,7 @@ interface TransactionRepository {
         categoryId: Int,
         amount: String,
         transactionDate: LocalDateTime,
-        comment: String?
+        comment: String
     ): Result<Transaction>
 
     /**

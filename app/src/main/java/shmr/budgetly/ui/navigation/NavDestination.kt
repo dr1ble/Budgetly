@@ -37,6 +37,7 @@ data class History(val parentRoute: String)
 data class TransactionDetails(
     val transactionId: Int? = null,
     val isIncome: Boolean,
+    val parentRoute: String
 )
 
 /**

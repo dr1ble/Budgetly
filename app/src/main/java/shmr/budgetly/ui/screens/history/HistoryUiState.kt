@@ -12,7 +12,8 @@ data class HistoryUiState(
     val currencySymbol: String = "",
     val isLoading: Boolean = false,
     val datePickerType: DatePickerDialogType? = null,
-    val error: DomainError? = null
+    val error: DomainError? = null,
+    val parentRoute: String = ""
 ) {
     /**
      * Флаг, показывающий, должен ли быть виден DatePicker.

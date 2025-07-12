@@ -104,7 +104,8 @@ fun HistoryScreen(
                 navController.navigate(
                     TransactionDetails(
                         transactionId = transaction.id,
-                        isIncome = transaction.category.isIncome
+                        isIncome = transaction.category.isIncome,
+                        parentRoute = uiState.parentRoute
                     )
                 )
             }

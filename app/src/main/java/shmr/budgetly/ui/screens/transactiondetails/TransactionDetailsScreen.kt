@@ -11,14 +11,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -82,14 +81,21 @@ fun TransactionDetailsScreen(
         topAppBarSetter {
             AppTopBar(
                 title = stringResource(id = title),
-                navigationIcon = { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) },
+                navigationIcon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_top_bar_cancel),
+                        contentDescription = stringResource(R.string.transaction_details_edit_cancel_button)
+                    )
+                },
                 onNavigationClick = { navController.popBackStack() },
                 actions = {
                     if (uiState.isSaving) {
                         CircularProgressIndicator(
-                            modifier = Modifier.padding(horizontal = 16.dp),
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                                .size(24.dp),
                             color = MaterialTheme.colorScheme.onPrimary,
-                            strokeWidth = 2.5.dp
+                            strokeWidth = 2.dp
                         )
                     } else {
                         IconButton(
@@ -126,16 +132,13 @@ fun TransactionDetailsScreen(
             uiState.error != null -> ErrorState(
                 message = getErrorMessage(uiState.error!!),
                 onRetry = {
-                    if (uiState.isEditMode) {
-                        viewModel.init(
-                            TransactionDetails(
-                                transactionId = viewModel.uiState.value.let { if (it.isEditMode) viewModel.transactionId else null },
-                                isIncome = uiState.isIncome
-                            )
+                    viewModel.init(
+                        TransactionDetails(
+                            transactionId = if (uiState.isEditMode) viewModel.transactionId else null,
+                            isIncome = uiState.isIncome,
+                            parentRoute = uiState.parentRoute
                         )
-                    } else {
-                        viewModel.init(TransactionDetails(isIncome = uiState.isIncome))
-                    }
+                    )
                 }
             )
 
@@ -196,12 +199,12 @@ private fun TransactionDetailsContent(
                         BasicTextField(
                             value = uiState.amount,
                             onValueChange = viewModel::onAmountChange,
-                            modifier = Modifier.width(100.dp), // Aдаптивная ширина для суммы
+                            modifier = Modifier.width(140.dp),
                             textStyle = MaterialTheme.typography.bodyLarge.copy(
                                 color = MaterialTheme.colorScheme.onBackground,
                                 textAlign = TextAlign.End
                             ),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                             singleLine = true,
                             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                         )
@@ -325,7 +328,7 @@ fun DeleteButton(isIncome: Boolean, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
-        shape = MaterialTheme.shapes.small,
+        shape = MaterialTheme.shapes.extraLarge,
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.errorContainer,
             contentColor = MaterialTheme.colorScheme.onErrorContainer

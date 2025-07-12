@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import shmr.budgetly.domain.entity.Account
 import shmr.budgetly.domain.entity.Category
 import shmr.budgetly.domain.usecase.CreateTransactionUseCase
 import shmr.budgetly.domain.usecase.DeleteTransactionUseCase
@@ -17,9 +16,13 @@ import shmr.budgetly.domain.usecase.GetTransactionUseCase
 import shmr.budgetly.domain.usecase.UpdateTransactionUseCase
 import shmr.budgetly.domain.util.Result
 import shmr.budgetly.ui.navigation.TransactionDetails
+import java.math.BigDecimal
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.util.Locale
 import javax.inject.Inject
 
 class TransactionDetailsViewModel @Inject constructor(
@@ -44,7 +47,13 @@ class TransactionDetailsViewModel @Inject constructor(
 
         transactionId = navArgs.transactionId
         val isEditMode = navArgs.transactionId != null
-        _uiState.update { it.copy(isEditMode = isEditMode, isIncome = navArgs.isIncome) }
+        _uiState.update {
+            it.copy(
+                isEditMode = isEditMode,
+                isIncome = navArgs.isIncome,
+                parentRoute = navArgs.parentRoute
+            )
+        }
 
         if (isEditMode) {
             loadTransactionDetails(navArgs.transactionId)
@@ -56,7 +65,6 @@ class TransactionDetailsViewModel @Inject constructor(
     private fun loadDataForCreation() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
-            // Параллельно загружаем основной счет и категории
             val accountResultDeferred = async { getMainAccountUseCase() }
             val categoriesResultDeferred = async { getAllCategoriesUseCase() }
 
@@ -114,11 +122,14 @@ class TransactionDetailsViewModel @Inject constructor(
             val filteredCategories =
                 allCategories.filter { it.isIncome == transaction.category.isIncome }
 
+            val amountForEditing = transaction.amount.replace(',', '.')
+
+
             _uiState.update {
                 it.copy(
                     isLoading = false,
-                    amount = transaction.amount.substringBefore('.'),
-                    selectedAccount = account, // В режиме редактирования счет пока не меняем
+                    amount = amountForEditing,
+                    selectedAccount = account,
                     selectedCategory = transaction.category,
                     date = transaction.transactionDate.toLocalDate(),
                     time = transaction.transactionDate.toLocalTime(),
@@ -131,14 +142,21 @@ class TransactionDetailsViewModel @Inject constructor(
     }
 
     fun onAmountChange(newAmount: String) {
-        if (newAmount.all { it.isDigit() }) {
-            _uiState.update { it.copy(amount = newAmount) }
+        val sanitizedAmount =
+            if (newAmount.startsWith("0") && newAmount.length > 1 && newAmount[1] != '.') {
+                newAmount.substring(1)
+            } else {
+                newAmount
+            }
+        val regex = "^[0-9]*([.,][0-9]{0,2})?$".toRegex()
+        if (sanitizedAmount.matches(regex)) {
+            _uiState.update { it.copy(amount = sanitizedAmount.replace(',', '.')) }
         }
     }
 
-    fun onAccountSelected(account: Account) {
-        _uiState.update { it.copy(selectedAccount = account, isAccountPickerVisible = false) }
-    }
+//    fun onAccountSelected(account: Account) {
+//        _uiState.update { it.copy(selectedAccount = account, isAccountPickerVisible = false) }
+//    }
 
     fun onCategorySelected(category: Category) {
         _uiState.update { it.copy(selectedCategory = category, isCategoryPickerVisible = false) }
@@ -163,22 +181,35 @@ class TransactionDetailsViewModel @Inject constructor(
             _uiState.update { it.copy(isSaving = true, saveError = null) }
 
             val state = _uiState.value
+
+            val amountToSend = try {
+                val symbols = DecimalFormatSymbols(Locale.US)
+                val decimalFormat = DecimalFormat("0.00", symbols)
+                decimalFormat.format(BigDecimal(state.amount.replace(',', '.')))
+            } catch (_: Exception) {
+                state.amount
+            }
+
+            val transactionDateTime = LocalDateTime.of(state.date, state.time)
+
+            val commentToSend = state.comment
+
             val result = if (state.isEditMode) {
                 updateTransactionUseCase(
                     id = transactionId!!,
                     accountId = state.selectedAccount!!.id,
                     categoryId = state.selectedCategory!!.id,
-                    amount = state.amount,
-                    transactionDate = LocalDateTime.of(state.date, state.time),
-                    comment = state.comment.takeIf { it.isNotBlank() }
+                    amount = amountToSend,
+                    transactionDate = transactionDateTime,
+                    comment = commentToSend
                 )
             } else {
                 createTransactionUseCase(
                     accountId = state.selectedAccount!!.id,
                     categoryId = state.selectedCategory!!.id,
-                    amount = state.amount,
-                    transactionDate = LocalDateTime.of(state.date, state.time),
-                    comment = state.comment.takeIf { it.isNotBlank() }
+                    amount = amountToSend,
+                    transactionDate = transactionDateTime,
+                    comment = commentToSend
                 )
             }
 
@@ -239,8 +270,8 @@ class TransactionDetailsViewModel @Inject constructor(
     fun showTimePicker() = _uiState.update { it.copy(isTimePickerVisible = true) }
     fun dismissTimePicker() = _uiState.update { it.copy(isTimePickerVisible = false) }
 
-    fun showAccountPicker() = _uiState.update { it.copy(isAccountPickerVisible = true) }
-    fun dismissAccountPicker() = _uiState.update { it.copy(isAccountPickerVisible = false) }
+//    fun showAccountPicker() = _uiState.update { it.copy(isAccountPickerVisible = true) }
+//    fun dismissAccountPicker() = _uiState.update { it.copy(isAccountPickerVisible = false) }
 
     fun showCategoryPicker() = _uiState.update { it.copy(isCategoryPickerVisible = true) }
     fun dismissCategoryPicker() = _uiState.update { it.copy(isCategoryPickerVisible = false) }

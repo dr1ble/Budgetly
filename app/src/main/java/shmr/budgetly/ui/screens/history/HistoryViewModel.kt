@@ -53,6 +53,7 @@ class HistoryViewModel @Inject constructor(
             Incomes::class.qualifiedName -> TransactionFilterType.INCOME
             else -> TransactionFilterType.ALL
         }
+        _uiState.update { it.copy(parentRoute = navArgs.parentRoute) }
         loadHistory(isInitialLoad = true)
     }
 

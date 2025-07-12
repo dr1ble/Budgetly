@@ -18,9 +18,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import shmr.budgetly.ui.theme.dimens
+import shmr.budgetly.ui.util.truncateWithEllipsis
 
 @Composable
 fun BaseListItem(
@@ -33,7 +36,8 @@ fun BaseListItem(
     trail: @Composable (() -> Unit)? = null,
     showDivider: Boolean = true,
     backgroundColor: Color = Color.Transparent,
-    onClick: (() -> Unit)? = null
+    onClick: (() -> Unit)? = null,
+    truncateSubtitle: Boolean = false
 ) {
 
     Box(
@@ -61,12 +65,18 @@ fun BaseListItem(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
-                    style = titleTextStyle
+                    style = titleTextStyle.copy(lineHeight = 18.sp)
                 )
                 if (subtitle != null) {
+                    val finalSubtitle = if (truncateSubtitle) {
+                        truncateWithEllipsis(subtitle)
+                    } else {
+                        subtitle
+                    }
+
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = subtitle,
+                        text = finalSubtitle,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -89,6 +99,29 @@ fun BaseListItem(
             )
         }
     }
+}
+
+/**
+ * Специальный Composable для отображения денежной суммы,
+ * который автоматически уменьшает размер шрифта, если сумма слишком длинная.
+ */
+@Composable
+fun AmountText(
+    text: String,
+    style: TextStyle = MaterialTheme.typography.bodyLarge,
+    fontWeight: FontWeight? = FontWeight.Normal
+) {
+    val fontSize = when {
+        text.length > 13 -> 14.sp
+        text.length > 9 -> 15.sp
+        else -> style.fontSize
+    }
+
+    Text(
+        text = text,
+        style = style.copy(fontSize = fontSize),
+        fontWeight = fontWeight
+    )
 }
 
 @Composable
