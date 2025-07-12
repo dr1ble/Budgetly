@@ -7,31 +7,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import shmr.budgetly.domain.entity.Account
 import shmr.budgetly.domain.usecase.GetMainAccountUseCase
 import shmr.budgetly.domain.usecase.UpdateAccountUseCase
-import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.domain.util.Result
 import javax.inject.Inject
-
-data class EditAccountUiState(
-    val isInitialLoading: Boolean = true,
-    val isLoading: Boolean = false,
-    val error: DomainError? = null,
-    val isSaveSuccess: Boolean = false,
-    val name: String? = null,
-    val balance: String? = null,
-    val currency: String? = null,
-    val isBottomSheetVisible: Boolean = false,
-    private val initialAccount: Account? = null
-) {
-    val isSaveEnabled: Boolean
-        get() = !isLoading && initialAccount != null && name != null && balance != null && currency != null && (
-                name != initialAccount.name ||
-                        balance != initialAccount.balance ||
-                        currency != initialAccount.currency
-                )
-}
 
 @HiltViewModel
 class EditAccountViewModel @Inject constructor(
@@ -90,16 +69,16 @@ class EditAccountViewModel @Inject constructor(
 
     fun saveAccount() {
         val currentState = _uiState.value
-        if (currentState.isLoading || currentState.name == null || currentState.balance == null || currentState.currency == null) {
+        if (!currentState.isSaveEnabled) {
             return
         }
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             val result = updateAccount(
-                name = currentState.name,
-                balance = currentState.balance,
-                currency = currentState.currency
+                name = currentState.name!!,
+                balance = currentState.balance!!,
+                currency = currentState.currency!!
             )
             when (result) {
                 is Result.Success -> {
@@ -111,9 +90,5 @@ class EditAccountViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    fun resetSaveSuccessFlag() {
-        _uiState.update { it.copy(isSaveSuccess = false) }
     }
 }

@@ -8,21 +8,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import shmr.budgetly.domain.entity.Transaction
 import shmr.budgetly.domain.usecase.GetIncomeTransactionsUseCase
 import shmr.budgetly.domain.usecase.GetMainAccountUseCase
-import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.domain.util.Result
 import shmr.budgetly.ui.util.formatCurrencySymbol
 import javax.inject.Inject
-
-data class IncomesUiState(
-    val transactions: List<Transaction> = emptyList(),
-    val totalAmount: String = "0",
-    val isLoading: Boolean = false,
-    val isRefreshing: Boolean = false,
-    val error: DomainError? = null
-)
 
 /**
  * ViewModel для экрана "Доходы".
@@ -58,14 +48,12 @@ class IncomesViewModel @Inject constructor(
                 )
             }
 
-            // Параллельно запрашиваем счет и транзакции
             val accountResultDeferred = async { getMainAccount() }
             val transactionsResultDeferred = async { getIncomeTransactions() }
 
             val accountResult = accountResultDeferred.await()
             val transactionsResult = transactionsResultDeferred.await()
 
-            // Обрабатываем ошибки в первую очередь
             val error = (accountResult as? Result.Error)?.error
                 ?: (transactionsResult as? Result.Error)?.error
 
@@ -74,7 +62,6 @@ class IncomesViewModel @Inject constructor(
                 return@launch
             }
 
-            // Если ошибок нет, данные гарантированно есть
             val account = (accountResult as Result.Success).data
             val transactions = (transactionsResult as Result.Success).data
 

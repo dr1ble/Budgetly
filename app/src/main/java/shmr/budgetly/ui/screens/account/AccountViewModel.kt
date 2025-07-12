@@ -9,15 +9,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import shmr.budgetly.domain.entity.Account
 import shmr.budgetly.domain.usecase.GetMainAccountUseCase
-import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.domain.util.Result
 import javax.inject.Inject
-
-data class AccountUiState(
-    val account: Account? = null,
-    val isLoading: Boolean = false,
-    val error: DomainError? = null
-)
 
 /**
  * ViewModel для экрана "Счет".

@@ -10,34 +10,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import shmr.budgetly.domain.entity.Transaction
 import shmr.budgetly.domain.model.TransactionFilterType
 import shmr.budgetly.domain.usecase.GetHistoryUseCase
 import shmr.budgetly.domain.usecase.GetMainAccountUseCase
-import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.domain.util.Result
 import shmr.budgetly.ui.navigation.Expenses
 import shmr.budgetly.ui.navigation.History
 import shmr.budgetly.ui.navigation.Incomes
 import shmr.budgetly.ui.util.formatCurrencySymbol
+import shmr.budgetly.ui.util.DatePickerDialogType
 import java.time.Instant
-import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
 
-enum class DatePickerDialogType { START_DATE, END_DATE }
-
-data class HistoryUiState(
-    val transactionsByDate: Map<LocalDate, List<Transaction>> = emptyMap(),
-    val startDate: LocalDate = LocalDate.now().withDayOfMonth(1),
-    val endDate: LocalDate = LocalDate.now(),
-    val totalSum: String = "0",
-    val isLoading: Boolean = false,
-    val datePickerType: DatePickerDialogType? = null,
-    val error: DomainError? = null
-) {
-    val isDatePickerVisible: Boolean get() = datePickerType != null
-}
 
 /**
  * ViewModel для экрана "История".
@@ -135,9 +120,6 @@ class HistoryViewModel @Inject constructor(
             val transactions = (historyResult as Result.Success).data
 
             val currencySymbol = formatCurrencySymbol(account.currency)
-            val total = transactions.sumOf {
-                it.amount.replace(Regex("[^0-9.-]"), "").toDoubleOrNull() ?: 0.0
-            }
 
             val grouped = transactions
                 .sortedByDescending { it.transactionDate }
@@ -146,7 +128,7 @@ class HistoryViewModel @Inject constructor(
             _uiState.update {
                 it.copy(
                     transactionsByDate = grouped,
-                    totalSum = "%,.0f %s".format(total, currencySymbol).replace(",", " "),
+                    currencySymbol = currencySymbol,
                     isLoading = false
                 )
             }
