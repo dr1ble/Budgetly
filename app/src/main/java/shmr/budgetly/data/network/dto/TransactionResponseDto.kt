@@ -1,13 +1,19 @@
 package shmr.budgetly.data.network.dto
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * Data Transfer Object (DTO) для ответа на запрос транзакции.
+ * Содержит полную информацию о транзакции, включая вложенные объекты счета и категории.
+ * Соответствует схеме `TransactionResponse` в OpenAPI.
+ */
 @Serializable
 data class TransactionResponseDto(
-    val id: Int,
-    val account: AccountBriefDto,
-    val category: CategoryDto,
-    val amount: String,
-    val transactionDate: String,
-    val comment: String? = null
+    @SerialName("id") val id: Int,
+    @SerialName("account") val account: AccountBriefDto,
+    @SerialName("category") val category: CategoryDto,
+    @SerialName("amount") val amount: String,
+    @SerialName("transactionDate") val transactionDate: String,
+    @SerialName("comment") val comment: String? = null
 )
