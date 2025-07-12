@@ -1,5 +1,6 @@
 package shmr.budgetly.data.network.dto
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -8,7 +9,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class UpdateAccountRequestDto(
-    val name: String,
-    val balance: String,
-    val currency: String
+    @SerialName("name") val name: String,
+    @SerialName("balance") val balance: String,
+    @SerialName("currency") val currency: String
 )

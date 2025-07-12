@@ -2,33 +2,22 @@ package shmr.budgetly.ui.screens.articles
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import shmr.budgetly.domain.entity.Category
 import shmr.budgetly.domain.usecase.GetAllCategoriesUseCase
-import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.domain.util.Result
 import javax.inject.Inject
 
-data class ArticlesUiState(
-    val searchQuery: String = "",
-    val allCategories: List<Category> = emptyList(),
-    val filteredCategories: List<Category> = emptyList(),
-    val isLoading: Boolean = false,
-    val error: DomainError? = null
-)
-
 /**
- * ViewModel для экрана "Статьи" (Категории).
+ * ViewModel для экрана "Статьи".
  * Отвечает за:
- * 1. Загрузку списка всех категорий через [GetAllCategoriesUseCase].
- * 2. Фильтрацию списка категорий на основе поискового запроса пользователя.
+ * 1. Загрузку списка всех категорий, которые в данном контексте выступают как "статьи".
+ * 2. Обработку поискового запроса от пользователя.
  * 3. Управление состоянием UI ([ArticlesUiState]).
  */
-@HiltViewModel
+
 class ArticlesViewModel @Inject constructor(
     private val getAllCategories: GetAllCategoriesUseCase
 ) : ViewModel() {
@@ -41,54 +30,35 @@ class ArticlesViewModel @Inject constructor(
     }
 
     /**
-     * Инициирует загрузку списка категорий.
+     * Инициирует загрузку категорий.
+     * @param isInitialLoad true для первоначальной загрузки, false для фонового обновления.
      */
-    fun loadCategories(isInitialLoad: Boolean = false) {
+    fun loadCategories(isInitialLoad: Boolean) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = isInitialLoad, error = null) }
-            processResult(getAllCategories())
-        }
-    }
 
-    /**
-     * Обрабатывает результат загрузки категорий.
-     */
-    private fun processResult(result: Result<List<Category>>) {
-        when (result) {
-            is Result.Success -> _uiState.update { currentState ->
-                currentState.copy(
-                    isLoading = false,
-                    allCategories = result.data,
-                    filteredCategories = filterCategories(result.data, currentState.searchQuery)
-                )
-            }
-
-            is Result.Error -> _uiState.update {
-                it.copy(isLoading = false, error = result.error)
+            when (val result = getAllCategories()) {
+                is Result.Success -> {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            allCategories = result.data
+                        )
+                    }
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(isLoading = false, error = result.error)
+                    }
+                }
             }
         }
     }
 
     /**
-     * Обновляет состояние при изменении поискового запроса.
+     * Обрабатывает изменение текста в поисковой строке.
      */
     fun onSearchQueryChanged(query: String) {
-        _uiState.update { currentState ->
-            currentState.copy(
-                searchQuery = query,
-                filteredCategories = filterCategories(currentState.allCategories, query)
-            )
-        }
-    }
-
-    /**
-     * Фильтрует категории по имени на основе поискового запроса.
-     */
-    private fun filterCategories(categories: List<Category>, query: String): List<Category> {
-        return if (query.isBlank()) {
-            categories
-        } else {
-            categories.filter { it.name.contains(query, ignoreCase = true) }
-        }
+        _uiState.update { it.copy(searchQuery = query) }
     }
 }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,6 +19,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -34,19 +36,60 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import shmr.budgetly.R
+import shmr.budgetly.ui.components.AppTopBar
 import shmr.budgetly.ui.components.BaseListItem
 import shmr.budgetly.ui.components.EmojiIcon
 import shmr.budgetly.ui.components.ErrorState
+import shmr.budgetly.ui.util.LocalTopAppBarSetter
 import shmr.budgetly.ui.util.formatCurrencySymbol
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditAccountScreen(
     viewModel: EditAccountViewModel,
-    onSaveSuccess: () -> Unit
+    onSaveSuccess: () -> Unit,
+    navController: NavController
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val topAppBarSetter = LocalTopAppBarSetter.current
+
+    LaunchedEffect(uiState) {
+        topAppBarSetter {
+            AppTopBar(
+                title = stringResource(R.string.edit_account_top_bar_title),
+                navigationIcon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_top_bar_cancel),
+                        contentDescription = stringResource(R.string.edit_account_cancel_button)
+                    )
+                },
+                onNavigationClick = { navController.popBackStack() },
+                actions = {
+                    if (uiState.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                                .size(24.dp),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        IconButton(
+                            onClick = viewModel::saveAccount,
+                            enabled = uiState.isSaveEnabled
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_top_bar_confirm),
+                                contentDescription = stringResource(R.string.save_action_description)
+                            )
+                        }
+                    }
+                }
+            )
+        }
+    }
 
     LaunchedEffect(uiState.isSaveSuccess) {
         if (uiState.isSaveSuccess) {
@@ -75,6 +118,7 @@ fun EditAccountScreen(
                 message = stringResource(R.string.error_unknown),
                 onRetry = viewModel::loadInitialData
             )
+
             uiState.name != null && uiState.balance != null && uiState.currency != null -> {
                 EditAccountContent(uiState = uiState, viewModel = viewModel)
             }
@@ -162,7 +206,7 @@ private fun BalanceItem(balance: String, onBalanceChange: (String) -> Unit) {
                 textAlign = TextAlign.End
             ),
             singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
             modifier = Modifier.weight(1f)
         )

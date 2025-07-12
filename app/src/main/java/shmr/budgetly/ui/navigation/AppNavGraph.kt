@@ -1,73 +1,110 @@
 package shmr.budgetly.ui.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
+import shmr.budgetly.ui.di.LocalViewModelFactory
 import shmr.budgetly.ui.screens.account.AccountScreen
-import shmr.budgetly.ui.screens.account.AccountViewModel
 import shmr.budgetly.ui.screens.account.edit.EditAccountScreen
-import shmr.budgetly.ui.screens.account.edit.EditAccountViewModel
 import shmr.budgetly.ui.screens.articles.ArticlesScreen
 import shmr.budgetly.ui.screens.expenses.ExpensesScreen
 import shmr.budgetly.ui.screens.history.HistoryScreen
+import shmr.budgetly.ui.screens.history.HistoryViewModel
 import shmr.budgetly.ui.screens.incomes.IncomesScreen
 import shmr.budgetly.ui.screens.settings.SettingsScreen
+import shmr.budgetly.ui.screens.transactiondetails.TransactionDetailsScreen
+import shmr.budgetly.ui.screens.transactiondetails.TransactionDetailsViewModel
 
-/**
- * Основной навигационный граф приложения, определяющий переходы между экранами,
- * доступными из нижней навигационной панели.
- *
- * @param navController Контроллер навигации, управляющий стеком экранов.
- */
+const val ACCOUNT_UPDATED_RESULT_KEY = "account_updated"
+const val TRANSACTION_SAVED_RESULT_KEY = "transaction_saved"
+
 @Composable
-fun AppNavGraph(navController: NavHostController) {
+fun AppNavGraph(
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
+    val viewModelFactory = LocalViewModelFactory.current
+
     NavHost(
         navController = navController,
-        startDestination = NavDestination.BottomNav.Expenses.route,
+        startDestination = Expenses,
+        modifier = modifier
     ) {
-        composable(route = NavDestination.BottomNav.Expenses.route) {
-            ExpensesScreen()
-        }
-        composable(route = NavDestination.BottomNav.Incomes.route) {
-            IncomesScreen()
-        }
-
-        composable(route = NavDestination.BottomNav.Articles.route) {
-            ArticlesScreen()
-        }
-        composable(route = NavDestination.BottomNav.Settings.route) {
-            SettingsScreen()
-        }
-        composable(
-            route = NavDestination.History.routeWithArgument,
-            arguments = NavDestination.History.arguments
-        ) {
-            HistoryScreen()
-        }
-        composable(NavDestination.BottomNav.Account.route) { backStackEntry ->
-            val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry(NavDestination.BottomNav.Account.route)
-            }
-            val viewModel: AccountViewModel = hiltViewModel(parentEntry)
-            AccountScreen(
-                viewModel = viewModel,
+        composable<Expenses> {
+            ExpensesScreen(
+                viewModel = viewModel(factory = viewModelFactory),
                 navController = navController
             )
         }
+        composable<Incomes> {
+            IncomesScreen(
+                viewModel = viewModel(factory = viewModelFactory),
+                navController = navController
+            )
+        }
+        composable<Account> {
+            AccountScreen(
+                navController = navController,
+                viewModel = viewModel(factory = viewModelFactory)
+            )
+        }
+        composable<Articles> {
+            ArticlesScreen(
+                viewModel = viewModel(factory = viewModelFactory),
+                navController = navController
+            )
+        }
+        composable<Settings> {
+            SettingsScreen(
+                viewModel = viewModel(factory = viewModelFactory),
+                navController = navController
+            )
+        }
+        composable<History> { navBackStackEntry ->
+            val historyViewModel: HistoryViewModel = viewModel(factory = viewModelFactory)
+            val navArgs: History = navBackStackEntry.toRoute()
 
-        composable(NavDestination.EditAccount.route) {
-            val viewModel: EditAccountViewModel = hiltViewModel()
+            LaunchedEffect(Unit) {
+                historyViewModel.init(navArgs)
+            }
+            HistoryScreen(
+                viewModel = historyViewModel,
+                navController = navController
+            )
+        }
+        composable<EditAccount> {
             EditAccountScreen(
-                viewModel = viewModel,
+                viewModel = viewModel(factory = viewModelFactory),
+                navController = navController,
                 onSaveSuccess = {
                     navController.previousBackStackEntry
                         ?.savedStateHandle
-                        ?.set("account_updated", true)
+                        ?.set(ACCOUNT_UPDATED_RESULT_KEY, true)
                     navController.popBackStack()
-                    viewModel.resetSaveSuccessFlag()
+                }
+            )
+        }
+        composable<TransactionDetails> { navBackStackEntry ->
+            val viewModel: TransactionDetailsViewModel = viewModel(factory = viewModelFactory)
+            val navArgs: TransactionDetails = navBackStackEntry.toRoute()
+
+            LaunchedEffect(Unit) {
+                viewModel.init(navArgs)
+            }
+
+            TransactionDetailsScreen(
+                viewModel = viewModel,
+                navController = navController,
+                onSaveSuccess = {
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set(TRANSACTION_SAVED_RESULT_KEY, true)
+                    navController.popBackStack()
                 }
             )
         }

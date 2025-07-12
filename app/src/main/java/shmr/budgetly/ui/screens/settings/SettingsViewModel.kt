@@ -1,45 +1,11 @@
 package shmr.budgetly.ui.screens.settings
 
-import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import shmr.budgetly.R
 import javax.inject.Inject
-
-/**
- * Уникальный идентификатор для элемента настроек.
- */
-typealias SettingId = Int
-
-/**
- * Тип элемента настроек, определяющий его поведение в UI.
- */
-enum class SettingType {
-    THEME_SWITCH, NAVIGATION
-}
-
-/**
- * Модель данных для одного элемента на экране настроек.
- * @param id Уникальный идентификатор.
- * @param titleRes Ресурс строки для заголовка.
- * @param type Тип элемента.
- */
-data class SettingItem(
-    val id: SettingId,
-    @StringRes val titleRes: Int,
-    val type: SettingType
-)
-
-/**
- * Состояние UI для экрана настроек.
- */
-data class SettingsUiState(
-    val settingsItems: List<SettingItem> = emptyList(),
-    val isDarkThemeEnabled: Boolean = false // В будущем будет браться из SharedPreferences
-)
 
 /**
  * ViewModel для экрана "Настройки".
@@ -48,7 +14,7 @@ data class SettingsUiState(
  * 2. Обработку действий пользователя, таких как переключение темы.
  * 3. Управление состоянием UI ([SettingsUiState]).
  */
-@HiltViewModel
+
 class SettingsViewModel @Inject constructor() : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -72,10 +38,12 @@ class SettingsViewModel @Inject constructor() : ViewModel() {
             SettingItem(7, R.string.setting_language, SettingType.NAVIGATION),
             SettingItem(8, R.string.setting_about, SettingType.NAVIGATION)
         )
-        _uiState.value = SettingsUiState(
-            settingsItems = items,
-            isDarkThemeEnabled = false // Начальное значение
-        )
+        _uiState.update {
+            it.copy(
+                settingsItems = items,
+                isDarkThemeEnabled = false // Начальное значение
+            )
+        }
     }
 
     /**

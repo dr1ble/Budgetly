@@ -1,5 +1,6 @@
 package shmr.budgetly.data.network.dto
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -8,8 +9,8 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class CategoryDto(
-    val id: Int,
-    val name: String,
-    val emoji: String,
-    val isIncome: Boolean
+    @SerialName("id") val id: Int,
+    @SerialName("name") val name: String,
+    @SerialName("emoji") val emoji: String,
+    @SerialName("isIncome") val isIncome: Boolean
 )

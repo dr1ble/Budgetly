@@ -1,10 +1,19 @@
 package shmr.budgetly
 
 import android.app.Application
-import dagger.hilt.android.HiltAndroidApp
+import shmr.budgetly.di.AppComponent
+import shmr.budgetly.di.DaggerAppComponent
 
 /**
- * Основной класс приложения, инициализирующий Hilt для внедрения зависимостей.
+ * Основной класс приложения, инициализирующий Dagger компонент.
  */
-@HiltAndroidApp
-class BudgetlyApp : Application()
+class BudgetlyApp : Application() {
+
+    lateinit var appComponent: AppComponent
+        private set
+
+    override fun onCreate() {
+        super.onCreate()
+        appComponent = DaggerAppComponent.factory().create(this)
+    }
+}

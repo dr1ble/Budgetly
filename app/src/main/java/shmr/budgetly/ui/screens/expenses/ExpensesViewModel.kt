@@ -2,7 +2,6 @@ package shmr.budgetly.ui.screens.expenses
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -10,18 +9,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import shmr.budgetly.domain.usecase.GetExpenseTransactionsUseCase
 import shmr.budgetly.domain.usecase.GetMainAccountUseCase
-import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.domain.util.Result
+import shmr.budgetly.ui.util.formatAmount
 import shmr.budgetly.ui.util.formatCurrencySymbol
+import java.math.BigDecimal
 import javax.inject.Inject
-
-data class ExpensesUiState(
-    val transactions: List<shmr.budgetly.domain.entity.Transaction> = emptyList(),
-    val totalAmount: String = "0",
-    val isLoading: Boolean = false,
-    val isRefreshing: Boolean = false,
-    val error: DomainError? = null
-)
 
 /**
  * ViewModel для экрана "Расходы".
@@ -30,7 +22,7 @@ data class ExpensesUiState(
  * 2. Управление состоянием UI ([ExpensesUiState]), включая флаги для первоначальной загрузки и pull-to-refresh.
  * 3. Расчет и форматирование общей суммы расходов.
  */
-@HiltViewModel
+
 class ExpensesViewModel @Inject constructor(
     private val getExpenseTransactions: GetExpenseTransactionsUseCase,
     private val getMainAccount: GetMainAccountUseCase
@@ -38,6 +30,11 @@ class ExpensesViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(ExpensesUiState())
     val uiState = _uiState.asStateFlow()
+
+    init {
+        // Добавим начальную загрузку при инициализации ViewModel
+        loadExpenses(isInitialLoad = true)
+    }
 
     /**
      * Инициирует загрузку расходов.
@@ -47,7 +44,8 @@ class ExpensesViewModel @Inject constructor(
     fun loadExpenses(isInitialLoad: Boolean = false, forceRefresh: Boolean = false) {
         val state = _uiState.value
 
-        if (state.isLoading || state.isRefreshing || (!forceRefresh && state.transactions.isNotEmpty())) {
+        // Улучшенная защита от лишних вызовов
+        if ((state.isLoading || state.isRefreshing) && !forceRefresh) {
             return
         }
 
@@ -60,14 +58,12 @@ class ExpensesViewModel @Inject constructor(
                 )
             }
 
-            // Параллельно запрашиваем счет и транзакции
             val accountResultDeferred = async { getMainAccount() }
             val transactionsResultDeferred = async { getExpenseTransactions() }
 
             val accountResult = accountResultDeferred.await()
             val transactionsResult = transactionsResultDeferred.await()
 
-            // Обрабатываем ошибки в первую очередь
             val error = (accountResult as? Result.Error)?.error
                 ?: (transactionsResult as? Result.Error)?.error
 
@@ -81,7 +77,11 @@ class ExpensesViewModel @Inject constructor(
 
             val currencySymbol = formatCurrencySymbol(account.currency)
             val total = transactions.sumOf {
-                it.amount.replace(Regex("[^0-9.-]"), "").toDoubleOrNull() ?: 0.0
+                try {
+                    BigDecimal(it.amount)
+                } catch (_: NumberFormatException) {
+                    BigDecimal.ZERO
+                }
             }
 
             _uiState.update {
@@ -89,7 +89,7 @@ class ExpensesViewModel @Inject constructor(
                     isLoading = false,
                     isRefreshing = false,
                     transactions = transactions,
-                    totalAmount = "%,.0f %s".format(total, currencySymbol).replace(",", " ")
+                    totalAmount = formatAmount(total, currencySymbol)
                 )
             }
         }

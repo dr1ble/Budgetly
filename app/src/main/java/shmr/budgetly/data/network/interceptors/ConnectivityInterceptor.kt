@@ -5,21 +5,20 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import androidx.annotation.RequiresPermission
-import dagger.hilt.android.qualifiers.ApplicationContext
 import okhttp3.Interceptor
 import okhttp3.Response
 import shmr.budgetly.data.network.exception.NoConnectivityException
+import shmr.budgetly.di.scope.AppScope
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Перехватчик OkHttp, который проверяет наличие активного и валидного интернет-соединения
  * перед выполнением сетевого запроса. Если соединение отсутствует или не предоставляет
  * доступ в интернет, выбрасывает [NoConnectivityException].
  */
-@Singleton
+@AppScope
 class ConnectivityInterceptor @Inject constructor(
-    @ApplicationContext private val context: Context
+    private val context: Context
 ) : Interceptor {
 
     @RequiresPermission(Manifest.permission.ACCESS_NETWORK_STATE)

@@ -10,28 +10,38 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import shmr.budgetly.R
 import shmr.budgetly.domain.entity.Transaction
 import shmr.budgetly.domain.util.DomainError
+import shmr.budgetly.ui.components.AppTopBar
 import shmr.budgetly.ui.components.BaseListItem
 import shmr.budgetly.ui.components.DatePickerModal
 import shmr.budgetly.ui.components.EmojiIcon
 import shmr.budgetly.ui.components.ErrorState
+import shmr.budgetly.ui.navigation.TRANSACTION_SAVED_RESULT_KEY
+import shmr.budgetly.ui.navigation.TransactionDetails
 import shmr.budgetly.ui.theme.dimens
+import shmr.budgetly.ui.util.DatePickerDialogType
 import shmr.budgetly.ui.util.HistoryDateFormatter
+import shmr.budgetly.ui.util.LocalTopAppBarSetter
 import shmr.budgetly.ui.util.formatCurrencySymbol
 import java.time.LocalDate
 import java.time.ZoneId
@@ -39,12 +49,41 @@ import java.time.ZoneId
 /**
  * Экран "История", отображающий список транзакций за выбранный период.
  * Позволяет пользователю выбирать начальную и конечную даты.
- *
- * @param viewModel ViewModel для управления состоянием экрана.
  */
 @Composable
-fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel()) {
+fun HistoryScreen(
+    viewModel: HistoryViewModel,
+    navController: NavController
+) {
+    val topAppBarSetter = LocalTopAppBarSetter.current
+    LaunchedEffect(Unit) {
+        topAppBarSetter {
+            AppTopBar(
+                title = stringResource(R.string.history_top_bar_title),
+                navigationIcon = { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) },
+                onNavigationClick = { navController.popBackStack() },
+                actions = {
+                    IconButton(onClick = { /* TODO */ }) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_history_analyze),
+                            contentDescription = stringResource(R.string.analyze_action_description),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            )
+        }
+    }
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    LaunchedEffect(navBackStackEntry) {
+        if (navBackStackEntry?.savedStateHandle?.remove<Boolean>(TRANSACTION_SAVED_RESULT_KEY) == true) {
+            viewModel.loadHistory(isInitialLoad = true)
+        }
+    }
+
 
     if (uiState.isDatePickerVisible) {
         DatePickerDialog(uiState, viewModel)
@@ -58,7 +97,19 @@ fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel()) {
             onStartDateClick = viewModel::onStartDatePickerOpen,
             onEndDateClick = viewModel::onEndDatePickerOpen
         )
-        HistoryContent(uiState, onRetry = { viewModel.loadHistory(isInitialLoad = true) })
+        HistoryContent(
+            uiState = uiState,
+            onRetry = { viewModel.loadHistory(isInitialLoad = true) },
+            onTransactionClick = { transaction ->
+                navController.navigate(
+                    TransactionDetails(
+                        transactionId = transaction.id,
+                        isIncome = transaction.category.isIncome,
+                        parentRoute = uiState.parentRoute
+                    )
+                )
+            }
+        )
     }
 }
 
@@ -66,12 +117,16 @@ fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel()) {
  * Отображает контент экрана: индикатор загрузки, ошибку или список транзакций.
  */
 @Composable
-private fun HistoryContent(uiState: HistoryUiState, onRetry: () -> Unit) {
+private fun HistoryContent(
+    uiState: HistoryUiState,
+    onRetry: () -> Unit,
+    onTransactionClick: (Transaction) -> Unit
+) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         when {
             uiState.isLoading -> CircularProgressIndicator()
             uiState.error != null -> ErrorContent(uiState.error, onRetry)
-            else -> HistoryList(uiState.transactionsByDate)
+            else -> HistoryList(uiState.transactionsByDate, onTransactionClick)
         }
     }
 }
@@ -145,13 +200,19 @@ private fun HistoryHeader(
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun HistoryList(transactionsByDate: Map<LocalDate, List<Transaction>>) {
+private fun HistoryList(
+    transactionsByDate: Map<LocalDate, List<Transaction>>,
+    onTransactionClick: (Transaction) -> Unit
+) {
     LazyColumn(modifier = Modifier
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.background)) {
         transactionsByDate.forEach { (_, transactions) ->
             items(items = transactions, key = { it.id }) { transaction ->
-                TransactionItem(transaction = transaction)
+                TransactionItem(
+                    transaction = transaction,
+                    onClick = { onTransactionClick(transaction) }
+                )
             }
         }
     }
@@ -161,11 +222,15 @@ private fun HistoryList(transactionsByDate: Map<LocalDate, List<Transaction>>) {
  * Отображает один элемент списка транзакций.
  */
 @Composable
-private fun TransactionItem(transaction: Transaction) {
+private fun TransactionItem(
+    transaction: Transaction,
+    onClick: () -> Unit
+) {
     BaseListItem(
         lead = { EmojiIcon(emoji = transaction.category.emoji) },
         title = transaction.category.name,
         subtitle = transaction.comment.takeIf { it.isNotBlank() },
+        onClick = onClick,
         trail = {
             val currencySymbol = formatCurrencySymbol(transaction.currency)
             Column(

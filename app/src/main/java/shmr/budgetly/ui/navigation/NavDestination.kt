@@ -2,79 +2,97 @@ package shmr.budgetly.ui.navigation
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.navigation.NavType
-import androidx.navigation.navArgument
+import kotlinx.serialization.Serializable
 import shmr.budgetly.R
 
 /**
- * Определяет все возможные навигационные маршруты в приложении в виде
- * типизированного sealed-класса.
- * @param route Строковый идентификатор маршрута.
+ * Определяет все возможные навигационные маршруты в приложении.
+ * Каждый маршрут является отдельным `@Serializable` классом или объектом.
  */
-sealed class NavDestination(val route: String) {
 
-    /** Сплэш-экран. */
-    data object Splash : NavDestination("splash")
+/** Сплэш-экран. */
+@Serializable
+data object Splash
 
-    /** Главный экран с нижней навигацией. */
-    data object Main : NavDestination("main")
+/** Главный экран с нижней навигацией. */
+@Serializable
+data object Main
 
-    data object EditAccount : NavDestination("edit_account")
+@Serializable
+data object EditAccount
 
-    /**
-     * Экран истории, принимающий родительский маршрут в качестве аргумента.
-     */
-    data object History : NavDestination("history") {
-        const val PARENT_ROUTE_ARG = "parentRoute"
-        val routeWithArgument = "$route/{$PARENT_ROUTE_ARG}"
-        val arguments = listOf(
-            navArgument(PARENT_ROUTE_ARG) { type = NavType.StringType }
-        )
+/**
+ * Экран истории, принимающий родительский маршрут в качестве аргумента.
+ * @param parentRoute Строковое представление маршрута, с которого был совершен переход.
+ */
+@Serializable
+data class History(val parentRoute: String)
 
-        /** Строит маршрут к экрану истории, указывая, с какого экрана был совершен переход. */
-        fun buildRoute(parentRoute: String) = "$route/$parentRoute"
-    }
+/**
+ * Экран создания/редактирования транзакции.
+ * @param transactionId ID транзакции для режима редактирования. null для создания новой.
+ * @param isIncome Флаг, указывающий, создается ли доход (true) или расход (false).
+ */
+@Serializable
+data class TransactionDetails(
+    val transactionId: Int? = null,
+    val isIncome: Boolean,
+    val parentRoute: String
+)
 
-    /**
-     * Определяет пункты нижней навигационной панели.
-     * @param route Строковый идентификатор маршрута.
-     * @param icon Ресурс иконки для вкладки.
-     * @param label Ресурс строки для названия вкладки.
-     */
-    sealed class BottomNav(
-        route: String,
-        @DrawableRes val icon: Int,
-        @StringRes val label: Int
-    ) : NavDestination(route) {
-
-        data object Expenses : BottomNav(
-            route = "expenses",
-            icon = R.drawable.ic_bottom_nav_expenses,
-            label = R.string.bottom_nav_label_expenses
-        )
-
-        data object Incomes : BottomNav(
-            route = "incomes",
-            icon = R.drawable.ic_bottom_nav_income,
-            label = R.string.bottom_nav_label_incomes
-        )
-
-        data object Account : BottomNav(
-            route = "account",
-            icon = R.drawable.ic_bottom_nav_account,
-            label = R.string.bottom_nav_label_score
-        )
-
-        data object Articles : BottomNav(
-            route = "articles",
-            icon = R.drawable.ic_bottom_nav_articles,
-            label = R.string.bottom_nav_label_articles
-        )
-
-        data object Settings : BottomNav(
-            route = "settings",
-            icon = R.drawable.ic_bottom_nav_settings,
-            label = R.string.bottom_nav_label_settigns
-        )
-    }
+/**
+ * Базовый интерфейс для элементов BottomNav, чтобы у них были общие свойства.
+ * @property route Сам @Serializable объект, который используется для навигации.
+ * @property icon Ресурс иконки для вкладки.
+ * @property label Ресурс строки для названия вкладки.
+ */
+interface BottomNavItem {
+    val route: Any
+    @get:DrawableRes
+    val icon: Int
+    @get:StringRes
+    val label: Int
 }
+
+/** Пункт нижней навигации "Расходы". */
+@Serializable
+data object Expenses : BottomNavItem {
+    override val route = this
+    override val icon: Int = R.drawable.ic_bottom_nav_expenses
+    override val label: Int = R.string.bottom_nav_label_expenses
+}
+
+/** Пункт нижней навигации "Доходы". */
+@Serializable
+data object Incomes : BottomNavItem {
+    override val route = this
+    override val icon: Int = R.drawable.ic_bottom_nav_income
+    override val label: Int = R.string.bottom_nav_label_incomes
+}
+
+/** Пункт нижней навигации "Счет". */
+@Serializable
+data object Account : BottomNavItem {
+    override val route = this
+    override val icon: Int = R.drawable.ic_bottom_nav_account
+    override val label: Int = R.string.bottom_nav_label_score
+}
+
+/** Пункт нижней навигации "Статьи". */
+@Serializable
+data object Articles : BottomNavItem {
+    override val route = this
+    override val icon: Int = R.drawable.ic_bottom_nav_articles
+    override val label: Int = R.string.bottom_nav_label_articles
+}
+
+/** Пункт нижней навигации "Настройки". */
+@Serializable
+data object Settings : BottomNavItem {
+    override val route = this
+    override val icon: Int = R.drawable.ic_bottom_nav_settings
+    override val label: Int = R.string.bottom_nav_label_settigns
+}
+
+/** Удобный список для итерации по элементам нижней навигации. */
+val bottomNavItems = listOf(Expenses, Incomes, Account, Articles, Settings)

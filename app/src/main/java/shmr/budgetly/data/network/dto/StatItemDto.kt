@@ -1,5 +1,6 @@
 package shmr.budgetly.data.network.dto
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -8,8 +9,8 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class StatItemDto(
-    val categoryId: Int,
-    val categoryName: String,
-    val emoji: String,
-    val amount: String
+    @SerialName("categoryId") val categoryId: Int,
+    @SerialName("categoryName") val categoryName: String,
+    @SerialName("emoji") val emoji: String,
+    @SerialName("amount") val amount: String
 )

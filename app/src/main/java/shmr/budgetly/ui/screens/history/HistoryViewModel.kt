@@ -1,40 +1,25 @@
 package shmr.budgetly.ui.screens.history
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import shmr.budgetly.domain.entity.Transaction
 import shmr.budgetly.domain.model.TransactionFilterType
 import shmr.budgetly.domain.usecase.GetHistoryUseCase
 import shmr.budgetly.domain.usecase.GetMainAccountUseCase
-import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.domain.util.Result
-import shmr.budgetly.ui.navigation.NavDestination
+import shmr.budgetly.ui.navigation.Expenses
+import shmr.budgetly.ui.navigation.History
+import shmr.budgetly.ui.navigation.Incomes
+import shmr.budgetly.ui.util.DatePickerDialogType
 import shmr.budgetly.ui.util.formatCurrencySymbol
 import java.time.Instant
-import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
 
-enum class DatePickerDialogType { START_DATE, END_DATE }
-
-data class HistoryUiState(
-    val transactionsByDate: Map<LocalDate, List<Transaction>> = emptyMap(),
-    val startDate: LocalDate = LocalDate.now().withDayOfMonth(1),
-    val endDate: LocalDate = LocalDate.now(),
-    val totalSum: String = "0",
-    val isLoading: Boolean = false,
-    val datePickerType: DatePickerDialogType? = null,
-    val error: DomainError? = null
-) {
-    val isDatePickerVisible: Boolean get() = datePickerType != null
-}
 
 /**
  * ViewModel для экрана "История".
@@ -44,24 +29,31 @@ data class HistoryUiState(
  * 3. Обработку выбора дат в DatePicker'е.
  * 4. Управление состоянием UI ([HistoryUiState]).
  */
-@HiltViewModel
+
 class HistoryViewModel @Inject constructor(
     private val getHistory: GetHistoryUseCase,
     private val getMainAccount: GetMainAccountUseCase,
-    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HistoryUiState())
     val uiState = _uiState.asStateFlow()
 
-    private val parentRoute: String? = savedStateHandle[NavDestination.History.PARENT_ROUTE_ARG]
-    private val filterType: TransactionFilterType = when (parentRoute) {
-        NavDestination.BottomNav.Expenses.route -> TransactionFilterType.EXPENSE
-        NavDestination.BottomNav.Incomes.route -> TransactionFilterType.INCOME
-        else -> TransactionFilterType.ALL
-    }
+    private lateinit var filterType: TransactionFilterType
 
-    init {
+    /**
+     * Инициализирует ViewModel с необходимыми аргументами навигации.
+     * Этот метод должен быть вызван сразу после создания ViewModel.
+     */
+    fun init(navArgs: History) {
+        // Если ViewModel уже инициализирована, ничего не делаем
+        if (this::filterType.isInitialized) return
+
+        this.filterType = when (navArgs.parentRoute) {
+            Expenses::class.qualifiedName -> TransactionFilterType.EXPENSE
+            Incomes::class.qualifiedName -> TransactionFilterType.INCOME
+            else -> TransactionFilterType.ALL
+        }
+        _uiState.update { it.copy(parentRoute = navArgs.parentRoute) }
         loadHistory(isInitialLoad = true)
     }
 
@@ -104,6 +96,10 @@ class HistoryViewModel @Inject constructor(
     }
 
     fun loadHistory(isInitialLoad: Boolean = false) {
+        if (!this::filterType.isInitialized) {
+            return
+        }
+
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = isInitialLoad, error = null) }
 
@@ -131,9 +127,6 @@ class HistoryViewModel @Inject constructor(
             val transactions = (historyResult as Result.Success).data
 
             val currencySymbol = formatCurrencySymbol(account.currency)
-            val total = transactions.sumOf {
-                it.amount.replace(Regex("[^0-9.-]"), "").toDoubleOrNull() ?: 0.0
-            }
 
             val grouped = transactions
                 .sortedByDescending { it.transactionDate }
@@ -142,7 +135,7 @@ class HistoryViewModel @Inject constructor(
             _uiState.update {
                 it.copy(
                     transactionsByDate = grouped,
-                    totalSum = "%,.0f %s".format(total, currencySymbol).replace(",", " "),
+                    currencySymbol = currencySymbol,
                     isLoading = false
                 )
             }

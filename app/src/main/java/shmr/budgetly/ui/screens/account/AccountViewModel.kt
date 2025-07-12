@@ -2,22 +2,14 @@ package shmr.budgetly.ui.screens.account
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import shmr.budgetly.domain.entity.Account
 import shmr.budgetly.domain.usecase.GetMainAccountUseCase
-import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.domain.util.Result
 import javax.inject.Inject
-
-data class AccountUiState(
-    val account: Account? = null,
-    val isLoading: Boolean = false,
-    val error: DomainError? = null
-)
 
 /**
  * ViewModel для экрана "Счет".
@@ -26,7 +18,7 @@ data class AccountUiState(
  * 2. Управление состоянием UI ([AccountUiState]), включая состояния загрузки и ошибок.
  * 3. Обработку действий пользователя, таких как повторная загрузка данных.
  */
-@HiltViewModel
+
 class AccountViewModel @Inject constructor(
     private val getMainAccount: GetMainAccountUseCase
 ) : ViewModel() {
