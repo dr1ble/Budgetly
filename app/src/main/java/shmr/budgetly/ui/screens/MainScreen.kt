@@ -17,6 +17,7 @@ import shmr.budgetly.ui.components.BottomNavBar
 import shmr.budgetly.ui.navigation.AppNavGraph
 import shmr.budgetly.ui.navigation.Expenses
 import shmr.budgetly.ui.navigation.Incomes
+import shmr.budgetly.ui.navigation.TransactionDetails
 import shmr.budgetly.ui.util.LocalTopAppBarSetter
 
 /**
@@ -47,14 +48,15 @@ fun MainScreen() {
             },
             floatingActionButton = {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentDestination = navBackStackEntry?.destination
+                val currentRoute = navBackStackEntry?.destination?.route
 
-                val fabRoutes = setOf(
-                    Expenses::class.qualifiedName,
-                    Incomes::class.qualifiedName
-                )
-                if (currentDestination?.route in fabRoutes) {
-                    BaseFAB(onClick = { /* TODO */ })
+                val isIncomeScreen = currentRoute == Incomes::class.qualifiedName
+                val isExpenseScreen = currentRoute == Expenses::class.qualifiedName
+
+                if (isIncomeScreen || isExpenseScreen) {
+                    BaseFAB(onClick = {
+                        navController.navigate(TransactionDetails(isIncome = isIncomeScreen))
+                    })
                 }
             }
         ) { paddingValues ->

@@ -1,8 +1,8 @@
 package shmr.budgetly.domain.repository
 
 import shmr.budgetly.domain.entity.Account
-import shmr.budgetly.domain.util.Result
 import shmr.budgetly.domain.util.DomainError
+import shmr.budgetly.domain.util.Result
 
 /**
  * Репозиторий для управления данными счетов.
@@ -20,4 +20,6 @@ interface AccountRepository {
      * @return [Result] с обновленным [Account] в случае успеха.
      */
     suspend fun updateAccount(name: String, balance: String, currency: String): Result<Account>
+
+
 }

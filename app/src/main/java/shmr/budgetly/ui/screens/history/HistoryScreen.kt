@@ -27,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import shmr.budgetly.R
 import shmr.budgetly.domain.entity.Transaction
 import shmr.budgetly.domain.util.DomainError
@@ -35,6 +36,8 @@ import shmr.budgetly.ui.components.BaseListItem
 import shmr.budgetly.ui.components.DatePickerModal
 import shmr.budgetly.ui.components.EmojiIcon
 import shmr.budgetly.ui.components.ErrorState
+import shmr.budgetly.ui.navigation.TRANSACTION_SAVED_RESULT_KEY
+import shmr.budgetly.ui.navigation.TransactionDetails
 import shmr.budgetly.ui.theme.dimens
 import shmr.budgetly.ui.util.DatePickerDialogType
 import shmr.budgetly.ui.util.HistoryDateFormatter
@@ -74,6 +77,14 @@ fun HistoryScreen(
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    LaunchedEffect(navBackStackEntry) {
+        if (navBackStackEntry?.savedStateHandle?.remove<Boolean>(TRANSACTION_SAVED_RESULT_KEY) == true) {
+            viewModel.loadHistory(isInitialLoad = true)
+        }
+    }
+
+
     if (uiState.isDatePickerVisible) {
         DatePickerDialog(uiState, viewModel)
     }
@@ -86,7 +97,18 @@ fun HistoryScreen(
             onStartDateClick = viewModel::onStartDatePickerOpen,
             onEndDateClick = viewModel::onEndDatePickerOpen
         )
-        HistoryContent(uiState, onRetry = { viewModel.loadHistory(isInitialLoad = true) })
+        HistoryContent(
+            uiState = uiState,
+            onRetry = { viewModel.loadHistory(isInitialLoad = true) },
+            onTransactionClick = { transaction ->
+                navController.navigate(
+                    TransactionDetails(
+                        transactionId = transaction.id,
+                        isIncome = transaction.category.isIncome
+                    )
+                )
+            }
+        )
     }
 }
 
@@ -94,12 +116,16 @@ fun HistoryScreen(
  * Отображает контент экрана: индикатор загрузки, ошибку или список транзакций.
  */
 @Composable
-private fun HistoryContent(uiState: HistoryUiState, onRetry: () -> Unit) {
+private fun HistoryContent(
+    uiState: HistoryUiState,
+    onRetry: () -> Unit,
+    onTransactionClick: (Transaction) -> Unit
+) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         when {
             uiState.isLoading -> CircularProgressIndicator()
             uiState.error != null -> ErrorContent(uiState.error, onRetry)
-            else -> HistoryList(uiState.transactionsByDate)
+            else -> HistoryList(uiState.transactionsByDate, onTransactionClick)
         }
     }
 }
@@ -173,13 +199,19 @@ private fun HistoryHeader(
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun HistoryList(transactionsByDate: Map<LocalDate, List<Transaction>>) {
+private fun HistoryList(
+    transactionsByDate: Map<LocalDate, List<Transaction>>,
+    onTransactionClick: (Transaction) -> Unit
+) {
     LazyColumn(modifier = Modifier
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.background)) {
         transactionsByDate.forEach { (_, transactions) ->
             items(items = transactions, key = { it.id }) { transaction ->
-                TransactionItem(transaction = transaction)
+                TransactionItem(
+                    transaction = transaction,
+                    onClick = { onTransactionClick(transaction) }
+                )
             }
         }
     }
@@ -189,11 +221,15 @@ private fun HistoryList(transactionsByDate: Map<LocalDate, List<Transaction>>) {
  * Отображает один элемент списка транзакций.
  */
 @Composable
-private fun TransactionItem(transaction: Transaction) {
+private fun TransactionItem(
+    transaction: Transaction,
+    onClick: () -> Unit
+) {
     BaseListItem(
         lead = { EmojiIcon(emoji = transaction.category.emoji) },
         title = transaction.category.name,
         subtitle = transaction.comment.takeIf { it.isNotBlank() },
+        onClick = onClick,
         trail = {
             val currencySymbol = formatCurrencySymbol(transaction.currency)
             Column(

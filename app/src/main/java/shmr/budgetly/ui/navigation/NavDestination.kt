@@ -28,6 +28,16 @@ data object EditAccount
 @Serializable
 data class History(val parentRoute: String)
 
+/**
+ * Экран создания/редактирования транзакции.
+ * @param transactionId ID транзакции для режима редактирования. null для создания новой.
+ * @param isIncome Флаг, указывающий, создается ли доход (true) или расход (false).
+ */
+@Serializable
+data class TransactionDetails(
+    val transactionId: Int? = null,
+    val isIncome: Boolean,
+)
 
 /**
  * Базовый интерфейс для элементов BottomNav, чтобы у них были общие свойства.
@@ -36,7 +46,7 @@ data class History(val parentRoute: String)
  * @property label Ресурс строки для названия вкладки.
  */
 interface BottomNavItem {
-    val route: Any // Маршрут будет @Serializable объектом
+    val route: Any
     @get:DrawableRes
     val icon: Int
     @get:StringRes

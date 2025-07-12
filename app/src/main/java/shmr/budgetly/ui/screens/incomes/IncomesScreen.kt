@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import shmr.budgetly.R
 import shmr.budgetly.ui.components.AppTopBar
 import shmr.budgetly.ui.components.BaseListItem
@@ -36,6 +37,8 @@ import shmr.budgetly.ui.components.ErrorState
 import shmr.budgetly.ui.components.TotalHeader
 import shmr.budgetly.ui.navigation.History
 import shmr.budgetly.ui.navigation.Incomes
+import shmr.budgetly.ui.navigation.TRANSACTION_SAVED_RESULT_KEY
+import shmr.budgetly.ui.navigation.TransactionDetails
 import shmr.budgetly.ui.util.LocalTopAppBarSetter
 import shmr.budgetly.ui.util.formatCurrencySymbol
 import shmr.budgetly.ui.util.getErrorMessage
@@ -69,6 +72,14 @@ fun IncomesScreen(
     }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    LaunchedEffect(navBackStackEntry) {
+        if (navBackStackEntry?.savedStateHandle?.remove<Boolean>(TRANSACTION_SAVED_RESULT_KEY) == true) {
+            viewModel.loadIncomes(isInitialLoad = true)
+        }
+    }
+
+
     val pullRefreshState = rememberPullRefreshState(
         refreshing = uiState.isRefreshing,
         onRefresh = { viewModel.loadIncomes() }
@@ -77,7 +88,18 @@ fun IncomesScreen(
     Box(modifier = modifier
         .fillMaxSize()
         .pullRefresh(pullRefreshState)) {
-        ScreenContent(uiState = uiState, onRetry = { viewModel.loadIncomes(isInitialLoad = true) })
+        ScreenContent(
+            uiState = uiState,
+            onRetry = { viewModel.loadIncomes(isInitialLoad = true) },
+            onTransactionClick = { transactionId ->
+                navController.navigate(
+                    TransactionDetails(
+                        transactionId = transactionId,
+                        isIncome = true
+                    )
+                )
+            }
+        )
 
         PullRefreshIndicator(
             refreshing = uiState.isRefreshing,
@@ -91,7 +113,8 @@ fun IncomesScreen(
 @Composable
 private fun BoxScope.ScreenContent(
     uiState: IncomesUiState,
-    onRetry: () -> Unit
+    onRetry: () -> Unit,
+    onTransactionClick: (Int) -> Unit
 ) {
     when {
         uiState.isLoading && uiState.transactions.isEmpty() -> {
@@ -136,7 +159,7 @@ private fun BoxScope.ScreenContent(
                                 contentDescription = ""
                             )
                         },
-                        onClick = { }
+                        onClick = { onTransactionClick(transaction.id) }
                     )
                 }
             }

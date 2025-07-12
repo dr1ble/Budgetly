@@ -17,8 +17,11 @@ import shmr.budgetly.ui.screens.history.HistoryScreen
 import shmr.budgetly.ui.screens.history.HistoryViewModel
 import shmr.budgetly.ui.screens.incomes.IncomesScreen
 import shmr.budgetly.ui.screens.settings.SettingsScreen
+import shmr.budgetly.ui.screens.transactiondetails.TransactionDetailsScreen
+import shmr.budgetly.ui.screens.transactiondetails.TransactionDetailsViewModel
 
 const val ACCOUNT_UPDATED_RESULT_KEY = "account_updated"
+const val TRANSACTION_SAVED_RESULT_KEY = "transaction_saved"
 
 @Composable
 fun AppNavGraph(
@@ -82,6 +85,25 @@ fun AppNavGraph(
                     navController.previousBackStackEntry
                         ?.savedStateHandle
                         ?.set(ACCOUNT_UPDATED_RESULT_KEY, true)
+                    navController.popBackStack()
+                }
+            )
+        }
+        composable<TransactionDetails> { navBackStackEntry ->
+            val viewModel: TransactionDetailsViewModel = viewModel(factory = viewModelFactory)
+            val navArgs: TransactionDetails = navBackStackEntry.toRoute()
+
+            LaunchedEffect(Unit) {
+                viewModel.init(navArgs)
+            }
+
+            TransactionDetailsScreen(
+                viewModel = viewModel,
+                navController = navController,
+                onSaveSuccess = {
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set(TRANSACTION_SAVED_RESULT_KEY, true)
                     navController.popBackStack()
                 }
             )

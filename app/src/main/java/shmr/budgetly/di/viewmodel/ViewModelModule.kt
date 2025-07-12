@@ -12,6 +12,7 @@ import shmr.budgetly.ui.screens.expenses.ExpensesViewModel
 import shmr.budgetly.ui.screens.history.HistoryViewModel
 import shmr.budgetly.ui.screens.incomes.IncomesViewModel
 import shmr.budgetly.ui.screens.settings.SettingsViewModel
+import shmr.budgetly.ui.screens.transactiondetails.TransactionDetailsViewModel
 
 /**
  * Модуль Dagger, отвечающий за предоставление всех ViewModel в приложении.
@@ -58,4 +59,9 @@ abstract class ViewModelModule {
     @IntoMap
     @ViewModelKey(SettingsViewModel::class)
     abstract fun bindSettingsViewModel(viewModel: SettingsViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(TransactionDetailsViewModel::class)
+    abstract fun bindTransactionDetailsViewModel(viewModel: TransactionDetailsViewModel): ViewModel
 }
