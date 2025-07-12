@@ -1,7 +1,7 @@
 package shmr.budgetly.data.repository
 
 import shmr.budgetly.data.mapper.toDomainModel
-import shmr.budgetly.data.source.remote.RemoteDataSource
+import shmr.budgetly.data.source.remote.category.CategoryRemoteDataSource
 import shmr.budgetly.data.util.safeApiCall
 import shmr.budgetly.domain.entity.Category
 import shmr.budgetly.domain.repository.CategoryRepository
@@ -15,7 +15,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class CategoryRepositoryImpl @Inject constructor(
-    private val remoteDataSource: RemoteDataSource
+    private val remoteDataSource: CategoryRemoteDataSource // <-- ИЗМЕНЕНИЕ
 ) : CategoryRepository {
 
     override suspend fun getAllCategories(): Result<List<Category>> {

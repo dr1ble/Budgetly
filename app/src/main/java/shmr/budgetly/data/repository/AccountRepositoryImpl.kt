@@ -4,7 +4,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import shmr.budgetly.data.mapper.toDomainModel
 import shmr.budgetly.data.network.dto.UpdateAccountRequestDto
-import shmr.budgetly.data.source.remote.RemoteDataSource
+import shmr.budgetly.data.source.remote.account.AccountRemoteDataSource
 import shmr.budgetly.data.util.safeApiCall
 import shmr.budgetly.domain.entity.Account
 import shmr.budgetly.domain.repository.AccountRepository
@@ -21,10 +21,11 @@ import javax.inject.Singleton
  */
 @Singleton
 class AccountRepositoryImpl @Inject constructor(
-    private val remoteDataSource: RemoteDataSource,
+    private val remoteDataSource: AccountRemoteDataSource, // <-- ИЗМЕНЕНИЕ
     @Named("useHardcodedAccountId") private val useHardcodedAccountId: Boolean
 ) : AccountRepository {
 
+    // ... остальной код без изменений ...
     @Volatile
     private var cachedAccountId: Int? = null
     private val mutex = Mutex()
