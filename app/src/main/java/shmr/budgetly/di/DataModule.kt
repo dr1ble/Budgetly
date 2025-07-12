@@ -7,8 +7,6 @@ import dagger.hilt.components.SingletonComponent
 import shmr.budgetly.data.repository.AccountRepositoryImpl
 import shmr.budgetly.data.repository.CategoryRepositoryImpl
 import shmr.budgetly.data.repository.TransactionRepositoryImpl
-import shmr.budgetly.data.source.remote.RemoteDataSource
-import shmr.budgetly.data.source.remote.RemoteDataSourceImpl
 import shmr.budgetly.data.source.remote.account.AccountRemoteDataSource
 import shmr.budgetly.data.source.remote.account.AccountRemoteDataSourceImpl
 import shmr.budgetly.data.source.remote.category.CategoryRemoteDataSource
@@ -40,10 +38,6 @@ abstract class DataModule {
     @Binds
     @Singleton
     abstract fun bindCategoryRepository(impl: CategoryRepositoryImpl): CategoryRepository
-
-    @Binds
-    @Singleton
-    abstract fun bindRemoteDataSource(impl: RemoteDataSourceImpl): RemoteDataSource
 
     @Binds
     @Singleton
