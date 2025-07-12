@@ -20,14 +20,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import shmr.budgetly.R
 import shmr.budgetly.ui.components.AppTopBar
 import shmr.budgetly.ui.components.BaseFAB
 import shmr.budgetly.ui.components.BottomNavBar
-import shmr.budgetly.ui.navigation.AppNavGraph
-import shmr.budgetly.ui.navigation.NavDestination
+import shmr.budgetly.ui.navigation.*
 import shmr.budgetly.ui.screens.account.AccountViewModel
 import shmr.budgetly.ui.screens.account.edit.EditAccountViewModel
 
@@ -44,27 +45,21 @@ fun MainScreen() {
             MainTopAppBar(navController = navController)
         },
         bottomBar = {
-            val navBackStackEntry by navController.currentBackStackEntryAsState()
-            val currentRoute = navBackStackEntry?.destination?.route
-            val showBottomBar = when (currentRoute) {
-                NavDestination.EditAccount.route, NavDestination.History.routeWithArgument -> false
-                else -> true
-            }
-            if (showBottomBar) {
-                BottomNavBar(
-                    navController = navController,
-                    modifier = Modifier.navigationBarsPadding()
-                )
-            }
+            // Логика видимости удалена. BottomNavBar теперь отображается всегда.
+            BottomNavBar(
+                navController = navController,
+                modifier = Modifier.navigationBarsPadding()
+            )
         },
         floatingActionButton = {
             val navBackStackEntry by navController.currentBackStackEntryAsState()
-            val currentRoute = navBackStackEntry?.destination?.route
+            val currentDestination = navBackStackEntry?.destination
+
             val fabRoutes = setOf(
-                NavDestination.BottomNav.Expenses.route,
-                NavDestination.BottomNav.Incomes.route
+                Expenses::class.qualifiedName,
+                Incomes::class.qualifiedName
             )
-            if (currentRoute in fabRoutes) {
+            if (currentDestination?.route in fabRoutes) {
                 BaseFAB(onClick = { /* TODO */ })
             }
         }
@@ -77,32 +72,34 @@ fun MainScreen() {
 
 /**
  * Отображает [AppTopBar], сконфигурированный для текущего экрана.
- * @param currentRoute Текущий навигационный маршрут.
  * @param navController Контроллер навигации для выполнения действий.
  */
 @Composable
-private fun MainTopAppBar(navController: NavController) {
+private fun MainTopAppBar(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
+    val destination = navBackStackEntry?.destination
 
-    when (currentRoute) {
-        NavDestination.BottomNav.Expenses.route -> AppTopBar(
+    when {
+        destination?.hasRoute<Expenses>() ?: false -> AppTopBar(
             title = stringResource(R.string.expenses_top_bar_title),
-            actions = { HistoryActionButton { navController.navigateToHistory(currentRoute) } }
+            actions = { HistoryActionButton { navController.navigateToHistory(Expenses::class.qualifiedName) } }
         )
-        NavDestination.BottomNav.Incomes.route -> AppTopBar(
+
+        destination?.hasRoute<Incomes>() ?: false -> AppTopBar(
             title = stringResource(R.string.incomes_top_bar_title),
-            actions = { HistoryActionButton { navController.navigateToHistory(currentRoute) } }
+            actions = { HistoryActionButton { navController.navigateToHistory(Incomes::class.qualifiedName) } }
         )
-        NavDestination.History.routeWithArgument -> AppTopBar(
+
+        destination?.hasRoute<History>() ?: false -> AppTopBar(
             title = stringResource(R.string.history_top_bar_title),
             navigationIcon = { BackArrowIcon() },
             onNavigationClick = { navController.popBackStack() },
             actions = { AnalyzeActionButton { /* TODO */ } }
         )
-        NavDestination.BottomNav.Account.route -> {
+
+        destination?.hasRoute<Account>() ?: false -> {
             val parentEntry = remember(navBackStackEntry) {
-                navController.getBackStackEntry(NavDestination.BottomNav.Account.route)
+                navController.getBackStackEntry(Account::class)
             }
             val accountViewModel: AccountViewModel = hiltViewModel(parentEntry)
             val accountUiState by accountViewModel.uiState.collectAsState()
@@ -110,13 +107,13 @@ private fun MainTopAppBar(navController: NavController) {
             AppTopBar(
                 title = accountUiState.account?.name
                     ?: stringResource(R.string.account_top_bar_title),
-                actions = { EditActionButton { navController.navigate(NavDestination.EditAccount.route) } }
+                actions = { EditActionButton { navController.navigate(EditAccount) } }
             )
         }
 
-        NavDestination.EditAccount.route -> {
+        destination?.hasRoute<EditAccount>() ?: false -> {
             val editAccountBackStackEntry = remember(navBackStackEntry) {
-                navController.getBackStackEntry(NavDestination.EditAccount.route)
+                navController.getBackStackEntry(EditAccount::class)
             }
             val viewModel: EditAccountViewModel = hiltViewModel(editAccountBackStackEntry)
             val uiState by viewModel.uiState.collectAsState()
@@ -147,17 +144,14 @@ private fun MainTopAppBar(navController: NavController) {
                 }
             )
         }
-        NavDestination.BottomNav.Articles.route -> AppTopBar(
-            title = stringResource(R.string.articles_top_bar_title)
-        )
-        NavDestination.BottomNav.Settings.route -> AppTopBar(
-            title = stringResource(R.string.settings_top_bar_title)
-        )
+        destination?.hasRoute<Articles>() ?: false -> AppTopBar(title = stringResource(R.string.articles_top_bar_title))
+        destination?.hasRoute<Settings>() ?: false -> AppTopBar(title = stringResource(R.string.settings_top_bar_title))
     }
 }
 
-private fun NavController.navigateToHistory(parentRoute: String) {
-    navigate(NavDestination.History.buildRoute(parentRoute))
+private fun NavController.navigateToHistory(parentRoute: String?) {
+    if (parentRoute == null) return
+    navigate(History(parentRoute = parentRoute))
 }
 
 @Composable

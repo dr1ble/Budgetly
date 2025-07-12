@@ -17,20 +17,20 @@ fun RootNavGraph() {
 
     NavHost(
         navController = navController,
-        startDestination = NavDestination.Splash.route
+        startDestination = Splash
     ) {
-        composable(NavDestination.Splash.route) {
+        composable<Splash> {
             SplashScreen(
                 onReady = { splashViewModel.setReady() },
                 onAnimationFinished = {
-                    navController.navigate(NavDestination.Main.route) {
-                        popUpTo(NavDestination.Splash.route) { inclusive = true }
+                    navController.navigate(Main) {
+                        popUpTo<Splash> { inclusive = true }
                     }
                 }
             )
         }
 
-        composable(NavDestination.Main.route) {
+        composable<Main> {
             MainScreen()
         }
     }

@@ -13,7 +13,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import shmr.budgetly.ui.navigation.NavDestination
+import androidx.navigation.toRoute
+import shmr.budgetly.ui.navigation.*
 
 /**
  * Компонент нижней навигационной панели (Bottom Navigation Bar).
@@ -27,20 +28,11 @@ fun BottomNavBar(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    val destinations = listOf(
-        NavDestination.BottomNav.Expenses,
-        NavDestination.BottomNav.Incomes,
-        NavDestination.BottomNav.Account,
-        NavDestination.BottomNav.Articles,
-        NavDestination.BottomNav.Settings
-    )
-
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
 
     NavigationBar(modifier = modifier) {
-        destinations.forEach { destination ->
-            val isSelected = isDestinationSelected(destination, currentRoute, navBackStackEntry)
+        bottomNavItems.forEach { destination ->
+            val isSelected = isDestinationSelected(destination, navBackStackEntry)
             NavigationBarItem(
                 label = { Text(text = stringResource(id = destination.label)) },
                 icon = {
@@ -58,19 +50,33 @@ fun BottomNavBar(
 
 /**
  * Определяет, выбрана ли данная вкладка навигации.
- * Учитывает случай, когда открыт дочерний экран (например, История).
+ * Учитывает случай, когда открыт дочерний экран, и подсвечивает его родительскую вкладку.
  */
 private fun isDestinationSelected(
-    destination: NavDestination.BottomNav,
-    currentRoute: String?,
+    destination: BottomNavItem,
     navBackStackEntry: androidx.navigation.NavBackStackEntry?
 ): Boolean {
-    return if (currentRoute == NavDestination.History.routeWithArgument) {
-        navBackStackEntry?.arguments?.getString(NavDestination.History.PARENT_ROUTE_ARG) == destination.route
-    } else {
-        currentRoute == destination.route
+    val currentRoute = navBackStackEntry?.destination?.route
+    if (currentRoute == null) return false
+
+    val historyRouteBase = History::class.qualifiedName!!
+    val editAccountRouteBase = EditAccount::class.qualifiedName!!
+
+    val activeTabRouteName: String? = when {
+        currentRoute.startsWith(historyRouteBase) -> {
+            navBackStackEntry.toRoute<History>().parentRoute
+        }
+
+        currentRoute == editAccountRouteBase -> {
+            Account::class.qualifiedName
+        }
+
+        else -> currentRoute
     }
+
+    return destination.route::class.qualifiedName == activeTabRouteName
 }
+
 
 /**
  * Обрабатывает навигацию при клике на элемент нижней панели.
@@ -79,15 +85,14 @@ private fun isDestinationSelected(
  */
 private fun handleNavigation(
     navController: NavController,
-    destination: NavDestination.BottomNav,
+    destination: BottomNavItem,
     isSelected: Boolean
 ) {
+    val destinationRouteName = destination.route::class.qualifiedName!!
+
     if (isSelected) {
-        // Если вкладка уже выбрана (и мы на дочернем экране),
-        // возвращаемся на ее главный экран.
-        navController.popBackStack(destination.route, inclusive = false)
+        navController.popBackStack(destinationRouteName, inclusive = false)
     } else {
-        // Стандартное поведение: переключаемся на другую вкладку.
         navController.navigate(destination.route) {
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
