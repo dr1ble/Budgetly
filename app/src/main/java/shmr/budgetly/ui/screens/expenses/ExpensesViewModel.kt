@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import shmr.budgetly.domain.events.AppEvent
+import shmr.budgetly.domain.events.AppEventBus
 import shmr.budgetly.domain.usecase.GetExpenseTransactionsUseCase
 import shmr.budgetly.domain.usecase.GetMainAccountUseCase
 import shmr.budgetly.domain.util.Result
@@ -25,15 +27,26 @@ import javax.inject.Inject
 
 class ExpensesViewModel @Inject constructor(
     private val getExpenseTransactions: GetExpenseTransactionsUseCase,
-    private val getMainAccount: GetMainAccountUseCase
+    private val getMainAccount: GetMainAccountUseCase,
+    private val appEventBus: AppEventBus
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ExpensesUiState())
     val uiState = _uiState.asStateFlow()
 
     init {
-        // Добавим начальную загрузку при инициализации ViewModel
         loadExpenses(isInitialLoad = true)
+        observeAccountUpdates()
+    }
+
+    private fun observeAccountUpdates() {
+        viewModelScope.launch {
+            appEventBus.events.collect { event ->
+                if (event is AppEvent.AccountUpdated) {
+                    loadExpenses(isInitialLoad = true)
+                }
+            }
+        }
     }
 
     /**
@@ -44,16 +57,15 @@ class ExpensesViewModel @Inject constructor(
     fun loadExpenses(isInitialLoad: Boolean = false, forceRefresh: Boolean = false) {
         val state = _uiState.value
 
-        // Улучшенная защита от лишних вызовов
         if ((state.isLoading || state.isRefreshing) && !forceRefresh) {
             return
         }
 
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(
-                    isLoading = isInitialLoad,
-                    isRefreshing = !isInitialLoad,
+            _uiState.update { currentState ->
+                currentState.copy(
+                    isLoading = isInitialLoad && currentState.transactions.isEmpty(),
+                    isRefreshing = !isInitialLoad || currentState.transactions.isNotEmpty(),
                     error = null
                 )
             }

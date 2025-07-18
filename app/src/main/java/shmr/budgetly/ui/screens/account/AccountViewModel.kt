@@ -37,7 +37,13 @@ class AccountViewModel @Inject constructor(
      */
     fun loadAccount(isInitialLoad: Boolean = false) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = isInitialLoad, error = null) }
+            _uiState.update { currentState ->
+                currentState.copy(
+                    isLoading = isInitialLoad && currentState.account == null,
+                    isRefreshing = !isInitialLoad || currentState.account != null,
+                    error = null
+                )
+            }
             val result = getMainAccount()
             processResult(result)
         }
@@ -49,11 +55,19 @@ class AccountViewModel @Inject constructor(
     private fun processResult(result: Result<Account>) {
         when (result) {
             is Result.Success -> _uiState.update {
-                it.copy(account = result.data, isLoading = false)
+                it.copy(
+                    account = result.data,
+                    isLoading = false,
+                    isRefreshing = false
+                )
             }
 
             is Result.Error -> _uiState.update {
-                it.copy(isLoading = false, error = result.error)
+                it.copy(
+                    isLoading = false,
+                    isRefreshing = false,
+                    error = result.error
+                )
             }
         }
     }

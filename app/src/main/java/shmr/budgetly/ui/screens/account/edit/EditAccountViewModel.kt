@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import shmr.budgetly.domain.events.AppEvent
+import shmr.budgetly.domain.events.AppEventBus
 import shmr.budgetly.domain.usecase.GetMainAccountUseCase
 import shmr.budgetly.domain.usecase.UpdateAccountUseCase
 import shmr.budgetly.domain.util.Result
@@ -14,7 +16,8 @@ import javax.inject.Inject
 
 class EditAccountViewModel @Inject constructor(
     private val getMainAccount: GetMainAccountUseCase,
-    private val updateAccount: UpdateAccountUseCase
+    private val updateAccount: UpdateAccountUseCase,
+    private val appEventBus: AppEventBus
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EditAccountUiState())
@@ -51,7 +54,7 @@ class EditAccountViewModel @Inject constructor(
     }
 
     fun onBalanceChange(newBalance: String) {
-        Log.d("EditAccountDebug", "onBalanceChange called with: '$newBalance'") // <-- ДОБАВЛЕНО
+        Log.d("EditAccountDebug", "onBalanceChange called with: '$newBalance'")
         // Очищаем ввод от всего, кроме цифр и одной точки
         val cleanedBalance = newBalance.filter { it.isDigit() || it == '.' }
         _uiState.update { it.copy(balance = cleanedBalance) }
@@ -84,6 +87,7 @@ class EditAccountViewModel @Inject constructor(
             )
             when (result) {
                 is Result.Success -> {
+                    appEventBus.postEvent(AppEvent.AccountUpdated)
                     _uiState.update { it.copy(isLoading = false, isSaveSuccess = true) }
                 }
 

@@ -81,10 +81,9 @@ fun IncomesScreen(
         }
     }
 
-
     val pullRefreshState = rememberPullRefreshState(
         refreshing = uiState.isRefreshing,
-        onRefresh = { viewModel.loadIncomes() }
+        onRefresh = { viewModel.loadIncomes(forceRefresh = true) }
     )
 
     Box(modifier = modifier

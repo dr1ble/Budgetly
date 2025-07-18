@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import shmr.budgetly.domain.events.AppEvent
+import shmr.budgetly.domain.events.AppEventBus
 import shmr.budgetly.domain.usecase.GetIncomeTransactionsUseCase
 import shmr.budgetly.domain.usecase.GetMainAccountUseCase
 import shmr.budgetly.domain.util.Result
@@ -25,7 +27,8 @@ import javax.inject.Inject
 
 class IncomesViewModel @Inject constructor(
     private val getIncomeTransactions: GetIncomeTransactionsUseCase,
-    private val getMainAccount: GetMainAccountUseCase
+    private val getMainAccount: GetMainAccountUseCase,
+    private val appEventBus: AppEventBus
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(IncomesUiState())
@@ -33,18 +36,35 @@ class IncomesViewModel @Inject constructor(
 
     init {
         loadIncomes(isInitialLoad = true)
+        observeAccountUpdates()
+    }
+
+    private fun observeAccountUpdates() {
+        viewModelScope.launch {
+            appEventBus.events.collect { event ->
+                if (event is AppEvent.AccountUpdated) {
+                    loadIncomes(isInitialLoad = true)
+                }
+            }
+        }
     }
 
     /**
      * Инициирует загрузку доходов.
-     * @param isInitialLoad true для первоначальной загрузки, false для pull-to-refresh.
+     * @param isInitialLoad true для первоначальной загрузки (показывает полноэкранный индикатор).
+     * @param forceRefresh true, чтобы принудительно обновить данные, даже если они уже есть.
      */
-    fun loadIncomes(isInitialLoad: Boolean = false) {
+    fun loadIncomes(isInitialLoad: Boolean = false, forceRefresh: Boolean = false) {
+        val state = _uiState.value
+        if ((state.isLoading || state.isRefreshing) && !forceRefresh) {
+            return
+        }
+
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(
-                    isLoading = isInitialLoad,
-                    isRefreshing = !isInitialLoad,
+            _uiState.update { currentState ->
+                currentState.copy(
+                    isLoading = isInitialLoad && currentState.transactions.isEmpty(),
+                    isRefreshing = !isInitialLoad || currentState.transactions.isNotEmpty(),
                     error = null
                 )
             }

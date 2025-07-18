@@ -81,7 +81,6 @@ fun ExpensesScreen(
         }
     }
 
-
     val pullRefreshState = rememberPullRefreshState(
         refreshing = uiState.isRefreshing,
         onRefresh = { viewModel.loadExpenses(forceRefresh = true) }
