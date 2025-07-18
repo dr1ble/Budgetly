@@ -1,24 +1,20 @@
 package shmr.budgetly.ui.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.toRoute
 import shmr.budgetly.ui.di.rememberScreenComponent
 import shmr.budgetly.ui.screens.account.AccountScreen
 import shmr.budgetly.ui.screens.account.edit.EditAccountScreen
 import shmr.budgetly.ui.screens.articles.ArticlesScreen
 import shmr.budgetly.ui.screens.expenses.ExpensesScreen
 import shmr.budgetly.ui.screens.history.HistoryScreen
-import shmr.budgetly.ui.screens.history.HistoryViewModel
 import shmr.budgetly.ui.screens.incomes.IncomesScreen
 import shmr.budgetly.ui.screens.settings.SettingsScreen
 import shmr.budgetly.ui.screens.transactiondetails.TransactionDetailsScreen
-import shmr.budgetly.ui.screens.transactiondetails.TransactionDetailsViewModel
 
 const val ACCOUNT_UPDATED_RESULT_KEY = "account_updated"
 const val TRANSACTION_SAVED_RESULT_KEY = "transaction_saved"
@@ -28,8 +24,6 @@ fun AppNavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    // LocalViewModelFactory больше не используется
-
     NavHost(
         navController = navController,
         startDestination = Expenses,
@@ -75,18 +69,13 @@ fun AppNavGraph(
                 navController = navController
             )
         }
-        composable<History> { navBackStackEntry ->
+        composable<History>(
+        ) { navBackStackEntry ->
             val component =
                 rememberScreenComponent(navBackStackEntry) { it.historyComponent().create() }
-            val historyViewModel: HistoryViewModel =
-                viewModel(factory = component.viewModelFactory())
-            val navArgs: History = navBackStackEntry.toRoute()
 
-            LaunchedEffect(Unit) {
-                historyViewModel.init(navArgs)
-            }
             HistoryScreen(
-                viewModel = historyViewModel,
+                viewModel = viewModel(factory = component.viewModelFactory()),
                 navController = navController
             )
         }
@@ -108,16 +97,9 @@ fun AppNavGraph(
             val component = rememberScreenComponent(navBackStackEntry) {
                 it.transactionDetailsComponent().create()
             }
-            val viewModel: TransactionDetailsViewModel =
-                viewModel(factory = component.viewModelFactory())
-            val navArgs: TransactionDetails = navBackStackEntry.toRoute()
-
-            LaunchedEffect(Unit) {
-                viewModel.init(navArgs)
-            }
 
             TransactionDetailsScreen(
-                viewModel = viewModel,
+                viewModel = viewModel(factory = component.viewModelFactory()),
                 navController = navController,
                 onSaveSuccess = {
                     navController.previousBackStackEntry

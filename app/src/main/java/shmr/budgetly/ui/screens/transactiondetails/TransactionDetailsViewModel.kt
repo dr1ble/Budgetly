@@ -1,12 +1,18 @@
 package shmr.budgetly.ui.screens.transactiondetails
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import shmr.budgetly.di.viewmodel.AssistedSavedStateViewModelFactory
 import shmr.budgetly.domain.entity.Category
 import shmr.budgetly.domain.usecase.CreateTransactionUseCase
 import shmr.budgetly.domain.usecase.DeleteTransactionUseCase
@@ -23,30 +29,27 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.Locale
-import javax.inject.Inject
 
-class TransactionDetailsViewModel @Inject constructor(
+class TransactionDetailsViewModel @AssistedInject constructor(
     private val getTransactionUseCase: GetTransactionUseCase,
     private val createTransactionUseCase: CreateTransactionUseCase,
     private val updateTransactionUseCase: UpdateTransactionUseCase,
     private val deleteTransactionUseCase: DeleteTransactionUseCase,
     private val getAllCategoriesUseCase: GetAllCategoriesUseCase,
-    private val getMainAccountUseCase: GetMainAccountUseCase
+    private val getMainAccountUseCase: GetMainAccountUseCase,
+    @Assisted private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TransactionDetailsUiState())
     val uiState = _uiState.asStateFlow()
 
-    var transactionId: Int? = null
+    private var transactionId: Int? = null
 
-    /**
-     * Инициализация ViewModel. Определяет режим (создание/редактирование) и загружает данные.
-     */
-    fun init(navArgs: TransactionDetails) {
-        if (transactionId != null && transactionId == navArgs.transactionId) return
-
+    init {
+        val navArgs: TransactionDetails = savedStateHandle.toRoute()
         transactionId = navArgs.transactionId
         val isEditMode = navArgs.transactionId != null
+
         _uiState.update {
             it.copy(
                 isEditMode = isEditMode,
@@ -55,11 +58,29 @@ class TransactionDetailsViewModel @Inject constructor(
             )
         }
 
-        if (isEditMode) {
-            loadTransactionDetails(navArgs.transactionId)
+        loadInitialData()
+    }
+
+    /**
+     * Повторно запускает первоначальную загрузку данных.
+     * Используется для кнопки "Повторить" в случае ошибки.
+     */
+    fun retryLoad() {
+        loadInitialData()
+    }
+
+    private fun loadInitialData() {
+        if (_uiState.value.isEditMode) {
+            loadTransactionDetails(transactionId!!)
         } else {
             loadDataForCreation()
         }
+    }
+
+
+    @AssistedFactory
+    interface Factory : AssistedSavedStateViewModelFactory<TransactionDetailsViewModel> {
+        override fun create(savedStateHandle: SavedStateHandle): TransactionDetailsViewModel
     }
 
     private fun loadDataForCreation() {
@@ -153,10 +174,6 @@ class TransactionDetailsViewModel @Inject constructor(
             _uiState.update { it.copy(amount = sanitizedAmount.replace(',', '.')) }
         }
     }
-
-//    fun onAccountSelected(account: Account) {
-//        _uiState.update { it.copy(selectedAccount = account, isAccountPickerVisible = false) }
-//    }
 
     fun onCategorySelected(category: Category) {
         _uiState.update { it.copy(selectedCategory = category, isCategoryPickerVisible = false) }
@@ -269,9 +286,6 @@ class TransactionDetailsViewModel @Inject constructor(
 
     fun showTimePicker() = _uiState.update { it.copy(isTimePickerVisible = true) }
     fun dismissTimePicker() = _uiState.update { it.copy(isTimePickerVisible = false) }
-
-//    fun showAccountPicker() = _uiState.update { it.copy(isAccountPickerVisible = true) }
-//    fun dismissAccountPicker() = _uiState.update { it.copy(isAccountPickerVisible = false) }
 
     fun showCategoryPicker() = _uiState.update { it.copy(isCategoryPickerVisible = true) }
     fun dismissCategoryPicker() = _uiState.update { it.copy(isCategoryPickerVisible = false) }

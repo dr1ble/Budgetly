@@ -53,7 +53,6 @@ import shmr.budgetly.ui.components.DatePickerModal
 import shmr.budgetly.ui.components.EmojiIcon
 import shmr.budgetly.ui.components.ErrorState
 import shmr.budgetly.ui.components.TimePickerModal
-import shmr.budgetly.ui.navigation.TransactionDetails
 import shmr.budgetly.ui.theme.dimens
 import shmr.budgetly.ui.util.LocalTopAppBarSetter
 import shmr.budgetly.ui.util.formatCurrencySymbol
@@ -131,15 +130,7 @@ fun TransactionDetailsScreen(
             uiState.isLoading -> CircularProgressIndicator()
             uiState.error != null -> ErrorState(
                 message = getErrorMessage(uiState.error!!),
-                onRetry = {
-                    viewModel.init(
-                        TransactionDetails(
-                            transactionId = if (uiState.isEditMode) viewModel.transactionId else null,
-                            isIncome = uiState.isIncome,
-                            parentRoute = uiState.parentRoute
-                        )
-                    )
-                }
+                onRetry = viewModel::retryLoad
             )
 
             else -> TransactionDetailsContent(uiState, viewModel)

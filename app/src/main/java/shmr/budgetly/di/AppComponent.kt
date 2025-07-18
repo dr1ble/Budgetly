@@ -12,6 +12,8 @@ import shmr.budgetly.di.features.incomes.IncomesComponent
 import shmr.budgetly.di.features.settings.SettingsComponent
 import shmr.budgetly.di.features.transactiondetails.TransactionDetailsComponent
 import shmr.budgetly.di.scope.AppScope
+import shmr.budgetly.di.viewmodel.AssistedViewModelModule
+import shmr.budgetly.di.viewmodel.ViewModelModule
 
 /**
  * Корневой компонент Dagger для всего приложения.
@@ -20,7 +22,15 @@ import shmr.budgetly.di.scope.AppScope
  * Также он является фабрикой для всех экранных сабкомпонентов.
  */
 @AppScope
-@Component(modules = [AppModule::class, NetworkModule::class, DataModule::class])
+@Component(
+    modules = [
+        AppModule::class,
+        NetworkModule::class,
+        DataModule::class,
+        ViewModelModule::class,
+        AssistedViewModelModule::class
+    ]
+)
 interface AppComponent {
 
     @Component.Factory
