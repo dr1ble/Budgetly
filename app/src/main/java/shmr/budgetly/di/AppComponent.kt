@@ -27,6 +27,7 @@ import shmr.budgetly.di.viewmodel.ViewModelModule
         AppModule::class,
         NetworkModule::class,
         DataModule::class,
+        DatabaseModule::class,
         ViewModelModule::class,
         AssistedViewModelModule::class
     ]

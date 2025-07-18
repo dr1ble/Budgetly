@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import shmr.budgetly.domain.entity.Account
 import shmr.budgetly.domain.usecase.GetMainAccountUseCase
+import shmr.budgetly.domain.usecase.RefreshMainAccountUseCase
 import shmr.budgetly.domain.util.Result
 import javax.inject.Inject
 
@@ -20,15 +21,22 @@ import javax.inject.Inject
  */
 
 class AccountViewModel @Inject constructor(
-    private val getMainAccount: GetMainAccountUseCase
+    private val getMainAccount: GetMainAccountUseCase,
+    private val refreshMainAccount: RefreshMainAccountUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AccountUiState())
     val uiState = _uiState.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            getMainAccount().collect { result ->
+                processResult(result)
+            }
+        }
         loadAccount(isInitialLoad = true)
     }
+
 
     /**
      * Инициирует загрузку данных о счете.
@@ -36,16 +44,19 @@ class AccountViewModel @Inject constructor(
      * false для фоновых обновлений.
      */
     fun loadAccount(isInitialLoad: Boolean = false) {
+        val showLoading = isInitialLoad && _uiState.value.account == null
+        val showRefreshing = !isInitialLoad || _uiState.value.account != null
+
         viewModelScope.launch {
-            _uiState.update { currentState ->
-                currentState.copy(
-                    isLoading = isInitialLoad && currentState.account == null,
-                    isRefreshing = !isInitialLoad || currentState.account != null,
+            _uiState.update {
+                it.copy(
+                    isLoading = showLoading,
+                    isRefreshing = showRefreshing,
                     error = null
                 )
             }
-            val result = getMainAccount()
-            processResult(result)
+            refreshMainAccount()
+            _uiState.update { it.copy(isLoading = false, isRefreshing = false) }
         }
     }
 
@@ -58,16 +69,21 @@ class AccountViewModel @Inject constructor(
                 it.copy(
                     account = result.data,
                     isLoading = false,
-                    isRefreshing = false
+                    isRefreshing = false,
+                    error = null
                 )
             }
 
             is Result.Error -> _uiState.update {
-                it.copy(
-                    isLoading = false,
-                    isRefreshing = false,
-                    error = result.error
-                )
+                if (it.account == null) {
+                    it.copy(
+                        isLoading = false,
+                        isRefreshing = false,
+                        error = result.error
+                    )
+                } else {
+                    it.copy(isRefreshing = false) // Скрываем индикатор, но оставляем старые данные
+                }
             }
         }
     }

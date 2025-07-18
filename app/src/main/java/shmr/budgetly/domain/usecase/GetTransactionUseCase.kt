@@ -9,5 +9,5 @@ import javax.inject.Inject
 class GetTransactionUseCase @Inject constructor(
     private val repository: TransactionRepository
 ) {
-    suspend operator fun invoke(id: Int) = repository.getTransactionById(id)
+    operator fun invoke(id: Int) = repository.getTransactionById(id)
 }

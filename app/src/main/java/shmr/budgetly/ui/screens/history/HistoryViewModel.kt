@@ -7,15 +7,19 @@ import androidx.navigation.toRoute
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import shmr.budgetly.di.viewmodel.AssistedSavedStateViewModelFactory
+import shmr.budgetly.domain.entity.Account
+import shmr.budgetly.domain.entity.Transaction
 import shmr.budgetly.domain.model.TransactionFilterType
 import shmr.budgetly.domain.usecase.GetHistoryUseCase
 import shmr.budgetly.domain.usecase.GetMainAccountUseCase
+import shmr.budgetly.domain.usecase.RefreshTransactionsUseCase
 import shmr.budgetly.domain.util.Result
 import shmr.budgetly.ui.navigation.Expenses
 import shmr.budgetly.ui.navigation.History
@@ -25,7 +29,6 @@ import shmr.budgetly.ui.util.formatCurrencySymbol
 import java.time.Instant
 import java.time.ZoneId
 
-
 /**
  * ViewModel для экрана "История".
  * Отвечает за:
@@ -34,10 +37,10 @@ import java.time.ZoneId
  * 3. Обработку выбора дат в DatePicker'е.
  * 4. Управление состоянием UI ([HistoryUiState]).
  */
-
 class HistoryViewModel @AssistedInject constructor(
     private val getHistory: GetHistoryUseCase,
     private val getMainAccount: GetMainAccountUseCase,
+    private val refreshTransactions: RefreshTransactionsUseCase,
     @Assisted private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -54,6 +57,19 @@ class HistoryViewModel @AssistedInject constructor(
             else -> TransactionFilterType.ALL
         }
         _uiState.update { it.copy(parentRoute = navArgs.parentRoute) }
+
+        viewModelScope.launch {
+
+            _uiState.flatMapLatest { state ->
+                combine(
+                    getHistory(state.startDate, state.endDate, filterType),
+                    getMainAccount()
+                ) { transactionsResult, accountResult ->
+                    processResults(transactionsResult, accountResult)
+                }
+            }.collect {}
+        }
+
         loadHistory(isInitialLoad = true)
     }
 
@@ -61,6 +77,39 @@ class HistoryViewModel @AssistedInject constructor(
     interface Factory : AssistedSavedStateViewModelFactory<HistoryViewModel> {
         override fun create(savedStateHandle: SavedStateHandle): HistoryViewModel
     }
+
+    private fun processResults(
+        transactionsResult: Result<List<Transaction>>,
+        accountResult: Result<Account>
+    ) {
+        val transactions = (transactionsResult as? Result.Success)?.data
+        val account = (accountResult as? Result.Success)?.data
+        val error = (transactionsResult as? Result.Error)?.error
+            ?: (accountResult as? Result.Error)?.error
+
+        if (error != null && _uiState.value.transactionsByDate.isEmpty()) {
+            _uiState.update { it.copy(isLoading = false, isRefreshing = false, error = error) }
+            return
+        }
+
+        if (transactions != null && account != null) {
+            val currencySymbol = formatCurrencySymbol(account.currency)
+            val grouped = transactions
+                .sortedByDescending { it.transactionDate }
+                .groupBy { it.transactionDate.toLocalDate() }
+
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    isRefreshing = false,
+                    transactionsByDate = grouped,
+                    currencySymbol = currencySymbol,
+                    error = null
+                )
+            }
+        }
+    }
+
 
     fun onStartDatePickerOpen() =
         _uiState.update { it.copy(datePickerType = DatePickerDialogType.START_DATE) }
@@ -103,43 +152,8 @@ class HistoryViewModel @AssistedInject constructor(
     fun loadHistory(isInitialLoad: Boolean = false) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = isInitialLoad, error = null) }
-
-            val accountResultDeferred = async { getMainAccount() }
-            val historyResultDeferred = async {
-                getHistory(
-                    startDate = _uiState.value.startDate,
-                    endDate = _uiState.value.endDate,
-                    filterType = filterType
-                )
-            }
-
-            val accountResult = accountResultDeferred.await()
-            val historyResult = historyResultDeferred.await()
-
-            val error = (accountResult as? Result.Error)?.error
-                ?: (historyResult as? Result.Error)?.error
-
-            if (error != null) {
-                _uiState.update { it.copy(isLoading = false, error = error) }
-                return@launch
-            }
-
-            val account = (accountResult as Result.Success).data
-            val transactions = (historyResult as Result.Success).data
-
-            val currencySymbol = formatCurrencySymbol(account.currency)
-
-            val grouped = transactions
-                .sortedByDescending { it.transactionDate }
-                .groupBy { it.transactionDate.toLocalDate() }
-
-            _uiState.update {
-                it.copy(
-                    transactionsByDate = grouped,
-                    currencySymbol = currencySymbol,
-                    isLoading = false
-                )
-            }
+            refreshTransactions(_uiState.value.startDate, _uiState.value.endDate)
+            _uiState.update { it.copy(isLoading = false) }
         }
     }
 }

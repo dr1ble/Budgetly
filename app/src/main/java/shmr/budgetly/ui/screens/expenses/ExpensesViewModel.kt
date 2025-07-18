@@ -2,32 +2,37 @@ package shmr.budgetly.ui.screens.expenses
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import shmr.budgetly.domain.entity.Account
+import shmr.budgetly.domain.entity.Transaction
 import shmr.budgetly.domain.events.AppEvent
 import shmr.budgetly.domain.events.AppEventBus
 import shmr.budgetly.domain.usecase.GetExpenseTransactionsUseCase
 import shmr.budgetly.domain.usecase.GetMainAccountUseCase
+import shmr.budgetly.domain.usecase.RefreshTransactionsUseCase
 import shmr.budgetly.domain.util.Result
 import shmr.budgetly.ui.util.formatAmount
 import shmr.budgetly.ui.util.formatCurrencySymbol
 import java.math.BigDecimal
+import java.time.LocalDate
 import javax.inject.Inject
 
 /**
  * ViewModel для экрана "Расходы".
  * Отвечает за:
- * 1. Загрузку списка транзакций-расходов за текущий месяц через [GetExpenseTransactionsUseCase].
- * 2. Управление состоянием UI ([ExpensesUiState]), включая флаги для первоначальной загрузки и pull-to-refresh.
- * 3. Расчет и форматирование общей суммы расходов.
+ * 1. Загрузку и подписку на обновления списка транзакций-расходов и данных счета.
+ * 2. Управление состоянием UI ([ExpensesUiState]).
+ * 3. Реакцию на глобальные события, например, обновление счета.
  */
-
 class ExpensesViewModel @Inject constructor(
     private val getExpenseTransactions: GetExpenseTransactionsUseCase,
     private val getMainAccount: GetMainAccountUseCase,
+    private val refreshTransactions: RefreshTransactionsUseCase,
     private val appEventBus: AppEventBus
 ) : ViewModel() {
 
@@ -35,6 +40,15 @@ class ExpensesViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            combine(
+                getExpenseTransactions(),
+                getMainAccount()
+            ) { transactionsResult, accountResult ->
+                processResults(transactionsResult, accountResult)
+            }.collect()
+        }
+
         loadExpenses(isInitialLoad = true)
         observeAccountUpdates()
     }
@@ -43,65 +57,66 @@ class ExpensesViewModel @Inject constructor(
         viewModelScope.launch {
             appEventBus.events.collect { event ->
                 if (event is AppEvent.AccountUpdated) {
-                    loadExpenses(isInitialLoad = true)
+                    loadExpenses(forceRefresh = true)
                 }
             }
         }
     }
 
-    /**
-     * Инициирует загрузку расходов.
-     * @param isInitialLoad true для первоначальной загрузки (показывает полноэкранный индикатор).
-     * @param forceRefresh true, чтобы принудительно обновить данные, даже если они уже есть.
-     */
     fun loadExpenses(isInitialLoad: Boolean = false, forceRefresh: Boolean = false) {
         val state = _uiState.value
+        if ((state.isLoading || state.isRefreshing) && !forceRefresh) return
 
-        if ((state.isLoading || state.isRefreshing) && !forceRefresh) {
-            return
-        }
+        val showLoading = isInitialLoad && state.transactions.isEmpty()
+        val showRefreshing = forceRefresh || (isInitialLoad && !showLoading)
 
         viewModelScope.launch {
-            _uiState.update { currentState ->
-                currentState.copy(
-                    isLoading = isInitialLoad && currentState.transactions.isEmpty(),
-                    isRefreshing = !isInitialLoad || currentState.transactions.isNotEmpty(),
+            _uiState.update {
+                it.copy(
+                    isLoading = showLoading,
+                    isRefreshing = showRefreshing,
                     error = null
                 )
             }
 
-            val accountResultDeferred = async { getMainAccount() }
-            val transactionsResultDeferred = async { getExpenseTransactions() }
+            val today = LocalDate.now()
+            val startOfMonth = today.withDayOfMonth(1)
+            refreshTransactions(startOfMonth, today)
+        }
+    }
 
-            val accountResult = accountResultDeferred.await()
-            val transactionsResult = transactionsResultDeferred.await()
+    private fun processResults(
+        transactionsResult: Result<List<Transaction>>,
+        accountResult: Result<Account>
+    ) {
+        val transactions = (transactionsResult as? Result.Success)?.data
+        val account = (accountResult as? Result.Success)?.data
+        val error = (transactionsResult as? Result.Error)?.error
+            ?: (accountResult as? Result.Error)?.error
 
-            val error = (accountResult as? Result.Error)?.error
-                ?: (transactionsResult as? Result.Error)?.error
-
-            if (error != null) {
-                _uiState.update { it.copy(isLoading = false, isRefreshing = false, error = error) }
-                return@launch
+        if (error != null && _uiState.value.transactions.isEmpty()) {
+            _uiState.update {
+                it.copy(isLoading = false, isRefreshing = false, error = error)
             }
+            return
+        }
 
-            val account = (accountResult as Result.Success).data
-            val transactions = (transactionsResult as Result.Success).data
-
+        if (transactions != null && account != null) {
             val currencySymbol = formatCurrencySymbol(account.currency)
             val total = transactions.sumOf {
                 try {
-                    BigDecimal(it.amount)
+                    BigDecimal(it.amount.replace(',', '.'))
                 } catch (_: NumberFormatException) {
                     BigDecimal.ZERO
                 }
             }
-
             _uiState.update {
                 it.copy(
                     isLoading = false,
                     isRefreshing = false,
                     transactions = transactions,
-                    totalAmount = formatAmount(total, currencySymbol)
+                    totalAmount = formatAmount(total, currencySymbol),
+                    error = null
                 )
             }
         }

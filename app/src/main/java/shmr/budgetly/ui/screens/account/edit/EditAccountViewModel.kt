@@ -1,10 +1,10 @@
 package shmr.budgetly.ui.screens.account.edit
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import shmr.budgetly.domain.events.AppEvent
@@ -30,7 +30,8 @@ class EditAccountViewModel @Inject constructor(
     fun loadInitialData() {
         viewModelScope.launch {
             _uiState.update { it.copy(isInitialLoading = true, error = null) }
-            when (val result = getMainAccount()) {
+            // Используем .first() т.к. нам нужно только одно значение для редактирования
+            when (val result = getMainAccount().first()) {
                 is Result.Success -> {
                     _uiState.update {
                         it.copy(
@@ -54,8 +55,6 @@ class EditAccountViewModel @Inject constructor(
     }
 
     fun onBalanceChange(newBalance: String) {
-        Log.d("EditAccountDebug", "onBalanceChange called with: '$newBalance'")
-        // Очищаем ввод от всего, кроме цифр и одной точки
         val cleanedBalance = newBalance.filter { it.isDigit() || it == '.' }
         _uiState.update { it.copy(balance = cleanedBalance) }
     }

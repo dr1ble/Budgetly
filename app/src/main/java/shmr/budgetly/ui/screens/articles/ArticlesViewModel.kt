@@ -26,34 +26,44 @@ class ArticlesViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
 
     init {
-        loadCategories(isInitialLoad = true)
+        loadCategories()
+    }
+
+    /**
+     * Публичный метод для повторной попытки загрузки данных с UI.
+     */
+    fun onRetry() {
+        loadCategories()
     }
 
     /**
      * Инициирует загрузку категорий.
      * @param isInitialLoad true для первоначальной загрузки, false для фонового обновления.
      */
-    fun loadCategories(isInitialLoad: Boolean) {
+    private fun loadCategories() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = isInitialLoad, error = null) }
-
-            when (val result = getAllCategories()) {
-                is Result.Success -> {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            allCategories = result.data
-                        )
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            getAllCategories().collect { result ->
+                when (result) {
+                    is Result.Success -> {
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                allCategories = result.data
+                            )
+                        }
                     }
-                }
-                is Result.Error -> {
-                    _uiState.update {
-                        it.copy(isLoading = false, error = result.error)
+
+                    is Result.Error -> {
+                        _uiState.update {
+                            it.copy(isLoading = false, error = result.error)
+                        }
                     }
                 }
             }
         }
     }
+
 
     /**
      * Обрабатывает изменение текста в поисковой строке.

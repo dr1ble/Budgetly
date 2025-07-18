@@ -7,9 +7,9 @@ import androidx.navigation.toRoute
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import shmr.budgetly.di.viewmodel.AssistedSavedStateViewModelFactory
@@ -58,7 +58,7 @@ class TransactionDetailsViewModel @AssistedInject constructor(
             )
         }
 
-        loadInitialData()
+        retryLoad()
     }
 
     /**
@@ -66,10 +66,6 @@ class TransactionDetailsViewModel @AssistedInject constructor(
      * Используется для кнопки "Повторить" в случае ошибки.
      */
     fun retryLoad() {
-        loadInitialData()
-    }
-
-    private fun loadInitialData() {
         if (_uiState.value.isEditMode) {
             loadTransactionDetails(transactionId!!)
         } else {
@@ -86,12 +82,8 @@ class TransactionDetailsViewModel @AssistedInject constructor(
     private fun loadDataForCreation() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
-            val accountResultDeferred = async { getMainAccountUseCase() }
-            val categoriesResultDeferred = async { getAllCategoriesUseCase() }
-
-            val accountResult = accountResultDeferred.await()
-            val categoriesResult = categoriesResultDeferred.await()
-
+            val accountResult = getMainAccountUseCase().first()
+            val categoriesResult = getAllCategoriesUseCase().first()
 
             val error = (accountResult as? Result.Error)?.error
                 ?: (categoriesResult as? Result.Error)?.error
@@ -120,36 +112,33 @@ class TransactionDetailsViewModel @AssistedInject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
-            val transactionResultDeferred = async { getTransactionUseCase(id) }
-            val accountResultDeferred = async { getMainAccountUseCase() }
-            val categoriesResultDeferred = async { getAllCategoriesUseCase() }
-
-            val transactionResult = transactionResultDeferred.await()
-            val accountResult = accountResultDeferred.await()
-            val categoriesResult = categoriesResultDeferred.await()
-
-            val error = (transactionResult as? Result.Error)?.error
-                ?: (accountResult as? Result.Error)?.error
-                ?: (categoriesResult as? Result.Error)?.error
-
-            if (error != null) {
-                _uiState.update { it.copy(isLoading = false, error = error) }
+            val transactionResult = getTransactionUseCase(id).first()
+            if (transactionResult is Result.Error) {
+                _uiState.update { it.copy(isLoading = false, error = transactionResult.error) }
                 return@launch
             }
 
             val transaction = (transactionResult as Result.Success).data
+            val allCategoriesResult = getAllCategoriesUseCase().first()
+            val accountResult = getMainAccountUseCase().first()
+
+            if (allCategoriesResult is Result.Error || accountResult is Result.Error) {
+                val error = (allCategoriesResult as? Result.Error)?.error
+                    ?: (accountResult as Result.Error).error
+                _uiState.update { it.copy(isLoading = false, error = error) }
+                return@launch
+            }
+
+            val allCategories = (allCategoriesResult as Result.Success).data
             val account = (accountResult as Result.Success).data
-            val allCategories = (categoriesResult as Result.Success).data
             val filteredCategories =
                 allCategories.filter { it.isIncome == transaction.category.isIncome }
-
-            val amountForEditing = transaction.amount.replace(',', '.')
-
 
             _uiState.update {
                 it.copy(
                     isLoading = false,
-                    amount = amountForEditing,
+                    error = null,
+                    amount = transaction.amount.replace(',', '.'),
                     selectedAccount = account,
                     selectedCategory = transaction.category,
                     date = transaction.transactionDate.toLocalDate(),
@@ -161,6 +150,7 @@ class TransactionDetailsViewModel @AssistedInject constructor(
             }
         }
     }
+
 
     fun onAmountChange(newAmount: String) {
         val sanitizedAmount =
