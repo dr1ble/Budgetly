@@ -63,7 +63,15 @@ fun HistoryScreen(
                 navigationIcon = { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) },
                 onNavigationClick = { navController.popBackStack() },
                 actions = {
-                    IconButton(onClick = { /* TODO */ }) {
+                    IconButton(onClick = {
+                        navController.navigate(
+                            Analyze(
+                                parentRoute = uiState.parentRoute,
+                                startDate = uiState.startDate.toEpochDay(),
+                                endDate = uiState.endDate.toEpochDay()
+                            )
+                        )
+                    }) {
                         Icon(
                             painter = painterResource(R.drawable.ic_history_analyze),
                             contentDescription = stringResource(R.string.analyze_action_description),

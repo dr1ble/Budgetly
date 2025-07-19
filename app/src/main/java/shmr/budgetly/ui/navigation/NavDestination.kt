@@ -94,5 +94,12 @@ data object Settings : BottomNavItem {
     override val label: Int = R.string.bottom_nav_label_settigns
 }
 
+@Serializable
+data class Analyze(
+    val parentRoute: String,
+    val startDate: Long,
+    val endDate: Long
+)
+
 /** Удобный список для итерации по элементам нижней навигации. */
 val bottomNavItems = listOf(Expenses, Incomes, Account, Articles, Settings)

@@ -109,5 +109,15 @@ fun AppNavGraph(
                 }
             )
         }
+
+        composable<Analyze> { navBackStackEntry ->
+            val component = rememberScreenComponent(navBackStackEntry) {
+                it.analyzeComponent().create()
+            }
+            AnalyzeScreen(
+                viewModel = viewModel(factory = component.viewModelFactory()),
+                navController = navController
+            )
+        }
     }
 }

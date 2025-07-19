@@ -5,6 +5,7 @@ import dagger.BindsInstance
 import dagger.Component
 import shmr.budgetly.BudgetlyApp
 import shmr.budgetly.di.features.account.AccountComponent
+import shmr.budgetly.di.features.analyze.AnalyzeComponent
 import shmr.budgetly.di.features.articles.ArticlesComponent
 import shmr.budgetly.di.features.editaccount.EditAccountComponent
 import shmr.budgetly.di.features.expenses.ExpensesComponent
@@ -47,4 +48,6 @@ interface AppComponent {
     fun historyComponent(): HistoryComponent.Factory
     fun editAccountComponent(): EditAccountComponent.Factory
     fun transactionDetailsComponent(): TransactionDetailsComponent.Factory
+
+    fun analyzeComponent(): AnalyzeComponent.Factory
 }
