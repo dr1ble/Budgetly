@@ -36,6 +36,7 @@ import shmr.budgetly.ui.components.BaseListItem
 import shmr.budgetly.ui.components.DatePickerModal
 import shmr.budgetly.ui.components.EmojiIcon
 import shmr.budgetly.ui.components.ErrorState
+import shmr.budgetly.ui.navigation.Analyze
 import shmr.budgetly.ui.navigation.TRANSACTION_SAVED_RESULT_KEY
 import shmr.budgetly.ui.navigation.TransactionDetails
 import shmr.budgetly.ui.theme.dimens
@@ -55,15 +56,25 @@ fun HistoryScreen(
     viewModel: HistoryViewModel,
     navController: NavController
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val topAppBarSetter = LocalTopAppBarSetter.current
-    LaunchedEffect(Unit) {
+
+    LaunchedEffect(uiState.parentRoute) {
         topAppBarSetter {
             AppTopBar(
                 title = stringResource(R.string.history_top_bar_title),
                 navigationIcon = { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) },
                 onNavigationClick = { navController.popBackStack() },
                 actions = {
-                    IconButton(onClick = { /* TODO */ }) {
+                    IconButton(onClick = {
+                        navController.navigate(
+                            Analyze(
+                                parentRoute = uiState.parentRoute,
+                                startDate = uiState.startDate.toEpochDay(),
+                                endDate = uiState.endDate.toEpochDay()
+                            )
+                        )
+                    }) {
                         Icon(
                             painter = painterResource(R.drawable.ic_history_analyze),
                             contentDescription = stringResource(R.string.analyze_action_description),
@@ -75,7 +86,6 @@ fun HistoryScreen(
         }
     }
 
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     LaunchedEffect(navBackStackEntry) {

@@ -46,7 +46,7 @@ fun ArticlesScreen(
         ScreenContent(
             uiState = uiState,
             onSearchQueryChanged = viewModel::onSearchQueryChanged,
-            onRetry = { viewModel.loadCategories(isInitialLoad = true) }
+            onRetry = viewModel::onRetry
         )
     }
 }

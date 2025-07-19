@@ -1,5 +1,6 @@
 package shmr.budgetly.domain.repository
 
+import kotlinx.coroutines.flow.Flow
 import shmr.budgetly.domain.entity.Category
 import shmr.budgetly.domain.util.Result
 
@@ -9,8 +10,8 @@ import shmr.budgetly.domain.util.Result
  */
 interface CategoryRepository {
     /**
-     * Получает список всех категорий.
-     * @return [Result] со списком [Category] в случае успеха или [DomainError] в случае ошибки.
+     * Получает список всех категорий в виде потока данных.
+     * @return [Flow] с [Result], содержащим список [Category] в случае успеха или ошибку.
      */
-    suspend fun getAllCategories(): Result<List<Category>>
+    fun getAllCategories(): Flow<Result<List<Category>>>
 }

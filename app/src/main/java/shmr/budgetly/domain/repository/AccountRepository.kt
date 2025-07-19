@@ -1,7 +1,7 @@
 package shmr.budgetly.domain.repository
 
+import kotlinx.coroutines.flow.Flow
 import shmr.budgetly.domain.entity.Account
-import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.domain.util.Result
 
 /**
@@ -10,10 +10,10 @@ import shmr.budgetly.domain.util.Result
  */
 interface AccountRepository {
     /**
-     * Получает основной счет пользователя.
-     * @return [Result] с [Account] в случае успеха или [DomainError] в случае ошибки.
+     * Получает основной счет пользователя в виде потока данных.
+     * @return [Flow] с [Result], содержащим [Account] в случае успеха или ошибку.
      */
-    suspend fun getMainAccount(): Result<Account>
+    fun getMainAccount(): Flow<Result<Account>>
 
     /**
      * Обновляет основной счет пользователя.
@@ -21,5 +21,8 @@ interface AccountRepository {
      */
     suspend fun updateAccount(name: String, balance: String, currency: String): Result<Account>
 
-
+    /**
+     * Запускает принудительную синхронизацию счета с сервером.
+     */
+    suspend fun refreshMainAccount()
 }

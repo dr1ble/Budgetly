@@ -1,24 +1,21 @@
 package shmr.budgetly.ui.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.toRoute
-import shmr.budgetly.ui.di.LocalViewModelFactory
+import shmr.budgetly.ui.di.rememberScreenComponent
 import shmr.budgetly.ui.screens.account.AccountScreen
 import shmr.budgetly.ui.screens.account.edit.EditAccountScreen
+import shmr.budgetly.ui.screens.analyze.AnalyzeScreen
 import shmr.budgetly.ui.screens.articles.ArticlesScreen
 import shmr.budgetly.ui.screens.expenses.ExpensesScreen
 import shmr.budgetly.ui.screens.history.HistoryScreen
-import shmr.budgetly.ui.screens.history.HistoryViewModel
 import shmr.budgetly.ui.screens.incomes.IncomesScreen
 import shmr.budgetly.ui.screens.settings.SettingsScreen
 import shmr.budgetly.ui.screens.transactiondetails.TransactionDetailsScreen
-import shmr.budgetly.ui.screens.transactiondetails.TransactionDetailsViewModel
 
 const val ACCOUNT_UPDATED_RESULT_KEY = "account_updated"
 const val TRANSACTION_SAVED_RESULT_KEY = "transaction_saved"
@@ -28,58 +25,66 @@ fun AppNavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    val viewModelFactory = LocalViewModelFactory.current
-
     NavHost(
         navController = navController,
         startDestination = Expenses,
         modifier = modifier
     ) {
-        composable<Expenses> {
+        composable<Expenses> { navBackStackEntry ->
+            val component =
+                rememberScreenComponent(navBackStackEntry) { it.expensesComponent().create() }
             ExpensesScreen(
-                viewModel = viewModel(factory = viewModelFactory),
+                viewModel = viewModel(factory = component.viewModelFactory()),
                 navController = navController
             )
         }
-        composable<Incomes> {
+        composable<Incomes> { navBackStackEntry ->
+            val component =
+                rememberScreenComponent(navBackStackEntry) { it.incomesComponent().create() }
             IncomesScreen(
-                viewModel = viewModel(factory = viewModelFactory),
+                viewModel = viewModel(factory = component.viewModelFactory()),
                 navController = navController
             )
         }
-        composable<Account> {
+        composable<Account> { navBackStackEntry ->
+            val component =
+                rememberScreenComponent(navBackStackEntry) { it.accountComponent().create() }
             AccountScreen(
                 navController = navController,
-                viewModel = viewModel(factory = viewModelFactory)
+                viewModel = viewModel(factory = component.viewModelFactory())
             )
         }
-        composable<Articles> {
+        composable<Articles> { navBackStackEntry ->
+            val component =
+                rememberScreenComponent(navBackStackEntry) { it.articlesComponent().create() }
             ArticlesScreen(
-                viewModel = viewModel(factory = viewModelFactory),
+                viewModel = viewModel(factory = component.viewModelFactory()),
                 navController = navController
             )
         }
-        composable<Settings> {
+        composable<Settings> { navBackStackEntry ->
+            val component =
+                rememberScreenComponent(navBackStackEntry) { it.settingsComponent().create() }
             SettingsScreen(
-                viewModel = viewModel(factory = viewModelFactory),
+                viewModel = viewModel(factory = component.viewModelFactory()),
                 navController = navController
             )
         }
-        composable<History> { navBackStackEntry ->
-            val historyViewModel: HistoryViewModel = viewModel(factory = viewModelFactory)
-            val navArgs: History = navBackStackEntry.toRoute()
+        composable<History>(
+        ) { navBackStackEntry ->
+            val component =
+                rememberScreenComponent(navBackStackEntry) { it.historyComponent().create() }
 
-            LaunchedEffect(Unit) {
-                historyViewModel.init(navArgs)
-            }
             HistoryScreen(
-                viewModel = historyViewModel,
+                viewModel = viewModel(factory = component.viewModelFactory()),
                 navController = navController
             )
         }
-        composable<EditAccount> {
+        composable<EditAccount> { navBackStackEntry ->
+            val component =
+                rememberScreenComponent(navBackStackEntry) { it.editAccountComponent().create() }
             EditAccountScreen(
-                viewModel = viewModel(factory = viewModelFactory),
+                viewModel = viewModel(factory = component.viewModelFactory()),
                 navController = navController,
                 onSaveSuccess = {
                     navController.previousBackStackEntry
@@ -90,15 +95,12 @@ fun AppNavGraph(
             )
         }
         composable<TransactionDetails> { navBackStackEntry ->
-            val viewModel: TransactionDetailsViewModel = viewModel(factory = viewModelFactory)
-            val navArgs: TransactionDetails = navBackStackEntry.toRoute()
-
-            LaunchedEffect(Unit) {
-                viewModel.init(navArgs)
+            val component = rememberScreenComponent(navBackStackEntry) {
+                it.transactionDetailsComponent().create()
             }
 
             TransactionDetailsScreen(
-                viewModel = viewModel,
+                viewModel = viewModel(factory = component.viewModelFactory()),
                 navController = navController,
                 onSaveSuccess = {
                     navController.previousBackStackEntry
@@ -106,6 +108,16 @@ fun AppNavGraph(
                         ?.set(TRANSACTION_SAVED_RESULT_KEY, true)
                     navController.popBackStack()
                 }
+            )
+        }
+
+        composable<Analyze> { navBackStackEntry ->
+            val component = rememberScreenComponent(navBackStackEntry) {
+                it.analyzeComponent().create()
+            }
+            AnalyzeScreen(
+                viewModel = viewModel(factory = component.viewModelFactory()),
+                navController = navController
             )
         }
     }

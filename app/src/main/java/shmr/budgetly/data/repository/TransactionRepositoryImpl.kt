@@ -1,55 +1,114 @@
 package shmr.budgetly.data.repository
 
-import shmr.budgetly.data.mapper.toDomainModel
-import shmr.budgetly.data.network.dto.TransactionRequestDto
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import shmr.budgetly.data.local.model.toDomainModel
+import shmr.budgetly.data.local.model.toEntity
+import shmr.budgetly.data.mapper.toEntity
+import shmr.budgetly.data.source.local.category.CategoryLocalDataSource
+import shmr.budgetly.data.source.local.transaction.TransactionLocalDataSource
 import shmr.budgetly.data.source.remote.transaction.TransactionRemoteDataSource
 import shmr.budgetly.data.util.safeApiCall
 import shmr.budgetly.di.scope.AppScope
+import shmr.budgetly.domain.entity.Category
 import shmr.budgetly.domain.entity.Transaction
 import shmr.budgetly.domain.repository.AccountRepository
 import shmr.budgetly.domain.repository.TransactionRepository
 import shmr.budgetly.domain.util.Result
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 import javax.inject.Inject
 
-/**
- * Реализация [TransactionRepository], отвечающая за получение данных о транзакциях.
- * Зависит от [AccountRepository] для получения ID текущего счета перед запросом транзакций.
- */
 @AppScope
 class TransactionRepositoryImpl @Inject constructor(
     private val remoteDataSource: TransactionRemoteDataSource,
+    private val localDataSource: TransactionLocalDataSource,
+    private val categoryLocalDataSource: CategoryLocalDataSource,
     private val accountRepository: AccountRepository
 ) : TransactionRepository {
 
     private val isoLocalDateFormatter = DateTimeFormatter.ISO_LOCAL_DATE
 
-    // Кастомный форматер, который гарантирует формат "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-    private val apiDateTimeFormatter =
-        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
-
-    override suspend fun getTransactions(
+    override fun getTransactions(
         startDate: LocalDate,
         endDate: LocalDate
-    ): Result<List<Transaction>> {
-        return when (val accountResult = accountRepository.getMainAccount()) {
-            is Result.Success -> fetchTransactionsForAccount(
-                accountResult.data.id,
-                startDate,
-                endDate
-            )
-
-            is Result.Error -> Result.Error(accountResult.error)
+    ): Flow<Result<List<Transaction>>> {
+        return localDataSource.getTransactionsForPeriod(
+            startDate.format(isoLocalDateFormatter),
+            endDate.format(isoLocalDateFormatter)
+        ).map { list ->
+            Result.Success(list.map { it.transaction.toDomainModel(it.category.toDomainModel()) })
         }
     }
 
-    override suspend fun getTransactionById(id: Int): Result<Transaction> {
-        return safeApiCall {
-            remoteDataSource.getTransactionById(id).toDomainModel()
+    override suspend fun refreshTransactions(
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): Result<Unit> {
+        accountRepository.refreshMainAccount()
+
+        val accountResult = accountRepository.getMainAccount().first()
+        if (accountResult is Result.Error) {
+            return Result.Error(accountResult.error)
+        }
+        val accountId = (accountResult as Result.Success).data.id
+
+        val remoteResult = safeApiCall {
+            remoteDataSource.getTransactionsForPeriod(
+                accountId,
+                startDate.format(isoLocalDateFormatter),
+                endDate.format(isoLocalDateFormatter)
+            )
+        }
+
+        return when (remoteResult) {
+            is Result.Success -> {
+                val transactionsFromNetwork = remoteResult.data
+
+                // Получаем ID всех локально измененных транзакций
+                val dirtyTransactionIds =
+                    localDataSource.getDirtyTransactions().map { it.id }.toSet()
+
+                // Фильтруем список с сервера: убираем из него те транзакции, которые были изменены локально
+                val transactionsToUpsert = transactionsFromNetwork.filter {
+                    !dirtyTransactionIds.contains(it.id)
+                }
+
+                // Извлекаем все уникальные категории из отфильтрованного списка
+                val categoriesFromNetwork =
+                    transactionsToUpsert.map { it.category.toEntity() }.distinctBy { it.id }
+
+                if (categoriesFromNetwork.isNotEmpty()) {
+                    categoryLocalDataSource.upsertAll(categoriesFromNetwork)
+                }
+
+                if (transactionsToUpsert.isNotEmpty()) {
+                    localDataSource.upsertTransactions(transactionsToUpsert.map {
+                        it.toEntity(
+                            isDirty = false
+                        )
+                    })
+                }
+
+                Result.Success(Unit)
+            }
+
+            is Result.Error -> {
+                Result.Error(remoteResult.error)
+            }
+        }
+    }
+
+
+    override fun getTransactionById(id: Int): Flow<Result<Transaction>> {
+        return localDataSource.getTransactionById(id).map { entity ->
+            if (entity != null) {
+                Result.Success(entity.transaction.toDomainModel(entity.category.toDomainModel()))
+            } else {
+                Result.Error(shmr.budgetly.domain.util.DomainError.Unknown(Exception("Transaction not found")))
+            }
         }
     }
 
@@ -60,24 +119,26 @@ class TransactionRepositoryImpl @Inject constructor(
         transactionDate: LocalDateTime,
         comment: String
     ): Result<Transaction> {
-        val request = TransactionRequestDto(
-            accountId = accountId,
-            categoryId = categoryId,
+        val accountResult = accountRepository.getMainAccount().first()
+        if (accountResult is Result.Error) {
+            return Result.Error(accountResult.error)
+        }
+        val account = (accountResult as Result.Success).data
+
+        val tempId = (System.currentTimeMillis() / 1000).toInt() * -1
+
+        val transaction = Transaction(
+            id = tempId,
+            category = Category(id = categoryId, name = "", emoji = "", isIncome = false),
             amount = amount,
-            transactionDate = transactionDate.atZone(ZoneOffset.UTC).format(apiDateTimeFormatter),
+            currency = account.currency,
+            transactionDate = transactionDate,
             comment = comment
         )
-        val createResult = safeApiCall {
-            remoteDataSource.createTransaction(request)
-        }
+        val entity = transaction.toEntity(isDirty = true).copy(accountId = account.id)
 
-        return when (createResult) {
-            is Result.Success -> {
-                getTransactionById(createResult.data.id)
-            }
-
-            is Result.Error -> createResult
-        }
+        localDataSource.upsertTransaction(entity)
+        return getTransactionById(tempId).first()
     }
 
     override suspend fun updateTransaction(
@@ -88,35 +149,32 @@ class TransactionRepositoryImpl @Inject constructor(
         transactionDate: LocalDateTime,
         comment: String
     ): Result<Transaction> {
-        val request = TransactionRequestDto(
-            accountId = accountId,
-            categoryId = categoryId,
+        val accountResult = accountRepository.getMainAccount().first()
+        if (accountResult is Result.Error) {
+            return Result.Error(accountResult.error)
+        }
+        val account = (accountResult as Result.Success).data
+
+        val transaction = Transaction(
+            id = id,
+            category = Category(id = categoryId, name = "", emoji = "", isIncome = false),
             amount = amount,
-            transactionDate = transactionDate.atZone(ZoneOffset.UTC).format(apiDateTimeFormatter),
+            currency = account.currency,
+            transactionDate = transactionDate,
             comment = comment
         )
-        return safeApiCall {
-            remoteDataSource.updateTransaction(id, request).toDomainModel()
-        }
+        val entity = transaction.toEntity(isDirty = true).copy(accountId = account.id)
+        localDataSource.upsertTransaction(entity)
+        return getTransactionById(id).first()
     }
+
 
     override suspend fun deleteTransaction(id: Int): Result<Unit> {
-        return safeApiCall {
-            remoteDataSource.deleteTransaction(id)
+        if (id < 0) {
+            localDataSource.deleteById(id)
+        } else {
+            localDataSource.markAsDeleted(id, System.currentTimeMillis())
         }
-    }
-
-    private suspend fun fetchTransactionsForAccount(
-        accountId: Int,
-        startDate: LocalDate,
-        endDate: LocalDate
-    ): Result<List<Transaction>> {
-        return safeApiCall {
-            remoteDataSource.getTransactionsForPeriod(
-                accountId = accountId,
-                startDate = startDate.format(isoLocalDateFormatter),
-                endDate = endDate.format(isoLocalDateFormatter)
-            ).map { it.toDomainModel() }
-        }
+        return Result.Success(Unit)
     }
 }

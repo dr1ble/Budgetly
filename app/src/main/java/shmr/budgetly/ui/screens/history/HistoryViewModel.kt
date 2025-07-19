@@ -1,15 +1,25 @@
 package shmr.budgetly.ui.screens.history
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.async
+import androidx.navigation.toRoute
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import shmr.budgetly.di.viewmodel.AssistedSavedStateViewModelFactory
+import shmr.budgetly.domain.entity.Account
+import shmr.budgetly.domain.entity.Transaction
 import shmr.budgetly.domain.model.TransactionFilterType
 import shmr.budgetly.domain.usecase.GetHistoryUseCase
 import shmr.budgetly.domain.usecase.GetMainAccountUseCase
+import shmr.budgetly.domain.usecase.RefreshTransactionsUseCase
 import shmr.budgetly.domain.util.Result
 import shmr.budgetly.ui.navigation.Expenses
 import shmr.budgetly.ui.navigation.History
@@ -18,8 +28,6 @@ import shmr.budgetly.ui.util.DatePickerDialogType
 import shmr.budgetly.ui.util.formatCurrencySymbol
 import java.time.Instant
 import java.time.ZoneId
-import javax.inject.Inject
-
 
 /**
  * ViewModel для экрана "История".
@@ -29,33 +37,79 @@ import javax.inject.Inject
  * 3. Обработку выбора дат в DatePicker'е.
  * 4. Управление состоянием UI ([HistoryUiState]).
  */
-
-class HistoryViewModel @Inject constructor(
+class HistoryViewModel @AssistedInject constructor(
     private val getHistory: GetHistoryUseCase,
     private val getMainAccount: GetMainAccountUseCase,
+    private val refreshTransactions: RefreshTransactionsUseCase,
+    @Assisted private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HistoryUiState())
     val uiState = _uiState.asStateFlow()
 
-    private lateinit var filterType: TransactionFilterType
+    private val filterType: TransactionFilterType
 
-    /**
-     * Инициализирует ViewModel с необходимыми аргументами навигации.
-     * Этот метод должен быть вызван сразу после создания ViewModel.
-     */
-    fun init(navArgs: History) {
-        // Если ViewModel уже инициализирована, ничего не делаем
-        if (this::filterType.isInitialized) return
-
+    init {
+        val navArgs: History = savedStateHandle.toRoute()
         this.filterType = when (navArgs.parentRoute) {
             Expenses::class.qualifiedName -> TransactionFilterType.EXPENSE
             Incomes::class.qualifiedName -> TransactionFilterType.INCOME
             else -> TransactionFilterType.ALL
         }
         _uiState.update { it.copy(parentRoute = navArgs.parentRoute) }
+
+        viewModelScope.launch {
+
+            _uiState.flatMapLatest { state ->
+                combine(
+                    getHistory(state.startDate, state.endDate, filterType),
+                    getMainAccount()
+                ) { transactionsResult, accountResult ->
+                    processResults(transactionsResult, accountResult)
+                }
+            }.collect {}
+        }
+
         loadHistory(isInitialLoad = true)
     }
+
+    @AssistedFactory
+    interface Factory : AssistedSavedStateViewModelFactory<HistoryViewModel> {
+        override fun create(savedStateHandle: SavedStateHandle): HistoryViewModel
+    }
+
+    private fun processResults(
+        transactionsResult: Result<List<Transaction>>,
+        accountResult: Result<Account>
+    ) {
+        val transactions = (transactionsResult as? Result.Success)?.data
+        val account = (accountResult as? Result.Success)?.data
+        val error = (transactionsResult as? Result.Error)?.error
+            ?: (accountResult as? Result.Error)?.error
+
+        if (error != null && _uiState.value.transactionsByDate.isEmpty()) {
+            _uiState.update { it.copy(isLoading = false, isRefreshing = false, error = error) }
+            return
+        }
+
+        if (transactions != null && account != null) {
+            val currencySymbol = formatCurrencySymbol(account.currency)
+            val grouped = transactions
+                .sortedByDescending { it.transactionDate }
+                .groupBy { it.transactionDate.toLocalDate() }
+
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    isRefreshing = false,
+                    transactionsByDate = grouped,
+                    currencySymbol = currencySymbol,
+                    error = null
+                )
+            }
+        }
+    }
+
 
     fun onStartDatePickerOpen() =
         _uiState.update { it.copy(datePickerType = DatePickerDialogType.START_DATE) }
@@ -96,49 +150,10 @@ class HistoryViewModel @Inject constructor(
     }
 
     fun loadHistory(isInitialLoad: Boolean = false) {
-        if (!this::filterType.isInitialized) {
-            return
-        }
-
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = isInitialLoad, error = null) }
-
-            val accountResultDeferred = async { getMainAccount() }
-            val historyResultDeferred = async {
-                getHistory(
-                    startDate = _uiState.value.startDate,
-                    endDate = _uiState.value.endDate,
-                    filterType = filterType
-                )
-            }
-
-            val accountResult = accountResultDeferred.await()
-            val historyResult = historyResultDeferred.await()
-
-            val error = (accountResult as? Result.Error)?.error
-                ?: (historyResult as? Result.Error)?.error
-
-            if (error != null) {
-                _uiState.update { it.copy(isLoading = false, error = error) }
-                return@launch
-            }
-
-            val account = (accountResult as Result.Success).data
-            val transactions = (historyResult as Result.Success).data
-
-            val currencySymbol = formatCurrencySymbol(account.currency)
-
-            val grouped = transactions
-                .sortedByDescending { it.transactionDate }
-                .groupBy { it.transactionDate.toLocalDate() }
-
-            _uiState.update {
-                it.copy(
-                    transactionsByDate = grouped,
-                    currencySymbol = currencySymbol,
-                    isLoading = false
-                )
-            }
+            refreshTransactions(_uiState.value.startDate, _uiState.value.endDate)
+            _uiState.update { it.copy(isLoading = false) }
         }
     }
 }

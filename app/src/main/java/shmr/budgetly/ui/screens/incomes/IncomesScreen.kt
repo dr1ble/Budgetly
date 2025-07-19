@@ -77,14 +77,13 @@ fun IncomesScreen(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     LaunchedEffect(navBackStackEntry) {
         if (navBackStackEntry?.savedStateHandle?.remove<Boolean>(TRANSACTION_SAVED_RESULT_KEY) == true) {
-            viewModel.loadIncomes(isInitialLoad = true)
+            viewModel.loadIncomes(forceRefresh = true)
         }
     }
 
-
     val pullRefreshState = rememberPullRefreshState(
         refreshing = uiState.isRefreshing,
-        onRefresh = { viewModel.loadIncomes() }
+        onRefresh = { viewModel.loadIncomes(forceRefresh = true) }
     )
 
     Box(modifier = modifier

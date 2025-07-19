@@ -1,5 +1,7 @@
 package shmr.budgetly.domain.usecase
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import shmr.budgetly.domain.entity.Transaction
 import shmr.budgetly.domain.model.TransactionFilterType
 import shmr.budgetly.domain.repository.TransactionRepository
@@ -20,14 +22,16 @@ class GetHistoryUseCase @Inject constructor(
      * @param endDate Конечная дата периода.
      * @param filterType Тип транзакций для фильтрации.
      */
-    suspend operator fun invoke(
+    operator fun invoke(
         startDate: LocalDate,
         endDate: LocalDate,
         filterType: TransactionFilterType
-    ): Result<List<Transaction>> {
-        return when (val result = repository.getTransactions(startDate, endDate)) {
-            is Result.Success -> Result.Success(filterTransactions(result.data, filterType))
-            is Result.Error -> result
+    ): Flow<Result<List<Transaction>>> {
+        return repository.getTransactions(startDate, endDate).map { result ->
+            when (result) {
+                is Result.Success -> Result.Success(filterTransactions(result.data, filterType))
+                is Result.Error -> result
+            }
         }
     }
 

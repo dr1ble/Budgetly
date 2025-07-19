@@ -11,7 +11,7 @@ typealias SettingId = Int
  * Тип элемента настроек, определяющий его поведение в UI.
  */
 enum class SettingType {
-    THEME_SWITCH, NAVIGATION
+    THEME_SWITCH, NAVIGATION, SYNC_INFO
 }
 
 /**
@@ -31,5 +31,6 @@ data class SettingItem(
  */
 data class SettingsUiState(
     val settingsItems: List<SettingItem> = emptyList(),
-    val isDarkThemeEnabled: Boolean = false // В будущем будет браться из SharedPreferences
+    val isDarkThemeEnabled: Boolean = false,
+    val lastSyncTime: String = "Загрузка..."
 )

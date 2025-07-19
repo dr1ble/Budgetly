@@ -1,6 +1,13 @@
 package shmr.budgetly.data.repository
 
-import shmr.budgetly.data.mapper.toDomainModel
+import android.util.Log
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
+import shmr.budgetly.data.local.model.CategoryEntity
+import shmr.budgetly.data.local.model.toDomainModel
+import shmr.budgetly.data.mapper.toEntity
+import shmr.budgetly.data.source.local.category.CategoryLocalDataSource
 import shmr.budgetly.data.source.remote.category.CategoryRemoteDataSource
 import shmr.budgetly.data.util.safeApiCall
 import shmr.budgetly.di.scope.AppScope
@@ -9,18 +16,27 @@ import shmr.budgetly.domain.repository.CategoryRepository
 import shmr.budgetly.domain.util.Result
 import javax.inject.Inject
 
-/**
- * Реализация [CategoryRepository], отвечающая за получение данных о категориях.
- * Делегирует сетевые вызовы удаленному источнику данных и преобразует DTO в доменные сущности.
- */
 @AppScope
 class CategoryRepositoryImpl @Inject constructor(
-    private val remoteDataSource: CategoryRemoteDataSource // <-- ИЗМЕНЕНИЕ
+    private val remoteDataSource: CategoryRemoteDataSource,
+    private val localDataSource: CategoryLocalDataSource
 ) : CategoryRepository {
 
-    override suspend fun getAllCategories(): Result<List<Category>> {
-        return safeApiCall {
-            remoteDataSource.getAllCategories().map { it.toDomainModel() }
-        }
+    override fun getAllCategories(): Flow<Result<List<Category>>> {
+        return localDataSource.getAllCategories()
+            .map<List<CategoryEntity>, Result<List<Category>>> { entities ->
+                Result.Success(entities.map { it.toDomainModel() })
+            }
+            .onStart {
+                val remoteResult = safeApiCall { remoteDataSource.getAllCategories() }
+                if (remoteResult is Result.Success) {
+                    localDataSource.upsertAll(remoteResult.data.map { it.toEntity() })
+                } else if (remoteResult is Result.Error) {
+                    Log.e(
+                        "CategoryRepository",
+                        "Failed to refresh categories: ${remoteResult.error}"
+                    )
+                }
+            }
     }
 }

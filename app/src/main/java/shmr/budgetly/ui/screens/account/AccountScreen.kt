@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.ExperimentalMaterialApi
@@ -51,7 +53,7 @@ fun AccountScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val topAppBarSetter = LocalTopAppBarSetter.current
 
-    LaunchedEffect(uiState) {
+    LaunchedEffect(uiState.isRefreshing, uiState.account) {
         topAppBarSetter {
             val title = if (uiState.isLoading) "" else {
                 uiState.account?.name ?: stringResource(R.string.account_top_bar_title)
@@ -60,7 +62,15 @@ fun AccountScreen(
             AppTopBar(
                 title = title,
                 actions = {
-                    if (uiState.account != null && !uiState.isLoading) {
+                    if (uiState.isRefreshing) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                                .size(24.dp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            strokeWidth = 2.dp
+                        )
+                    } else if (uiState.account != null) {
                         IconButton(onClick = { navController.navigate(EditAccount) }) {
                             Icon(
                                 painter = painterResource(R.drawable.ic_top_bar_edit),
@@ -77,17 +87,17 @@ fun AccountScreen(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     LaunchedEffect(navBackStackEntry) {
         if (navBackStackEntry?.savedStateHandle?.remove<Boolean>(ACCOUNT_UPDATED_RESULT_KEY) == true) {
-            viewModel.loadAccount(isInitialLoad = true)
+            viewModel.loadAccount()
         }
     }
 
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         when {
-            uiState.isLoading && uiState.account == null -> {
+            uiState.isLoading -> {
                 CircularProgressIndicator()
             }
 
-            uiState.error != null -> {
+            uiState.error != null && uiState.account == null -> {
                 val currentError = uiState.error!!
                 val errorMessage = when (currentError) {
                     DomainError.NoInternet -> stringResource(R.string.error_no_internet)

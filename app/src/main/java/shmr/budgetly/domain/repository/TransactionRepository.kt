@@ -1,7 +1,7 @@
 package shmr.budgetly.domain.repository
 
+import kotlinx.coroutines.flow.Flow
 import shmr.budgetly.domain.entity.Transaction
-import shmr.budgetly.domain.util.DomainError
 import shmr.budgetly.domain.util.Result
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -12,17 +12,17 @@ import java.time.LocalDateTime
  */
 interface TransactionRepository {
     /**
-     * Получает список транзакций за указанный период.
+     * Получает список транзакций за указанный период в виде потока данных.
      * @param startDate Начальная дата периода.
      * @param endDate Конечная дата периода.
-     * @return [Result] со списком [Transaction] в случае успеха или [DomainError] в случае ошибки.
+     * @return [Flow] с [Result], содержащим список [Transaction] в случае успеха или ошибку.
      */
-    suspend fun getTransactions(startDate: LocalDate, endDate: LocalDate): Result<List<Transaction>>
+    fun getTransactions(startDate: LocalDate, endDate: LocalDate): Flow<Result<List<Transaction>>>
 
     /**
-     * Получает одну транзакцию по ее ID.
+     * Получает одну транзакцию по ее ID в виде потока данных.
      */
-    suspend fun getTransactionById(id: Int): Result<Transaction>
+    fun getTransactionById(id: Int): Flow<Result<Transaction>>
 
     /**
      * Создает новую транзакцию.
@@ -51,4 +51,10 @@ interface TransactionRepository {
      * Удаляет транзакцию.
      */
     suspend fun deleteTransaction(id: Int): Result<Unit>
+
+    /**
+     * Запускает принудительную синхронизацию транзакций с сервером.
+     * @return [Result.Success] в случае успеха, иначе [Result.Error].
+     */
+    suspend fun refreshTransactions(startDate: LocalDate, endDate: LocalDate): Result<Unit>
 }

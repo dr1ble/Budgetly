@@ -4,12 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -57,7 +59,27 @@ fun SettingsScreen(
                 SettingType.NAVIGATION -> {
                     BaseListItem(
                         title = stringResource(id = item.titleRes),
-                        onClick = { /* TODO: Implement navigation to sub-settings */ }
+                        trail = {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_list_item_settings_arrow_right),
+                                contentDescription = null,
+                            )
+                        },
+                        onClick = { }
+                    )
+                }
+
+                SettingType.SYNC_INFO -> {
+                    BaseListItem(
+                        title = stringResource(id = item.titleRes),
+                        subtitle = uiState.lastSyncTime,
+                        trail = {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_list_item_settings_arrow_right),
+                                contentDescription = null,
+                            )
+                        },
+                        onClick = { }
                     )
                 }
             }

@@ -73,5 +73,6 @@
     <string name="transaction_details_delete_income_button">Удалить доход</string>
     <string name="transaction_details_delete_expense_button">Удалить расход</string>
     <string name="transaction_details_edit_cancel_button">Отмена добавления/редактирования операции</string>
+    <string name="analyze_no_data">Нет данных</string>
 
 </resources>
