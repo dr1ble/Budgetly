@@ -11,7 +11,7 @@ data class HistoryUiState(
     val endDate: LocalDate = LocalDate.now(),
     val currencySymbol: String = "",
     val isLoading: Boolean = false,
-    val isRefreshing: Boolean = false, // <-- ИЗМЕНЕНИЕ
+    val isRefreshing: Boolean = false,
     val datePickerType: DatePickerDialogType? = null,
     val error: DomainError? = null,
     val parentRoute: String = ""

@@ -54,14 +54,11 @@ fun truncateWithEllipsis(text: String, maxLength: Int = 15): String {
     val lineBreakIndex = text.indexOf('\n')
 
     if (lineBreakIndex != -1) {
-        // Найден перенос строки
         val firstLine = text.substring(0, lineBreakIndex)
-        // Если после переноса строки есть еще символы (не только пробелы)
         val hasMoreText = text.substring(lineBreakIndex + 1).isNotBlank()
         return if (hasMoreText) "$firstLine..." else firstLine
     }
 
-    // Если переносов нет, работает старая логика
     if (text.length <= maxLength) {
         return text
     }

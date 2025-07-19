@@ -32,7 +32,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import shmr.budgetly.R
 import shmr.budgetly.domain.model.AnalysisItem
-import shmr.budgetly.domain.model.AnalysisResult
 import shmr.budgetly.ui.components.AmountText
 import shmr.budgetly.ui.components.AppTopBar
 import shmr.budgetly.ui.components.BaseListItem
@@ -44,6 +43,7 @@ import shmr.budgetly.ui.util.HistoryDateFormatter
 import shmr.budgetly.ui.util.LocalTopAppBarSetter
 import shmr.budgetly.ui.util.formatAmount
 import shmr.budgetly.ui.util.getErrorMessage
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Locale
@@ -91,15 +91,7 @@ fun AnalyzeScreen(
                 )
             }
 
-            uiState.noData -> {
-                Text(
-                    text = stringResource(R.string.analyze_no_data),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            uiState.analysisResult != null -> {
+            else -> {
                 AnalysisContent(
                     uiState = uiState,
                     onStartDateClick = viewModel::onStartDatePickerOpen,
@@ -117,6 +109,8 @@ private fun AnalysisContent(
     onStartDateClick: () -> Unit,
     onEndDateClick: () -> Unit
 ) {
+    val analysisResult = uiState.analysisResult
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -126,19 +120,36 @@ private fun AnalysisContent(
             Header(
                 startDate = uiState.startDate,
                 endDate = uiState.endDate,
-                totalAmount = formatAmount(
-                    uiState.analysisResult!!.totalAmount,
-                    uiState.analysisResult.currencySymbol
-                ),
+                totalAmount = analysisResult?.let {
+                    formatAmount(it.totalAmount, it.currencySymbol)
+                } ?: formatAmount(BigDecimal.ZERO, ""),
                 onStartDateClick = onStartDateClick,
                 onEndDateClick = onEndDateClick,
             )
         }
-        items(
-            items = uiState.analysisResult!!.items,
-            key = { it.category.id }
-        ) { item ->
-            AnalysisListItem(item = item, currencySymbol = uiState.analysisResult.currencySymbol)
+
+        if (analysisResult != null) {
+            items(
+                items = analysisResult.items,
+                key = { it.category.id }
+            ) { item ->
+                AnalysisListItem(item = item, currencySymbol = analysisResult.currencySymbol)
+            }
+        } else {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillParentMaxSize()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.analyze_no_data),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
     }
 }

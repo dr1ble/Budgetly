@@ -115,7 +115,7 @@ class AnalyzeViewModel @AssistedInject constructor(
 
     private fun loadAnalysis() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null, noData = false) }
+            _uiState.update { it.copy(isLoading = true, error = null, analysisResult = null) }
 
             refreshTransactions(startDate, endDate)
 
@@ -123,22 +123,11 @@ class AnalyzeViewModel @AssistedInject constructor(
                 when (transactionsResult) {
                     is Result.Success -> {
                         val analysis = analyzeTransactions(transactionsResult.data)
-                        if (analysis != null) {
-                            _uiState.update {
-                                it.copy(
-                                    isLoading = false,
-                                    analysisResult = analysis,
-                                    noData = false
-                                )
-                            }
-                        } else {
-                            _uiState.update {
-                                it.copy(
-                                    isLoading = false,
-                                    analysisResult = null,
-                                    noData = true
-                                )
-                            }
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                analysisResult = analysis
+                            )
                         }
                     }
 
@@ -147,7 +136,6 @@ class AnalyzeViewModel @AssistedInject constructor(
                             it.copy(
                                 isLoading = false,
                                 error = transactionsResult.error,
-                                noData = false
                             )
                         }
                     }

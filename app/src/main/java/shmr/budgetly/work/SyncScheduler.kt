@@ -30,7 +30,7 @@ class SyncScheduler @Inject constructor(
             .build()
 
         val periodicSyncRequest =
-            PeriodicWorkRequestBuilder<SyncWorker>(6, TimeUnit.HOURS) // Раз в 6 часов
+            PeriodicWorkRequestBuilder<SyncWorker>(3, TimeUnit.HOURS)
                 .setConstraints(constraints)
                 .build()
 

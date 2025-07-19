@@ -10,7 +10,6 @@ data class AnalyzeUiState(
     val error: DomainError? = null,
     val analysisResult: AnalysisResult? = null,
     val title: String = "",
-    val noData: Boolean = false,
     val startDate: LocalDate = LocalDate.now(),
     val endDate: LocalDate = LocalDate.now(),
     val datePickerType: DatePickerDialogType? = null
