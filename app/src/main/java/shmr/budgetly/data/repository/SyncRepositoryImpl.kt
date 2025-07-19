@@ -1,6 +1,9 @@
 package shmr.budgetly.data.repository
 
 import android.util.Log
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import retrofit2.HttpException
 import shmr.budgetly.data.local.model.TransactionEntity
 import shmr.budgetly.data.mapper.toEntity
 import shmr.budgetly.data.network.dto.TransactionRequestDto
@@ -21,15 +24,16 @@ class SyncRepositoryImpl @Inject constructor(
 ) : SyncRepository {
 
     private val apiDateTimeFormatter = DateTimeFormatter.ISO_INSTANT
+    private val mutex = Mutex()
 
-    override suspend fun syncData(): Boolean {
+    override suspend fun syncData(): Boolean = mutex.withLock {
         Log.d("SyncRepository", "Starting data synchronization...")
         try {
             val dirtyTransactions = localDataSource.getDirtyTransactions()
             if (dirtyTransactions.isEmpty()) {
                 Log.d("SyncRepository", "No dirty transactions to sync. Sync finished.")
                 userPreferencesRepository.updateLastSyncTimestamp(System.currentTimeMillis())
-                return true
+                return@withLock true
             }
 
             Log.d("SyncRepository", "Found ${dirtyTransactions.size} dirty transactions.")
@@ -42,7 +46,20 @@ class SyncRepositoryImpl @Inject constructor(
                                 "SyncRepository",
                                 "Deleting transaction with id: ${transaction.id} on server."
                             )
-                            remoteDataSource.deleteTransaction(transaction.id)
+                            try {
+                                remoteDataSource.deleteTransaction(transaction.id)
+                            } catch (e: HttpException) {
+                                // Если получили 404, значит транзакция уже удалена на сервере.
+                                // Считаем это успешным исходом и не прерываем синхронизацию.
+                                if (e.code() == 404) {
+                                    Log.w(
+                                        "SyncRepository",
+                                        "Transaction ${transaction.id} already deleted on server (404). Proceeding."
+                                    )
+                                } else {
+                                    throw e
+                                }
+                            }
                         }
                         Log.d(
                             "SyncRepository",
@@ -58,12 +75,9 @@ class SyncRepositoryImpl @Inject constructor(
                         )
                         val request = createRequestDto(transaction)
 
-                        val newTransactionResponseDto = remoteDataSource.createTransaction(request)
+                        val newTransactionDto = remoteDataSource.createTransaction(request)
 
-                        val newSyncedEntity = newTransactionResponseDto.toEntity(
-                            isDirty = false,
-                            lastUpdated = System.currentTimeMillis()
-                        )
+                        val newSyncedEntity = newTransactionDto.toEntity(sourceEntity = transaction)
 
                         localDataSource.deleteAndInsert(transaction, newSyncedEntity)
                         Log.d(
@@ -86,10 +100,10 @@ class SyncRepositoryImpl @Inject constructor(
 
             userPreferencesRepository.updateLastSyncTimestamp(System.currentTimeMillis())
             Log.d("SyncRepository", "Sync finished successfully.")
-            return true
+            return@withLock true
         } catch (e: Exception) {
             Log.e("SyncRepository", "Sync failed", e)
-            return false
+            return@withLock false
         }
     }
 

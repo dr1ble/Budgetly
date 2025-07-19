@@ -6,6 +6,7 @@ import shmr.budgetly.data.local.model.TransactionEntity
 import shmr.budgetly.data.network.dto.AccountDto
 import shmr.budgetly.data.network.dto.AccountResponseDto
 import shmr.budgetly.data.network.dto.CategoryDto
+import shmr.budgetly.data.network.dto.TransactionDto
 import shmr.budgetly.data.network.dto.TransactionResponseDto
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -70,5 +71,20 @@ fun TransactionResponseDto.toEntity(
         lastUpdated = lastUpdated,
         isDirty = isDirty,
         isDeleted = isDeleted
+    )
+}
+
+/**
+ * Преобразует "плоский" [TransactionDto] в сущность БД [TransactionEntity].
+ * Так как DTO не содержит всей нужной информации (например, валюты),
+ * он использует данные из "старой" локальной сущности.
+ * @param sourceEntity "грязная" локальная сущность, из которой берутся недостающие поля.
+ */
+fun TransactionDto.toEntity(sourceEntity: TransactionEntity): TransactionEntity {
+    return sourceEntity.copy(
+        id = this.id, // ID берем от сервера
+        lastUpdated = System.currentTimeMillis(),
+        isDirty = false, // Транзакция теперь синхронизирована
+        isDeleted = false
     )
 }

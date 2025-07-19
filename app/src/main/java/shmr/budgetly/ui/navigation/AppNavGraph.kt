@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import shmr.budgetly.ui.di.rememberScreenComponent
 import shmr.budgetly.ui.screens.account.AccountScreen
 import shmr.budgetly.ui.screens.account.edit.EditAccountScreen
+import shmr.budgetly.ui.screens.analyze.AnalyzeScreen
 import shmr.budgetly.ui.screens.articles.ArticlesScreen
 import shmr.budgetly.ui.screens.expenses.ExpensesScreen
 import shmr.budgetly.ui.screens.history.HistoryScreen

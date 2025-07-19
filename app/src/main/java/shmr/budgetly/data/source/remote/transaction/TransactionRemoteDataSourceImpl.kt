@@ -1,6 +1,7 @@
 package shmr.budgetly.data.source.remote.transaction
 
 import shmr.budgetly.data.network.ApiService
+import shmr.budgetly.data.network.dto.TransactionDto
 import shmr.budgetly.data.network.dto.TransactionRequestDto
 import shmr.budgetly.data.network.dto.TransactionResponseDto
 import shmr.budgetly.di.scope.AppScope
@@ -17,7 +18,7 @@ class TransactionRemoteDataSourceImpl @Inject constructor(
     ): List<TransactionResponseDto> =
         apiService.getTransactionsForPeriod(accountId, startDate, endDate)
 
-    override suspend fun createTransaction(request: TransactionRequestDto): TransactionResponseDto =
+    override suspend fun createTransaction(request: TransactionRequestDto): TransactionDto =
         apiService.createTransaction(request)
 
     override suspend fun getTransactionById(id: Int): TransactionResponseDto =
