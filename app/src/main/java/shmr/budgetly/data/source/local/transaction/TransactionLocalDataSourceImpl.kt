@@ -1,6 +1,8 @@
 package shmr.budgetly.data.source.local.transaction
 
+import androidx.room.withTransaction
 import kotlinx.coroutines.flow.Flow
+import shmr.budgetly.data.local.AppDatabase
 import shmr.budgetly.data.local.dao.TransactionDao
 import shmr.budgetly.data.local.model.TransactionEntity
 import shmr.budgetly.data.local.model.TransactionWithCategory
@@ -9,7 +11,8 @@ import javax.inject.Inject
 
 @AppScope
 class TransactionLocalDataSourceImpl @Inject constructor(
-    private val transactionDao: TransactionDao
+    private val transactionDao: TransactionDao,
+    private val database: AppDatabase
 ) : TransactionLocalDataSource {
 
     override fun getTransactionsForPeriod(
@@ -32,4 +35,15 @@ class TransactionLocalDataSourceImpl @Inject constructor(
 
     override suspend fun markAsDeleted(id: Int, timestamp: Long) =
         transactionDao.markAsDeleted(id, timestamp)
+
+    override suspend fun deleteAndInsert(old: TransactionEntity, new: TransactionEntity) {
+        database.withTransaction {
+            transactionDao.deleteTransaction(old)
+            transactionDao.upsertTransaction(new)
+        }
+    }
+
+    override suspend fun deleteById(id: Int) {
+        transactionDao.deleteById(id)
+    }
 }

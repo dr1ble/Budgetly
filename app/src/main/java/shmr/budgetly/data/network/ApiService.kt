@@ -10,7 +10,6 @@ import retrofit2.http.Query
 import shmr.budgetly.data.network.dto.AccountDto
 import shmr.budgetly.data.network.dto.AccountResponseDto
 import shmr.budgetly.data.network.dto.CategoryDto
-import shmr.budgetly.data.network.dto.TransactionDto
 import shmr.budgetly.data.network.dto.TransactionRequestDto
 import shmr.budgetly.data.network.dto.TransactionResponseDto
 import shmr.budgetly.data.network.dto.UpdateAccountRequestDto
@@ -61,7 +60,7 @@ interface ApiService {
      * Создает новую транзакцию.
      */
     @POST("transactions")
-    suspend fun createTransaction(@Body request: TransactionRequestDto): TransactionDto
+    suspend fun createTransaction(@Body request: TransactionRequestDto): TransactionResponseDto
 
     /**
      * Получает транзакцию по ее ID.

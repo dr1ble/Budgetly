@@ -15,4 +15,6 @@ interface TransactionLocalDataSource {
     suspend fun upsertTransaction(transaction: TransactionEntity)
     suspend fun upsertTransactions(transactions: List<TransactionEntity>)
     suspend fun markAsDeleted(id: Int, timestamp: Long)
+    suspend fun deleteAndInsert(old: TransactionEntity, new: TransactionEntity)
+    suspend fun deleteById(id: Int)
 }

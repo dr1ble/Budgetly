@@ -1,6 +1,7 @@
 package shmr.budgetly.data.local.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
@@ -24,6 +25,18 @@ interface TransactionDao {
      */
     @Upsert
     suspend fun upsertTransaction(transaction: TransactionEntity)
+
+    /**
+     * Удаляет транзакцию (жесткое удаление).
+     */
+    @Query("DELETE FROM transactions WHERE id = :id")
+    suspend fun deleteById(id: Int)
+
+    /**
+     * Удаляет транзакцию по сущности.
+     */
+    @Delete
+    suspend fun deleteTransaction(transaction: TransactionEntity)
 
     /**
      * Получает все транзакции за период, которые не помечены как удаленные.

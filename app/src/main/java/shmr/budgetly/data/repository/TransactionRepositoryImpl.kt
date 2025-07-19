@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.map
 import shmr.budgetly.data.local.model.toDomainModel
 import shmr.budgetly.data.local.model.toEntity
 import shmr.budgetly.data.mapper.toEntity
+import shmr.budgetly.data.source.local.category.CategoryLocalDataSource
 import shmr.budgetly.data.source.local.transaction.TransactionLocalDataSource
 import shmr.budgetly.data.source.remote.transaction.TransactionRemoteDataSource
 import shmr.budgetly.data.util.safeApiCall
@@ -18,20 +19,17 @@ import shmr.budgetly.domain.util.Result
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 import javax.inject.Inject
-import kotlin.random.Random
 
 @AppScope
 class TransactionRepositoryImpl @Inject constructor(
     private val remoteDataSource: TransactionRemoteDataSource,
     private val localDataSource: TransactionLocalDataSource,
+    private val categoryLocalDataSource: CategoryLocalDataSource,
     private val accountRepository: AccountRepository
 ) : TransactionRepository {
 
     private val isoLocalDateFormatter = DateTimeFormatter.ISO_LOCAL_DATE
-    private val apiDateTimeFormatter =
-        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
 
     override fun getTransactions(
         startDate: LocalDate,
@@ -67,7 +65,33 @@ class TransactionRepositoryImpl @Inject constructor(
 
         return when (remoteResult) {
             is Result.Success -> {
-                localDataSource.upsertTransactions(remoteResult.data.map { it.toEntity() })
+                val transactionsFromNetwork = remoteResult.data
+
+                // Получаем ID всех локально измененных транзакций
+                val dirtyTransactionIds =
+                    localDataSource.getDirtyTransactions().map { it.id }.toSet()
+
+                // Фильтруем список с сервера: убираем из него те транзакции, которые были изменены локально
+                val transactionsToUpsert = transactionsFromNetwork.filter {
+                    !dirtyTransactionIds.contains(it.id)
+                }
+
+                // Извлекаем все уникальные категории из отфильтрованного списка
+                val categoriesFromNetwork =
+                    transactionsToUpsert.map { it.category.toEntity() }.distinctBy { it.id }
+
+                if (categoriesFromNetwork.isNotEmpty()) {
+                    categoryLocalDataSource.upsertAll(categoriesFromNetwork)
+                }
+
+                if (transactionsToUpsert.isNotEmpty()) {
+                    localDataSource.upsertTransactions(transactionsToUpsert.map {
+                        it.toEntity(
+                            isDirty = false
+                        )
+                    })
+                }
+
                 Result.Success(Unit)
             }
 
@@ -101,21 +125,18 @@ class TransactionRepositoryImpl @Inject constructor(
         }
         val account = (accountResult as Result.Success).data
 
-        val tempId = (System.currentTimeMillis() + Random.nextLong()).toInt() * -1
+        val tempId = (System.currentTimeMillis() / 1000).toInt() * -1
+
         val transaction = Transaction(
             id = tempId,
-            category = Category(
-                id = categoryId,
-                name = "",
-                emoji = "",
-                isIncome = false
-            ),
+            category = Category(id = categoryId, name = "", emoji = "", isIncome = false),
             amount = amount,
             currency = account.currency,
             transactionDate = transactionDate,
             comment = comment
         )
-        val entity = transaction.toEntity(isDirty = true).copy(accountId = accountId)
+        val entity = transaction.toEntity(isDirty = true).copy(accountId = account.id)
+
         localDataSource.upsertTransaction(entity)
         return getTransactionById(tempId).first()
     }
@@ -136,25 +157,24 @@ class TransactionRepositoryImpl @Inject constructor(
 
         val transaction = Transaction(
             id = id,
-            category = Category(
-                id = categoryId,
-                name = "",
-                emoji = "",
-                isIncome = false
-            ),
+            category = Category(id = categoryId, name = "", emoji = "", isIncome = false),
             amount = amount,
             currency = account.currency,
             transactionDate = transactionDate,
             comment = comment
         )
-        val entity = transaction.toEntity(isDirty = true).copy(accountId = accountId)
+        val entity = transaction.toEntity(isDirty = true).copy(accountId = account.id)
         localDataSource.upsertTransaction(entity)
         return getTransactionById(id).first()
     }
 
 
     override suspend fun deleteTransaction(id: Int): Result<Unit> {
-        localDataSource.markAsDeleted(id, System.currentTimeMillis())
+        if (id < 0) {
+            localDataSource.deleteById(id)
+        } else {
+            localDataSource.markAsDeleted(id, System.currentTimeMillis())
+        }
         return Result.Success(Unit)
     }
 }

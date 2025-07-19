@@ -12,17 +12,19 @@ import kotlinx.coroutines.launch
 import shmr.budgetly.di.scope.AppScope
 import shmr.budgetly.domain.events.AppEvent
 import shmr.budgetly.domain.events.AppEventBus
+import shmr.budgetly.work.SyncScheduler
 import javax.inject.Inject
 
 /**
  * Отслеживает состояние сети в приложении.
  * При восстановлении интернет-соединения после его отсутствия
- * отправляет событие [AppEvent.NetworkAvailable] через [AppEventBus].
+ * запускает немедленную синхронизацию и отправляет событие [AppEvent.NetworkAvailable].
  */
 @AppScope
 class NetworkMonitor @Inject constructor(
     private val context: Context,
-    private val appEventBus: AppEventBus
+    private val appEventBus: AppEventBus,
+    private val syncScheduler: SyncScheduler // Внедряем планировщик
 ) {
     private val connectivityManager =
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -56,8 +58,12 @@ class NetworkMonitor @Inject constructor(
         val hasInternet =
             capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED) == true
 
-        // Отправляем событие, только если интернет ПОЯВИЛСЯ (предыдущее состояние было "нет интернета")
+        // Если интернет ПОЯВИЛСЯ (предыдущее состояние было "нет интернета")
         if (hasInternet && !isNetworkAvailable) {
+            // Запускаем немедленную синхронизацию
+            syncScheduler.scheduleImmediateSync()
+
+            // Отправляем событие для UI
             scope.launch {
                 appEventBus.postEvent(AppEvent.NetworkAvailable)
             }

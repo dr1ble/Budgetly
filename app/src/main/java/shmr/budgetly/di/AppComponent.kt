@@ -15,13 +15,8 @@ import shmr.budgetly.di.features.transactiondetails.TransactionDetailsComponent
 import shmr.budgetly.di.scope.AppScope
 import shmr.budgetly.di.viewmodel.AssistedViewModelModule
 import shmr.budgetly.di.viewmodel.ViewModelModule
+import shmr.budgetly.work.DaggerWorkerFactory
 
-/**
- * Корневой компонент Dagger для всего приложения.
- * Он живет в течение всего жизненного цикла приложения и предоставляет
- * глобальные зависимости (синглтоны), такие как сетевой клиент, репозитории и т.д.
- * Также он является фабрикой для всех экранных сабкомпонентов.
- */
 @AppScope
 @Component(
     modules = [
@@ -36,6 +31,8 @@ import shmr.budgetly.di.viewmodel.ViewModelModule
 interface AppComponent {
 
     fun inject(app: BudgetlyApp)
+
+    fun workerFactory(): DaggerWorkerFactory
 
     @Component.Factory
     interface Factory {
