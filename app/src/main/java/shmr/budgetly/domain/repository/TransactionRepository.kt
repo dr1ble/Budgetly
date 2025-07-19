@@ -54,6 +54,7 @@ interface TransactionRepository {
 
     /**
      * Запускает принудительную синхронизацию транзакций с сервером.
+     * @return [Result.Success] в случае успеха, иначе [Result.Error].
      */
-    suspend fun refreshTransactions(startDate: LocalDate, endDate: LocalDate)
+    suspend fun refreshTransactions(startDate: LocalDate, endDate: LocalDate): Result<Unit>
 }

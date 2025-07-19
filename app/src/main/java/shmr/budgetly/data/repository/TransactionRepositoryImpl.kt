@@ -10,6 +10,7 @@ import shmr.budgetly.data.source.local.transaction.TransactionLocalDataSource
 import shmr.budgetly.data.source.remote.transaction.TransactionRemoteDataSource
 import shmr.budgetly.data.util.safeApiCall
 import shmr.budgetly.di.scope.AppScope
+import shmr.budgetly.domain.entity.Category
 import shmr.budgetly.domain.entity.Transaction
 import shmr.budgetly.domain.repository.AccountRepository
 import shmr.budgetly.domain.repository.TransactionRepository
@@ -44,19 +45,34 @@ class TransactionRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun refreshTransactions(startDate: LocalDate, endDate: LocalDate) {
+    override suspend fun refreshTransactions(
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): Result<Unit> {
+        accountRepository.refreshMainAccount()
+
         val accountResult = accountRepository.getMainAccount().first()
-        if (accountResult is Result.Success) {
-            val accountId = accountResult.data.id
-            val remoteResult = safeApiCall {
-                remoteDataSource.getTransactionsForPeriod(
-                    accountId,
-                    startDate.format(isoLocalDateFormatter),
-                    endDate.format(isoLocalDateFormatter)
-                )
-            }
-            if (remoteResult is Result.Success) {
+        if (accountResult is Result.Error) {
+            return Result.Error(accountResult.error)
+        }
+        val accountId = (accountResult as Result.Success).data.id
+
+        val remoteResult = safeApiCall {
+            remoteDataSource.getTransactionsForPeriod(
+                accountId,
+                startDate.format(isoLocalDateFormatter),
+                endDate.format(isoLocalDateFormatter)
+            )
+        }
+
+        return when (remoteResult) {
+            is Result.Success -> {
                 localDataSource.upsertTransactions(remoteResult.data.map { it.toEntity() })
+                Result.Success(Unit)
+            }
+
+            is Result.Error -> {
+                Result.Error(remoteResult.error)
             }
         }
     }
@@ -79,18 +95,23 @@ class TransactionRepositoryImpl @Inject constructor(
         transactionDate: LocalDateTime,
         comment: String
     ): Result<Transaction> {
+        val accountResult = accountRepository.getMainAccount().first()
+        if (accountResult is Result.Error) {
+            return Result.Error(accountResult.error)
+        }
+        val account = (accountResult as Result.Success).data
+
         val tempId = (System.currentTimeMillis() + Random.nextLong()).toInt() * -1
         val transaction = Transaction(
             id = tempId,
-            // Создаем заглушку для категории
-            category = shmr.budgetly.domain.entity.Category(
+            category = Category(
                 id = categoryId,
                 name = "",
                 emoji = "",
                 isIncome = false
             ),
             amount = amount,
-            currency = "", // Будет взята из счета при синхронизации
+            currency = account.currency,
             transactionDate = transactionDate,
             comment = comment
         )
@@ -107,17 +128,22 @@ class TransactionRepositoryImpl @Inject constructor(
         transactionDate: LocalDateTime,
         comment: String
     ): Result<Transaction> {
+        val accountResult = accountRepository.getMainAccount().first()
+        if (accountResult is Result.Error) {
+            return Result.Error(accountResult.error)
+        }
+        val account = (accountResult as Result.Success).data
+
         val transaction = Transaction(
             id = id,
-            // Создаем заглушку для категории
-            category = shmr.budgetly.domain.entity.Category(
+            category = Category(
                 id = categoryId,
                 name = "",
                 emoji = "",
                 isIncome = false
             ),
             amount = amount,
-            currency = "",
+            currency = account.currency,
             transactionDate = transactionDate,
             comment = comment
         )

@@ -9,8 +9,8 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 /**
- * UseCase для получения списка транзакций-доходов за текущий месяц.
- * Инкапсулирует бизнес-логику: определение периода (текущий месяц),
+ * UseCase для получения списка транзакций-доходов за текущий день.
+ * Инкапсулирует бизнес-логику: определение периода (текущий день),
  * запрос транзакций и их фильтрация по типу "доход".
  */
 class GetIncomeTransactionsUseCase @Inject constructor(
@@ -18,9 +18,8 @@ class GetIncomeTransactionsUseCase @Inject constructor(
 ) {
     operator fun invoke(): Flow<Result<List<Transaction>>> {
         val today = LocalDate.now()
-        val startOfMonth = today.withDayOfMonth(1)
 
-        return repository.getTransactions(startOfMonth, today).map { result ->
+        return repository.getTransactions(today, today).map { result ->
             when (result) {
                 is Result.Success -> Result.Success(result.data.filter { it.category.isIncome })
                 is Result.Error -> result

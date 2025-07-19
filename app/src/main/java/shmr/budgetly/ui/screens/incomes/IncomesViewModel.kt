@@ -82,9 +82,17 @@ class IncomesViewModel @Inject constructor(
             }
 
             val today = LocalDate.now()
-            val startOfMonth = today.withDayOfMonth(1)
-            // Инициируем обновление данных, результат придет в `collect`
-            refreshTransactions(startOfMonth, today)
+            val result = refreshTransactions(today, today)
+
+            if (result is Result.Error) {
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        isRefreshing = false,
+                        error = result.error
+                    )
+                }
+            }
         }
     }
 

@@ -33,7 +33,7 @@ interface TransactionDao {
     @Query(
         """
         SELECT * FROM transactions
-        WHERE date(transactionDate) BETWEEN date(:startDate) AND date(:endDate)
+        WHERE date(transactionDate, 'unixepoch') BETWEEN date(:startDate) AND date(:endDate)
         AND isDeleted = 0
     """
     )

@@ -80,8 +80,18 @@ class ExpensesViewModel @Inject constructor(
             }
 
             val today = LocalDate.now()
-            val startOfMonth = today.withDayOfMonth(1)
-            refreshTransactions(startOfMonth, today)
+            val result = refreshTransactions(today, today)
+
+            // Если обновление провалилось, явно устанавливаем ошибку в UI state
+            if (result is Result.Error) {
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        isRefreshing = false,
+                        error = result.error
+                    )
+                }
+            }
         }
     }
 
