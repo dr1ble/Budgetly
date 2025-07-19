@@ -4,8 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import shmr.budgetly.domain.entity.Account
@@ -22,13 +21,6 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import javax.inject.Inject
 
-/**
- * ViewModel для экрана "Расходы".
- * Отвечает за:
- * 1. Загрузку и подписку на обновления списка транзакций-расходов и данных счета.
- * 2. Управление состоянием UI ([ExpensesUiState]).
- * 3. Реакцию на глобальные события, например, обновление счета.
- */
 class ExpensesViewModel @Inject constructor(
     private val getExpenseTransactions: GetExpenseTransactionsUseCase,
     private val getMainAccount: GetMainAccountUseCase,
@@ -40,24 +32,20 @@ class ExpensesViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            combine(
-                getExpenseTransactions(),
-                getMainAccount()
-            ) { transactionsResult, accountResult ->
-                processResults(transactionsResult, accountResult)
-            }.collect()
-        }
-
         loadExpenses(isInitialLoad = true)
-        observeAccountUpdates()
+        observeAppEvents()
     }
 
-    private fun observeAccountUpdates() {
+    private fun observeAppEvents() {
         viewModelScope.launch {
             appEventBus.events.collect { event ->
-                if (event is AppEvent.AccountUpdated) {
-                    loadExpenses(forceRefresh = true)
+                when (event) {
+                    is AppEvent.AccountUpdated -> loadExpenses(forceRefresh = true)
+                    is AppEvent.NetworkAvailable -> {
+                        if (_uiState.value.error != null) {
+                            loadExpenses(isInitialLoad = true)
+                        }
+                    }
                 }
             }
         }
@@ -65,7 +53,7 @@ class ExpensesViewModel @Inject constructor(
 
     fun loadExpenses(isInitialLoad: Boolean = false, forceRefresh: Boolean = false) {
         val state = _uiState.value
-        if ((state.isLoading || state.isRefreshing) && !forceRefresh) return
+        if (state.isLoading || state.isRefreshing) return
 
         val showLoading = isInitialLoad && state.transactions.isEmpty()
         val showRefreshing = forceRefresh || (isInitialLoad && !showLoading)
@@ -80,18 +68,12 @@ class ExpensesViewModel @Inject constructor(
             }
 
             val today = LocalDate.now()
-            val result = refreshTransactions(today, today)
+            refreshTransactions(today, today)
 
-            // Если обновление провалилось, явно устанавливаем ошибку в UI state
-            if (result is Result.Error) {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        isRefreshing = false,
-                        error = result.error
-                    )
-                }
-            }
+            val transactionsResult = getExpenseTransactions().first()
+            val accountResult = getMainAccount().first()
+
+            processResults(transactionsResult, accountResult)
         }
     }
 
@@ -103,13 +85,6 @@ class ExpensesViewModel @Inject constructor(
         val account = (accountResult as? Result.Success)?.data
         val error = (transactionsResult as? Result.Error)?.error
             ?: (accountResult as? Result.Error)?.error
-
-        if (error != null && _uiState.value.transactions.isEmpty()) {
-            _uiState.update {
-                it.copy(isLoading = false, isRefreshing = false, error = error)
-            }
-            return
-        }
 
         if (transactions != null && account != null) {
             val currencySymbol = formatCurrencySymbol(account.currency)
@@ -127,6 +102,14 @@ class ExpensesViewModel @Inject constructor(
                     transactions = transactions,
                     totalAmount = formatAmount(total, currencySymbol),
                     error = null
+                )
+            }
+        } else {
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    isRefreshing = false,
+                    error = error
                 )
             }
         }

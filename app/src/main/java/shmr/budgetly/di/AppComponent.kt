@@ -3,6 +3,7 @@ package shmr.budgetly.di
 import android.content.Context
 import dagger.BindsInstance
 import dagger.Component
+import shmr.budgetly.BudgetlyApp
 import shmr.budgetly.di.features.account.AccountComponent
 import shmr.budgetly.di.features.articles.ArticlesComponent
 import shmr.budgetly.di.features.editaccount.EditAccountComponent
@@ -33,6 +34,8 @@ import shmr.budgetly.di.viewmodel.ViewModelModule
     ]
 )
 interface AppComponent {
+
+    fun inject(app: BudgetlyApp)
 
     @Component.Factory
     interface Factory {

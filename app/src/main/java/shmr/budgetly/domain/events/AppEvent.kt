@@ -8,4 +8,9 @@ sealed class AppEvent {
      * Событие, сигнализирующее об обновлении данных счета.
      */
     data object AccountUpdated : AppEvent()
+
+    /**
+     * Событие, сигнализирующее о восстановлении интернет-соединения.
+     */
+    data object NetworkAvailable : AppEvent()
 }

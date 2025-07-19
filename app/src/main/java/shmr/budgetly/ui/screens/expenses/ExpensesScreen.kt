@@ -77,7 +77,7 @@ fun ExpensesScreen(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     LaunchedEffect(navBackStackEntry) {
         if (navBackStackEntry?.savedStateHandle?.remove<Boolean>(TRANSACTION_SAVED_RESULT_KEY) == true) {
-            viewModel.loadExpenses(isInitialLoad = true)
+            viewModel.loadExpenses(forceRefresh = true)
         }
     }
 
