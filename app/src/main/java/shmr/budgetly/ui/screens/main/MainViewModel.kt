@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import shmr.budgetly.domain.model.ThemeColor
 import shmr.budgetly.domain.repository.UserPreferencesRepository
+import shmr.budgetly.domain.usecase.GetThemeColorUseCase
 import javax.inject.Inject
 
 /**
@@ -13,20 +15,27 @@ import javax.inject.Inject
  * такие как настройка темы.
  */
 class MainViewModel @Inject constructor(
-    userPreferencesRepository: UserPreferencesRepository
+    userPreferencesRepository: UserPreferencesRepository,
+    getThemeColorUseCase: GetThemeColorUseCase
 ) : ViewModel() {
 
     /**
      * Поток, который сообщает, включена ли темная тема.
-     * `stateIn` кэширует последнее значение и делает Flow "горячим",
-     * пока есть подписчики.
      */
     val isDarkTheme: StateFlow<Boolean> = userPreferencesRepository.isDarkThemeEnabled
         .stateIn(
             scope = viewModelScope,
-            // Начинаем наблюдение, когда UI виден, и останавливаемся через 5 секунд после того, как он скрыт.
             started = SharingStarted.WhileSubscribed(5_000),
-            // По умолчанию используется светлая тема, пока не загрузится значение из DataStore.
             initialValue = false
+        )
+
+    /**
+     * Поток с выбранным основным цветом темы.
+     */
+    val themeColor: StateFlow<ThemeColor> = getThemeColorUseCase()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = ThemeColor.GREEN
         )
 }

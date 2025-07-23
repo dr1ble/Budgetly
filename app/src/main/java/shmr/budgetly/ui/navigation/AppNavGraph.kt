@@ -11,6 +11,7 @@ import shmr.budgetly.ui.screens.account.AccountScreen
 import shmr.budgetly.ui.screens.account.edit.EditAccountScreen
 import shmr.budgetly.ui.screens.analyze.AnalyzeScreen
 import shmr.budgetly.ui.screens.articles.ArticlesScreen
+import shmr.budgetly.ui.screens.colorpicker.ColorPickerScreen
 import shmr.budgetly.ui.screens.expenses.ExpensesScreen
 import shmr.budgetly.ui.screens.history.HistoryScreen
 import shmr.budgetly.ui.screens.incomes.IncomesScreen
@@ -116,6 +117,16 @@ fun AppNavGraph(
                 it.analyzeComponent().create()
             }
             AnalyzeScreen(
+                viewModel = viewModel(factory = component.viewModelFactory()),
+                navController = navController
+            )
+        }
+
+        composable<ColorPicker> { navBackStackEntry ->
+            val component = rememberScreenComponent(navBackStackEntry) {
+                it.colorPickerComponent().create()
+            }
+            ColorPickerScreen(
                 viewModel = viewModel(factory = component.viewModelFactory()),
                 navController = navController
             )

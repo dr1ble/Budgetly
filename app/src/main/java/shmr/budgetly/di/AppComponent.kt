@@ -7,6 +7,7 @@ import shmr.budgetly.BudgetlyApp
 import shmr.budgetly.di.features.account.AccountComponent
 import shmr.budgetly.di.features.analyze.AnalyzeComponent
 import shmr.budgetly.di.features.articles.ArticlesComponent
+import shmr.budgetly.di.features.colorpicker.ColorPickerComponent
 import shmr.budgetly.di.features.editaccount.EditAccountComponent
 import shmr.budgetly.di.features.expenses.ExpensesComponent
 import shmr.budgetly.di.features.history.HistoryComponent
@@ -54,4 +55,6 @@ interface AppComponent : ViewModelFactoryProvider { // Реализуем инт
     fun transactionDetailsComponent(): TransactionDetailsComponent.Factory
 
     fun analyzeComponent(): AnalyzeComponent.Factory
+
+    fun colorPickerComponent(): ColorPickerComponent.Factory
 }

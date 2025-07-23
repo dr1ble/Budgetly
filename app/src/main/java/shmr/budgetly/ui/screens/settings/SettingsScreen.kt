@@ -18,6 +18,7 @@ import androidx.navigation.NavController
 import shmr.budgetly.R
 import shmr.budgetly.ui.components.AppTopBar
 import shmr.budgetly.ui.components.BaseListItem
+import shmr.budgetly.ui.navigation.ColorPicker
 import shmr.budgetly.ui.util.LocalTopAppBarSetter
 
 @Composable
@@ -54,6 +55,18 @@ fun SettingsScreen(
                                 onCheckedChange = viewModel::onThemeChanged
                             )
                         }
+                    )
+                }
+                SettingType.PRIMARY_COLOR -> {
+                    BaseListItem(
+                        title = stringResource(id = item.titleRes),
+                        trail = {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_list_item_settings_arrow_right),
+                                contentDescription = null,
+                            )
+                        },
+                        onClick = { navController.navigate(ColorPicker) }
                     )
                 }
                 SettingType.NAVIGATION -> {

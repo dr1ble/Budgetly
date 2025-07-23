@@ -88,7 +88,7 @@ private fun isDestinationSelected(
         else -> currentRoute
     }
 
-    return destination.route::class.qualifiedName == activeTabRouteName
+    return destination::class.qualifiedName == activeTabRouteName
 }
 
 
@@ -102,12 +102,12 @@ private fun handleNavigation(
     destination: BottomNavItem,
     isSelected: Boolean
 ) {
-    val destinationRouteName = destination.route::class.qualifiedName!!
+    val destinationRouteName = destination::class.qualifiedName!!
 
     if (isSelected) {
         navController.popBackStack(destinationRouteName, inclusive = false)
     } else {
-        navController.navigate(destination.route) {
+        navController.navigate(destination) {
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
             }

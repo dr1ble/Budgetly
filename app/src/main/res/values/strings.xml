@@ -75,4 +75,8 @@
     <string name="transaction_details_edit_cancel_button">Отмена добавления/редактирования операции</string>
     <string name="analyze_no_data">Нет данных</string>
 
+    <string name="color_name_green">Зеленый (стандартный)</string>
+    <string name="color_name_blue">Синий</string>
+    <string name="color_name_orange">Оранжевый</string>
+    <string name="color_is_selected_description">Выбранный цвет</string>
 </resources>

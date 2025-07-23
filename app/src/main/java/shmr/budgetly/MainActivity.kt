@@ -36,10 +36,13 @@ class MainActivity : ComponentActivity() {
         setupWindow()
 
         setContent {
-            // Подписываемся на состояние темы из ViewModel
             val isDarkTheme by mainViewModel.isDarkTheme.collectAsStateWithLifecycle()
+            val themeColor by mainViewModel.themeColor.collectAsStateWithLifecycle()
 
-            BudgetlyTheme(darkTheme = isDarkTheme) {
+            BudgetlyTheme(
+                darkTheme = isDarkTheme,
+                themeColor = themeColor
+            ) {
                 RootNavGraph()
             }
         }
