@@ -36,7 +36,7 @@ fun AppSearchBar(
             onValueChange = onQueryChange,
             modifier = modifier
                 .fillMaxWidth(),
-            placeholder = { Text(text = placeholder) },
+            placeholder = { Text(text = placeholder, ) },
             trailingIcon = {
                 Icon(
                     imageVector = Icons.Default.Search,

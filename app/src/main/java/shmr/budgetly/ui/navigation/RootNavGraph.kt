@@ -5,7 +5,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import shmr.budgetly.ui.screens.MainScreen
+import shmr.budgetly.ui.screens.main.MainScreen
 import shmr.budgetly.ui.screens.splash.SplashScreen
 import shmr.budgetly.ui.screens.splash.SplashViewModel
 

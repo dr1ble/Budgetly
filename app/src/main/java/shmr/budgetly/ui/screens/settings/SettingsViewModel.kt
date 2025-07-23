@@ -25,6 +25,7 @@ class SettingsViewModel @Inject constructor(
     init {
         loadSettings()
         observeLastSyncTime()
+        observeTheme()
     }
 
     private fun observeLastSyncTime() {
@@ -40,6 +41,17 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Подписывается на Flow состояния темы из репозитория и обновляет UI state.
+     */
+    private fun observeTheme() {
+        viewModelScope.launch {
+            userPreferencesRepository.isDarkThemeEnabled.collect { isEnabled ->
+                _uiState.update { it.copy(isDarkThemeEnabled = isEnabled) }
+            }
+        }
+    }
+
     private fun loadSettings() {
         val items = listOf(
             SettingItem(1, R.string.setting_dark_theme, SettingType.THEME_SWITCH),
@@ -51,18 +63,21 @@ class SettingsViewModel @Inject constructor(
             SettingItem(7, R.string.setting_language, SettingType.NAVIGATION),
             SettingItem(8, R.string.setting_about, SettingType.NAVIGATION),
         )
+
         _uiState.update {
             it.copy(
-                settingsItems = items,
-                isDarkThemeEnabled = false
+                settingsItems = items
             )
         }
     }
 
+    /**
+     * Вызывается из UI при переключении свитча темы.
+     * Сохраняет новое значение в репозиторий.
+     */
     fun onThemeChanged(isDark: Boolean) {
-        // TODO: Сохранять выбор темы в постоянное хранилище (SharedPreferences/DataStore)
-        _uiState.update { currentState ->
-            currentState.copy(isDarkThemeEnabled = isDark)
+        viewModelScope.launch {
+            userPreferencesRepository.setDarkTheme(isDark)
         }
     }
 }

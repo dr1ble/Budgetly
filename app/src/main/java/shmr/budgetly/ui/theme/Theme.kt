@@ -11,34 +11,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Green400,
-    onPrimary = Black900,
-    secondary = Green200,
-    onSecondary = Black900,
-    tertiary = White300,
-    background = White100,
-    onBackground = Black900,
-    surface = White200,
-    onSurface = Black900,
-    surfaceVariant = Grey200,
-    onSurfaceVariant = Black700,
-    secondaryContainer = Green200,
-    onSecondaryContainer = Green400,
-    outline = Grey600,
-    outlineVariant = Grey400,
-    error = Black700,
-    errorContainer = Red400,
-    onErrorContainer = White100
-)
-
-// LightColorScheme сейчас идентичен Dark, можно настроить разные цвета
 private val LightColorScheme = lightColorScheme(
     primary = Green400,
     onPrimary = Black900,
     secondary = Green200,
     onSecondary = Black900,
-    tertiary = White300,
     background = White100,
     onBackground = Black900,
     surface = White200,
@@ -47,12 +24,33 @@ private val LightColorScheme = lightColorScheme(
     onSurfaceVariant = Black700,
     secondaryContainer = Green200,
     onSecondaryContainer = Green400,
-    outline = Grey600,
-    outlineVariant = Grey400,
-    error = Black700,
+    outline = Grey400,
+    outlineVariant = Grey200,
+    error = Red400,
     errorContainer = Red400,
     onErrorContainer = White100
 )
+
+private val DarkColorScheme = darkColorScheme(
+    primary = DarkPrimary,
+    onPrimary = DarkOnPrimary,
+    secondary = DarkSurface,
+    onSecondary = DarkOnSurface,
+    background = DarkBackground,
+    onBackground = DarkOnSurface,
+    surface = DarkBackgroundBar,
+    onSurface = DarkOnSurface,
+    surfaceVariant = DarkSurface,
+    onSurfaceVariant = DarkOnSurfaceVariant,
+    secondaryContainer = DarkSurface,
+    onSecondaryContainer = DarkOnSurface,
+    outline = DarkOutline,
+    outlineVariant = DarkOutline,
+    error = DarkError,
+    errorContainer = DarkErrorContainer,
+    onErrorContainer = DarkOnError
+)
+
 
 /**
  * Основная тема приложения Budgetly.
@@ -73,6 +71,7 @@ fun BudgetlyTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
+
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }

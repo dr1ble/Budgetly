@@ -15,6 +15,8 @@ import shmr.budgetly.di.features.settings.SettingsComponent
 import shmr.budgetly.di.features.transactiondetails.TransactionDetailsComponent
 import shmr.budgetly.di.scope.AppScope
 import shmr.budgetly.di.viewmodel.AssistedViewModelModule
+import shmr.budgetly.di.viewmodel.ViewModelFactoryModule
+import shmr.budgetly.di.viewmodel.ViewModelFactoryProvider
 import shmr.budgetly.di.viewmodel.ViewModelModule
 import shmr.budgetly.work.DaggerWorkerFactory
 
@@ -26,10 +28,12 @@ import shmr.budgetly.work.DaggerWorkerFactory
         DataModule::class,
         DatabaseModule::class,
         ViewModelModule::class,
-        AssistedViewModelModule::class
+        AssistedViewModelModule::class,
+        ViewModelFactoryModule::class, // Добавляем модуль фабрики
+        MainViewModelModule::class     // Добавляем модуль для MainViewModel
     ]
 )
-interface AppComponent {
+interface AppComponent : ViewModelFactoryProvider { // Реализуем интерфейс провайдера
 
     fun inject(app: BudgetlyApp)
 
