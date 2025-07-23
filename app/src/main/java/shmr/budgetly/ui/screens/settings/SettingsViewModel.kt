@@ -57,7 +57,7 @@ class SettingsViewModel @Inject constructor(
             SettingItem(1, R.string.setting_dark_theme, SettingType.THEME_SWITCH),
             SettingItem(2, R.string.setting_primary_color, SettingType.PRIMARY_COLOR),
             SettingItem(3, R.string.setting_sounds, SettingType.NAVIGATION),
-            SettingItem(4, R.string.setting_haptics, SettingType.NAVIGATION),
+            SettingItem(4, R.string.setting_haptics, SettingType.NAVIGATION_HAPTICS),
             SettingItem(5, R.string.setting_passcode, SettingType.NAVIGATION),
             SettingItem(6, R.string.setting_sync, SettingType.SYNC_INFO),
             SettingItem(7, R.string.setting_language, SettingType.NAVIGATION),

@@ -5,10 +5,12 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.IntoMap
+import shmr.budgetly.di.viewmodel.ViewModelKey
+import shmr.budgetly.domain.monitor.HapticFeedbackManager
 import shmr.budgetly.domain.repository.UserPreferencesRepository
+import shmr.budgetly.domain.usecase.GetHapticSettingsUseCase
 import shmr.budgetly.domain.usecase.GetThemeColorUseCase
 import shmr.budgetly.ui.screens.main.MainViewModel
-import shmr.budgetly.di.viewmodel.ViewModelKey
 
 @Module
 abstract class MainViewModelModule {
@@ -21,9 +23,16 @@ abstract class MainViewModelModule {
         @Provides
         fun provideMainViewModel(
             userPreferencesRepository: UserPreferencesRepository,
-            getThemeColorUseCase: GetThemeColorUseCase
+            getThemeColorUseCase: GetThemeColorUseCase,
+            getHapticSettingsUseCase: GetHapticSettingsUseCase,
+            hapticFeedbackManager: HapticFeedbackManager
         ): MainViewModel {
-            return MainViewModel(userPreferencesRepository, getThemeColorUseCase)
+            return MainViewModel(
+                userPreferencesRepository,
+                getThemeColorUseCase,
+                getHapticSettingsUseCase,
+                hapticFeedbackManager
+            )
         }
     }
 }

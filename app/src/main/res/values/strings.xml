@@ -79,4 +79,10 @@
     <string name="color_name_blue">Синий</string>
     <string name="color_name_orange">Оранжевый</string>
     <string name="color_is_selected_description">Выбранный цвет</string>
+
+    <string name="haptics_enable_toggle">Вибрация</string>
+    <string name="haptic_effect_click">Клик</string>
+    <string name="haptic_effect_tick">Тик</string>
+    <string name="haptic_effect_double_click">Двойной клик</string>
+    <string name="haptic_effect_is_selected_description">Выбранный эффект</string>
 </resources>

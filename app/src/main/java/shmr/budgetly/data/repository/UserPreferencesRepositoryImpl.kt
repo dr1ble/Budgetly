@@ -11,6 +11,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import shmr.budgetly.di.scope.AppScope
+import shmr.budgetly.domain.model.HapticEffect
 import shmr.budgetly.domain.model.ThemeColor
 import shmr.budgetly.domain.repository.UserPreferencesRepository
 import javax.inject.Inject
@@ -26,6 +27,8 @@ class UserPreferencesRepositoryImpl @Inject constructor(
         val LAST_SYNC_TIMESTAMP = longPreferencesKey("last_sync_timestamp")
         val IS_DARK_THEME_ENABLED = booleanPreferencesKey("is_dark_theme_enabled")
         val THEME_COLOR = stringPreferencesKey("theme_color")
+        val IS_HAPTICS_ENABLED = booleanPreferencesKey("is_haptics_enabled")
+        val HAPTIC_EFFECT = stringPreferencesKey("haptic_effect")
     }
 
     override val lastSyncTimestamp: Flow<Long> = context.dataStore.data
@@ -64,6 +67,35 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     override suspend fun setThemeColor(color: ThemeColor) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.THEME_COLOR] = color.name
+        }
+    }
+
+    override val isHapticsEnabled: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            // По умолчанию хаптики включены
+            preferences[PreferencesKeys.IS_HAPTICS_ENABLED] ?: true
+        }
+
+    override suspend fun setHapticsEnabled(isEnabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.IS_HAPTICS_ENABLED] = isEnabled
+        }
+    }
+
+    override val hapticEffect: Flow<HapticEffect> = context.dataStore.data
+        .map { preferences ->
+            val effectName = preferences[PreferencesKeys.HAPTIC_EFFECT]
+            return@map try {
+                if (effectName != null) HapticEffect.valueOf(effectName) else HapticEffect.CLICK
+            } catch (e: IllegalArgumentException) {
+                // Возвращаем значение по умолчанию, если сохранено некорректное значение
+                HapticEffect.CLICK
+            }
+        }
+
+    override suspend fun setHapticEffect(effect: HapticEffect) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.HAPTIC_EFFECT] = effect.name
         }
     }
 }

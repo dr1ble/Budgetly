@@ -28,11 +28,13 @@ import shmr.budgetly.ui.navigation.bottomNavItems
  *
  * @param navController Контроллер навигации для выполнения переходов.
  * @param modifier Модификатор для настройки внешнего вида и поведения.
+ * @param onTabClick Лямбда, вызываемая при нажатии на любую вкладку для воспроизведения вибрации.
  */
 @Composable
 fun BottomNavBar(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onTabClick: () -> Unit
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
@@ -51,7 +53,10 @@ fun BottomNavBar(
                     )
                 },
                 selected = isSelected,
-                onClick = { handleNavigation(navController, destination, isSelected) }
+                onClick = {
+                    onTabClick()
+                    handleNavigation(navController, destination, isSelected)
+                }
             )
         }
     }

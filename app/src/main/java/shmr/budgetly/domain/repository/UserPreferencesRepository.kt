@@ -1,6 +1,7 @@
 package shmr.budgetly.domain.repository
 
 import kotlinx.coroutines.flow.Flow
+import shmr.budgetly.domain.model.HapticEffect
 import shmr.budgetly.domain.model.ThemeColor
 
 /**
@@ -39,4 +40,24 @@ interface UserPreferencesRepository {
      * Сохраняет выбранный основной цвет темы.
      */
     suspend fun setThemeColor(color: ThemeColor)
+
+    /**
+     * Поток, сообщающий, включена ли тактильная обратная связь.
+     */
+    val isHapticsEnabled: Flow<Boolean>
+
+    /**
+     * Сохраняет настройку включения/выключения тактильной обратной связи.
+     */
+    suspend fun setHapticsEnabled(isEnabled: Boolean)
+
+    /**
+     * Поток с выбранным эффектом тактильной обратной связи.
+     */
+    val hapticEffect: Flow<HapticEffect>
+
+    /**
+     * Сохраняет выбранный эффект тактильной обратной связи.
+     */
+    suspend fun setHapticEffect(effect: HapticEffect)
 }

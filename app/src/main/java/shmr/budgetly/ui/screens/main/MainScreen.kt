@@ -11,8 +11,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import shmr.budgetly.BudgetlyApp
 import shmr.budgetly.ui.components.BaseFAB
 import shmr.budgetly.ui.components.BottomNavBar
 import shmr.budgetly.ui.navigation.AppNavGraph
@@ -28,6 +31,9 @@ import shmr.budgetly.ui.util.LocalTopAppBarSetter
  */
 @Composable
 fun MainScreen() {
+    val appComponent = (LocalContext.current.applicationContext as BudgetlyApp).appComponent
+    val mainViewModel: MainViewModel = viewModel(factory = appComponent.viewModelFactory())
+
     val navController = rememberNavController()
 
     var topAppBar: @Composable () -> Unit by remember { mutableStateOf({}) }
@@ -44,7 +50,8 @@ fun MainScreen() {
             bottomBar = {
                 BottomNavBar(
                     navController = navController,
-                    modifier = Modifier.navigationBarsPadding()
+                    modifier = Modifier.navigationBarsPadding(),
+                    onTabClick = mainViewModel::performHapticFeedback
                 )
             },
             floatingActionButton = {
@@ -56,6 +63,8 @@ fun MainScreen() {
 
                 if (isIncomeScreen || isExpenseScreen) {
                     BaseFAB(onClick = {
+                        mainViewModel.performHapticFeedback()
+
                         val parentRoute = if (isIncomeScreen) {
                             Incomes::class.qualifiedName!!
                         } else {

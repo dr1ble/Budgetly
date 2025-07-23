@@ -26,6 +26,9 @@ data object EditAccount : NavDestination
 @Serializable
 data object ColorPicker : NavDestination
 
+@Serializable
+data object Haptics : NavDestination
+
 // --- Экраны с аргументами ---
 
 @Serializable

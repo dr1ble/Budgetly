@@ -10,6 +10,7 @@ import shmr.budgetly.di.features.articles.ArticlesComponent
 import shmr.budgetly.di.features.colorpicker.ColorPickerComponent
 import shmr.budgetly.di.features.editaccount.EditAccountComponent
 import shmr.budgetly.di.features.expenses.ExpensesComponent
+import shmr.budgetly.di.features.haptics.HapticsComponent
 import shmr.budgetly.di.features.history.HistoryComponent
 import shmr.budgetly.di.features.incomes.IncomesComponent
 import shmr.budgetly.di.features.settings.SettingsComponent
@@ -57,4 +58,5 @@ interface AppComponent : ViewModelFactoryProvider { // Реализуем инт
     fun analyzeComponent(): AnalyzeComponent.Factory
 
     fun colorPickerComponent(): ColorPickerComponent.Factory
+    fun hapticsComponent(): HapticsComponent.Factory
 }

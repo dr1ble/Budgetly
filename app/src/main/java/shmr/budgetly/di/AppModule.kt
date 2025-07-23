@@ -5,6 +5,7 @@ import dagger.Module
 import dagger.Provides
 import shmr.budgetly.BuildConfig
 import shmr.budgetly.di.scope.AppScope
+import shmr.budgetly.domain.monitor.HapticFeedbackManager
 import javax.inject.Named
 
 /**
@@ -30,4 +31,10 @@ object AppModule {
     @AppScope
     @Named("useHardcodedAccountId")
     fun provideUseHardcodedAccountId(): Boolean = BuildConfig.USE_HARDCODED_ACCOUNT_ID
+
+    @Provides
+    @AppScope
+    fun provideHapticFeedbackManager(context: android.content.Context): HapticFeedbackManager {
+        return HapticFeedbackManager(context)
+    }
 }

@@ -10,7 +10,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import shmr.budgetly.ui.navigation.RootNavGraph
-import shmr.budgetly.ui.screens.main.MainViewModel // ИЗМЕНЕНО
+import shmr.budgetly.ui.screens.main.MainViewModel
 import shmr.budgetly.ui.screens.splash.SplashViewModel
 import shmr.budgetly.ui.theme.BudgetlyTheme
 

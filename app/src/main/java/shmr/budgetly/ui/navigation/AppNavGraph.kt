@@ -13,6 +13,7 @@ import shmr.budgetly.ui.screens.analyze.AnalyzeScreen
 import shmr.budgetly.ui.screens.articles.ArticlesScreen
 import shmr.budgetly.ui.screens.colorpicker.ColorPickerScreen
 import shmr.budgetly.ui.screens.expenses.ExpensesScreen
+import shmr.budgetly.ui.screens.haptics.HapticsScreen
 import shmr.budgetly.ui.screens.history.HistoryScreen
 import shmr.budgetly.ui.screens.incomes.IncomesScreen
 import shmr.budgetly.ui.screens.settings.SettingsScreen
@@ -127,6 +128,16 @@ fun AppNavGraph(
                 it.colorPickerComponent().create()
             }
             ColorPickerScreen(
+                viewModel = viewModel(factory = component.viewModelFactory()),
+                navController = navController
+            )
+        }
+
+        composable<Haptics> { navBackStackEntry ->
+            val component = rememberScreenComponent(navBackStackEntry) {
+                it.hapticsComponent().create()
+            }
+            HapticsScreen(
                 viewModel = viewModel(factory = component.viewModelFactory()),
                 navController = navController
             )
