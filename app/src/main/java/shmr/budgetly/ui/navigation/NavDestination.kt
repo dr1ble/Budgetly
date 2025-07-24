@@ -38,6 +38,9 @@ data object SyncSettings : NavDestination
 @Serializable
 data object Language : NavDestination
 
+@Serializable
+object AboutApp
+
 // --- Экраны с аргументами ---
 
 /**

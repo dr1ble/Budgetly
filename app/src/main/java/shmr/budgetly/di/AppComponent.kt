@@ -4,6 +4,7 @@ import android.content.Context
 import dagger.BindsInstance
 import dagger.Component
 import shmr.budgetly.BudgetlyApp
+import shmr.budgetly.di.features.about.AboutAppComponent
 import shmr.budgetly.di.features.account.AccountComponent
 import shmr.budgetly.di.features.analyze.AnalyzeComponent
 import shmr.budgetly.di.features.articles.ArticlesComponent
@@ -69,6 +70,8 @@ interface AppComponent : ViewModelFactoryProvider {
     fun syncSettingsComponent(): SyncSettingsComponent.Factory
 
     fun languageComponent(): LanguageComponent.Factory
+
+    fun aboutAppComponent(): AboutAppComponent.Factory
 
 
 }

@@ -18,6 +18,7 @@ import androidx.navigation.NavController
 import shmr.budgetly.R
 import shmr.budgetly.ui.components.AppTopBar
 import shmr.budgetly.ui.components.BaseListItem
+import shmr.budgetly.ui.navigation.AboutApp
 import shmr.budgetly.ui.navigation.ColorPicker
 import shmr.budgetly.ui.navigation.Haptics
 import shmr.budgetly.ui.navigation.Language
@@ -138,6 +139,14 @@ fun SettingsScreen(
                             )
                         },
                         onClick = { navController.navigate(Language) }
+                    )
+                }
+
+                SettingType.NAVIGATION_ABOUT -> {
+                    BaseListItem(
+                        title = stringResource(id = item.titleRes),
+                        trail = { /* ... */ },
+                        onClick = { navController.navigate(AboutApp) } // Изменяем навигацию здесь
                     )
                 }
             }

@@ -15,6 +15,7 @@ import shmr.budgetly.ui.screens.expenses.ExpensesScreen
 import shmr.budgetly.ui.screens.history.HistoryScreen
 import shmr.budgetly.ui.screens.incomes.IncomesScreen
 import shmr.budgetly.ui.screens.settings.SettingsScreen
+import shmr.budgetly.ui.screens.settings.about.AboutAppScreen
 import shmr.budgetly.ui.screens.settings.colorpicker.ColorPickerScreen
 import shmr.budgetly.ui.screens.settings.haptics.HapticsScreen
 import shmr.budgetly.ui.screens.settings.language.LanguageScreen
@@ -173,6 +174,16 @@ fun AppNavGraph(
                 it.languageComponent().create()
             }
             LanguageScreen(
+                viewModel = viewModel(factory = component.viewModelFactory()),
+                navController = navController
+            )
+        }
+
+        composable<AboutApp> { navBackStackEntry ->
+            val component = rememberScreenComponent(navBackStackEntry) {
+                it.aboutAppComponent().create()
+            }
+            AboutAppScreen(
                 viewModel = viewModel(factory = component.viewModelFactory()),
                 navController = navController
             )

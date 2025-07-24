@@ -109,4 +109,7 @@
     <string name="language_is_selected_description">Выбранный язык</string>
     <string name="language_russian">Русский</string>
     <string name="language_english">Английский</string>
+
+    <string name="about_app_version">Версия приложения</string>
+    <string name="about_app_last_update">Последнее обновление</string>
 </resources>
