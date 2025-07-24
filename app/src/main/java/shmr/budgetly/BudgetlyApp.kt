@@ -5,7 +5,6 @@ import androidx.work.Configuration
 import androidx.work.WorkManager
 import shmr.budgetly.di.AppComponent
 import shmr.budgetly.di.DaggerAppComponent
-import shmr.budgetly.domain.monitor.LocaleDelegate
 import shmr.budgetly.domain.monitor.NetworkMonitor
 import shmr.budgetly.work.SyncScheduler
 import javax.inject.Inject
@@ -24,9 +23,6 @@ class BudgetlyApp : Application() {
     @Inject
     lateinit var syncScheduler: SyncScheduler
 
-    @Inject
-    lateinit var localeDelegate: LocaleDelegate
-
     override fun onCreate() {
         super.onCreate()
 
@@ -44,8 +40,7 @@ class BudgetlyApp : Application() {
         // 4. Только теперь, когда WorkManager готов, внедряем зависимости, которые от него зависят.
         appComponent.inject(this)
 
-        // 5. Запускаем делегат локали и остальные сервисы.
-        localeDelegate.applyLocale()
+        // 5. Запускаем остальные сервисы.
         networkMonitor.start()
         syncScheduler.startObserving()
     }

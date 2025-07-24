@@ -2,7 +2,6 @@ package shmr.budgetly.domain.repository
 
 import kotlinx.coroutines.flow.Flow
 import shmr.budgetly.domain.model.HapticEffect
-import shmr.budgetly.domain.model.Language
 import shmr.budgetly.domain.model.SyncInterval
 import shmr.budgetly.domain.model.ThemeColor
 
@@ -73,14 +72,5 @@ interface UserPreferencesRepository {
      */
     suspend fun setSyncInterval(interval: SyncInterval)
 
-    /**
-     * Поток с выбранным языком приложения.
-     */
-    val language: Flow<Language>
 
-    /**
-     * Сохраняет выбранный язык приложения.
-     * @param language Язык для сохранения.
-     */
-    suspend fun setLanguage(language: Language)
 }
