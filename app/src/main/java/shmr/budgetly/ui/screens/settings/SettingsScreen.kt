@@ -46,6 +46,7 @@ fun SettingsScreen(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .testTag("SettingsScreenContainer") // Добавляем testTag для поиска в тесте
     ) {
         items(
             items = uiState.settingsItems,
@@ -147,8 +148,13 @@ fun SettingsScreen(
                 SettingType.NAVIGATION_ABOUT -> {
                     BaseListItem(
                         title = stringResource(id = item.titleRes),
-                        trail = { /* ... */ },
-                        onClick = { navController.navigate(AboutApp) } // Изменяем навигацию здесь
+                        trail = {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_list_item_settings_arrow_right),
+                                contentDescription = null
+                            )
+                        },
+                        onClick = { navController.navigate(AboutApp) }
                     )
                 }
             }
