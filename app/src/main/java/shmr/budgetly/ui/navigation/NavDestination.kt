@@ -35,6 +35,9 @@ data object PinSettings : NavDestination
 @Serializable
 data object SyncSettings : NavDestination
 
+@Serializable
+data object Language : NavDestination
+
 // --- Экраны с аргументами ---
 
 /**

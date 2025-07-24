@@ -17,6 +17,7 @@ import shmr.budgetly.ui.screens.incomes.IncomesScreen
 import shmr.budgetly.ui.screens.settings.SettingsScreen
 import shmr.budgetly.ui.screens.settings.colorpicker.ColorPickerScreen
 import shmr.budgetly.ui.screens.settings.haptics.HapticsScreen
+import shmr.budgetly.ui.screens.settings.language.LanguageScreen
 import shmr.budgetly.ui.screens.settings.pincode.PinSettingsScreen
 import shmr.budgetly.ui.screens.settings.sync.SyncSettingsScreen
 import shmr.budgetly.ui.screens.transactiondetails.TransactionDetailsScreen
@@ -162,6 +163,16 @@ fun AppNavGraph(
                 it.syncSettingsComponent().create()
             }
             SyncSettingsScreen(
+                viewModel = viewModel(factory = component.viewModelFactory()),
+                navController = navController
+            )
+        }
+
+        composable<Language> { navBackStackEntry ->
+            val component = rememberScreenComponent(navBackStackEntry) {
+                it.languageComponent().create()
+            }
+            LanguageScreen(
                 viewModel = viewModel(factory = component.viewModelFactory()),
                 navController = navController
             )

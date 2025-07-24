@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import shmr.budgetly.di.scope.AppScope
 import shmr.budgetly.domain.model.HapticEffect
+import shmr.budgetly.domain.model.Language
 import shmr.budgetly.domain.model.SyncInterval
 import shmr.budgetly.domain.model.ThemeColor
 import shmr.budgetly.domain.repository.UserPreferencesRepository
@@ -31,6 +32,7 @@ class UserPreferencesRepositoryImpl @Inject constructor(
         val IS_HAPTICS_ENABLED = booleanPreferencesKey("is_haptics_enabled")
         val HAPTIC_EFFECT = stringPreferencesKey("haptic_effect")
         val SYNC_INTERVAL = stringPreferencesKey("sync_interval")
+        val APP_LANGUAGE = stringPreferencesKey("app_language")
     }
 
     override val lastSyncTimestamp: Flow<Long> = context.dataStore.data
@@ -107,6 +109,17 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     override suspend fun setSyncInterval(interval: SyncInterval) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.SYNC_INTERVAL] = interval.name
+        }
+    }
+
+    override val language: Flow<Language> = context.dataStore.data
+        .map { preferences ->
+            Language.fromCode(preferences[PreferencesKeys.APP_LANGUAGE])
+        }
+
+    override suspend fun setLanguage(language: Language) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.APP_LANGUAGE] = language.code
         }
     }
 }

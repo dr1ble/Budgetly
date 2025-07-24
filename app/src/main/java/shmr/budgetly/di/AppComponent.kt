@@ -13,6 +13,7 @@ import shmr.budgetly.di.features.expenses.ExpensesComponent
 import shmr.budgetly.di.features.haptics.HapticsComponent
 import shmr.budgetly.di.features.history.HistoryComponent
 import shmr.budgetly.di.features.incomes.IncomesComponent
+import shmr.budgetly.di.features.language.LanguageComponent
 import shmr.budgetly.di.features.pincode.PinCodeComponent
 import shmr.budgetly.di.features.pinsettings.PinSettingsComponent
 import shmr.budgetly.di.features.settings.SettingsComponent
@@ -66,6 +67,8 @@ interface AppComponent : ViewModelFactoryProvider {
     fun pinSettingsComponent(): PinSettingsComponent.Factory
 
     fun syncSettingsComponent(): SyncSettingsComponent.Factory
+
+    fun languageComponent(): LanguageComponent.Factory
 
 
 }

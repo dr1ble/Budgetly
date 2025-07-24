@@ -105,4 +105,8 @@
     <string name="sync_interval_1_hour">Каждый час</string>
     <string name="sync_interval_3_hours">Каждые 3 часа</string>
     <string name="setting_sync_frequency">Частота синхронизации</string>
+
+    <string name="language_is_selected_description">Выбранный язык</string>
+    <string name="language_russian">Русский</string>
+    <string name="language_english">Английский</string>
 </resources>

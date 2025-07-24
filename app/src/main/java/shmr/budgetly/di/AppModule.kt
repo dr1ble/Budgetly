@@ -6,6 +6,8 @@ import dagger.Provides
 import shmr.budgetly.BuildConfig
 import shmr.budgetly.di.scope.AppScope
 import shmr.budgetly.domain.monitor.HapticFeedbackManager
+import shmr.budgetly.domain.monitor.LocaleDelegate
+import shmr.budgetly.domain.repository.UserPreferencesRepository
 import javax.inject.Named
 
 /**
@@ -36,5 +38,11 @@ object AppModule {
     @AppScope
     fun provideHapticFeedbackManager(context: android.content.Context): HapticFeedbackManager {
         return HapticFeedbackManager(context)
+    }
+
+    @Provides
+    @AppScope
+    fun provideLocaleDelegate(userPreferencesRepository: UserPreferencesRepository): LocaleDelegate {
+        return LocaleDelegate(userPreferencesRepository)
     }
 }

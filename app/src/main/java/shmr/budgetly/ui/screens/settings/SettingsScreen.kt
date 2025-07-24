@@ -20,6 +20,7 @@ import shmr.budgetly.ui.components.AppTopBar
 import shmr.budgetly.ui.components.BaseListItem
 import shmr.budgetly.ui.navigation.ColorPicker
 import shmr.budgetly.ui.navigation.Haptics
+import shmr.budgetly.ui.navigation.Language
 import shmr.budgetly.ui.navigation.PinSettings
 import shmr.budgetly.ui.navigation.SyncSettings
 import shmr.budgetly.ui.util.LocalTopAppBarSetter
@@ -124,6 +125,19 @@ fun SettingsScreen(
                             )
                         },
                         onClick = { navController.navigate(SyncSettings) }
+                    )
+                }
+
+                SettingType.NAVIGATION_LANGUAGE -> {
+                    BaseListItem(
+                        title = stringResource(id = item.titleRes),
+                        trail = {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_list_item_settings_arrow_right),
+                                contentDescription = null
+                            )
+                        },
+                        onClick = { navController.navigate(Language) }
                     )
                 }
             }

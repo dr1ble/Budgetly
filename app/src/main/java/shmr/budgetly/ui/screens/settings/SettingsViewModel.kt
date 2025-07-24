@@ -52,7 +52,7 @@ class SettingsViewModel @Inject constructor(
             SettingItem(4, R.string.setting_haptics, SettingType.NAVIGATION_HAPTICS),
             SettingItem(5, R.string.setting_passcode, SettingType.NAVIGATION_PINCODE),
             SettingItem(6, R.string.setting_sync, SettingType.SYNC_INFO),
-            SettingItem(7, R.string.setting_language, SettingType.NAVIGATION),
+            SettingItem(7, R.string.setting_language, SettingType.NAVIGATION_LANGUAGE),
             SettingItem(8, R.string.setting_about, SettingType.NAVIGATION)
         )
     }
