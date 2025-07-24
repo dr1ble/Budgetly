@@ -14,6 +14,7 @@ import shmr.budgetly.di.features.haptics.HapticsComponent
 import shmr.budgetly.di.features.history.HistoryComponent
 import shmr.budgetly.di.features.incomes.IncomesComponent
 import shmr.budgetly.di.features.pincode.PinCodeComponent
+import shmr.budgetly.di.features.pinsettings.PinSettingsComponent
 import shmr.budgetly.di.features.settings.SettingsComponent
 import shmr.budgetly.di.features.transactiondetails.TransactionDetailsComponent
 import shmr.budgetly.di.scope.AppScope
@@ -61,6 +62,8 @@ interface AppComponent : ViewModelFactoryProvider {
     fun hapticsComponent(): HapticsComponent.Factory
 
     fun pinCodeComponent(): PinCodeComponent.Factory
+    fun pinSettingsComponent(): PinSettingsComponent.Factory
+
 
 
 }

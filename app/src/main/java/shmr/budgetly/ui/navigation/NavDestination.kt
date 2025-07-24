@@ -29,6 +29,9 @@ data object ColorPicker : NavDestination
 @Serializable
 data object Haptics : NavDestination
 
+@Serializable
+data object PinSettings : NavDestination
+
 // --- Экраны с аргументами ---
 
 /**

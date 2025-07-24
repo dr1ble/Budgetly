@@ -18,4 +18,9 @@ sealed class AppEvent {
      * Событие, запрашивающее переход на экран установки/изменения пин-кода.
      */
     data object NavigateToPinSetup : AppEvent()
+
+    /**
+     * Событие, сигнализирующее об изменении статуса PIN-кода (установлен/удален).
+     */
+    data object PinStatusChanged : AppEvent()
 }

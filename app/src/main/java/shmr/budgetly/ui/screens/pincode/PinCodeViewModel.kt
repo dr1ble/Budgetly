@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import shmr.budgetly.di.viewmodel.AssistedSavedStateViewModelFactory
+import shmr.budgetly.domain.events.AppEvent
+import shmr.budgetly.domain.events.AppEventBus
 import shmr.budgetly.domain.usecase.CheckPinUseCase
 import shmr.budgetly.domain.usecase.ClearPinUseCase
 import shmr.budgetly.domain.usecase.IsPinSetUseCase
@@ -24,6 +26,7 @@ class PinCodeViewModel @AssistedInject constructor(
     private val savePinUseCase: SavePinUseCase,
     private val checkPinUseCase: CheckPinUseCase,
     private val clearPinUseCase: ClearPinUseCase,
+    private val appEventBus: AppEventBus,
     @Assisted private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -75,6 +78,7 @@ class PinCodeViewModel @AssistedInject constructor(
                 PinCodeMode.CREATE_STEP_2 -> {
                     if (currentPin == tempPin) {
                         savePinUseCase(currentPin)
+                        appEventBus.postEvent(AppEvent.PinStatusChanged)
                         _uiState.update { it.copy(isPinCreated = true) }
                     } else {
                         tempPin = null
@@ -125,6 +129,7 @@ class PinCodeViewModel @AssistedInject constructor(
                     val isCorrect = checkPinUseCase(currentPin)
                     if (isCorrect) {
                         clearPinUseCase()
+                        appEventBus.postEvent(AppEvent.PinStatusChanged)
                         _uiState.update { it.copy(isPinCleared = true) }
                     } else {
                         _uiState.update {

@@ -48,6 +48,8 @@ class IncomesViewModel @Inject constructor(
                     }
                     is AppEvent.NavigateToPinSetup -> {
                     }
+                    is AppEvent.PinStatusChanged -> {
+                    }
                 }
             }
         }

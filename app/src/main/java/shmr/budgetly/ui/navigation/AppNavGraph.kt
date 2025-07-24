@@ -16,6 +16,7 @@ import shmr.budgetly.ui.screens.expenses.ExpensesScreen
 import shmr.budgetly.ui.screens.haptics.HapticsScreen
 import shmr.budgetly.ui.screens.history.HistoryScreen
 import shmr.budgetly.ui.screens.incomes.IncomesScreen
+import shmr.budgetly.ui.screens.pincode.PinSettingsScreen
 import shmr.budgetly.ui.screens.settings.SettingsScreen
 import shmr.budgetly.ui.screens.transactiondetails.TransactionDetailsScreen
 
@@ -70,8 +71,7 @@ fun AppNavGraph(
                 rememberScreenComponent(navBackStackEntry) { it.settingsComponent().create() }
             SettingsScreen(
                 viewModel = viewModel(factory = component.viewModelFactory()),
-                navController = navController,
-                onNavigateToPin = onNavigateToPin
+                navController = navController
             )
         }
         composable<History>(
@@ -142,6 +142,17 @@ fun AppNavGraph(
             HapticsScreen(
                 viewModel = viewModel(factory = component.viewModelFactory()),
                 navController = navController
+            )
+        }
+
+        composable<PinSettings> { navBackStackEntry ->
+            val component = rememberScreenComponent(navBackStackEntry) {
+                it.pinSettingsComponent().create()
+            }
+            PinSettingsScreen(
+                viewModel = viewModel(factory = component.viewModelFactory()),
+                navController = navController,
+                onNavigateToPin = onNavigateToPin
             )
         }
     }

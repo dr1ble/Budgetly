@@ -48,6 +48,8 @@ class ExpensesViewModel @Inject constructor(
                     }
                     is AppEvent.NavigateToPinSetup -> {
                     }
+                    is AppEvent.PinStatusChanged -> {
+                    }
                 }
             }
         }
