@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -57,6 +58,7 @@ fun SettingsScreen(
                         trail = {
                             Switch(
                                 checked = uiState.isDarkThemeEnabled,
+                                modifier = Modifier.testTag("DarkThemeSwitch"),
                                 onCheckedChange = viewModel::onThemeChanged
                             )
                         }

@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import kotlinx.serialization.Serializable
 import shmr.budgetly.R
 
+
 /**
  * Базовый запечатанный интерфейс для всех навигационных маршрутов в приложении.
  * Каждый маршрут является отдельным `@Serializable` классом или объектом.
@@ -120,7 +121,7 @@ data object Articles : BottomNavItem {
 @Serializable
 data object Settings : BottomNavItem {
     override val icon: Int = R.drawable.ic_bottom_nav_settings
-    override val label: Int = R.string.bottom_nav_label_settigns
+    override val label: Int = R.string.bottom_nav_label_settings
 }
 
 /** Удобный список для итерации по элементам нижней навигации. */

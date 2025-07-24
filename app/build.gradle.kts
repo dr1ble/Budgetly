@@ -30,7 +30,9 @@ android {
         versionCode = 1
         versionName = "0.1"
 
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments["clearPackageData"] = "true"
         buildConfigField("String", "BUILD_TIME", "\"${System.currentTimeMillis()}\"")
         buildConfigField("String", "API_TOKEN", "\"$apiToken\"")
     }

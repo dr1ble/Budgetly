@@ -5,7 +5,7 @@
     <string name="bottom_nav_label_incomes">Доходы</string>
     <string name="bottom_nav_label_score">Счет</string>
     <string name="bottom_nav_label_articles">Статьи</string>
-    <string name="bottom_nav_label_settigns">Настройки</string>
+    <string name="bottom_nav_label_settings">Настройки</string>
 
     <string name="splash_screen_label">Splash screen</string>
 
@@ -112,4 +112,5 @@
 
     <string name="about_app_version">Версия приложения</string>
     <string name="about_app_last_update">Последнее обновление</string>
+
 </resources>

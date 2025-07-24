@@ -60,11 +60,7 @@ fun RootNavGraph() {
                     navController.navigate(Main) { popUpTo<Pin> { inclusive = true } }
                 },
                 onPinCreated = {
-                    navController.navigate(Pin(PinScreenPurpose.UNLOCK)) {
-                        popUpTo<Pin> {
-                            inclusive = true
-                        }
-                    }
+                    navController.popBackStack()
                 },
                 onPinCleared = { navController.popBackStack() },
                 onCancel = { navController.popBackStack() }
