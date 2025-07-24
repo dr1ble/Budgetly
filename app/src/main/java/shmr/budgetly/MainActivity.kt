@@ -2,10 +2,10 @@ package shmr.budgetly
 
 import android.os.Build
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -21,7 +21,7 @@ import shmr.budgetly.ui.theme.BudgetlyTheme
  * Отвечает за настройку окна, установку SplashScreen и отображение основного контента
  * с помощью Jetpack Compose.
  */
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
 
     private val splashViewModel: SplashViewModel by viewModels {
         (application as BudgetlyApp).appComponent.viewModelFactory()

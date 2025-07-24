@@ -25,6 +25,8 @@ class LanguageViewModel @Inject constructor(
     fun onLanguageSelected(language: Language) {
         if (language == _uiState.value.selectedLanguage) return
 
+        _uiState.update { it.copy(selectedLanguage = language) }
+
         val appLocale = LocaleListCompat.forLanguageTags(language.code)
         AppCompatDelegate.setApplicationLocales(appLocale)
     }
