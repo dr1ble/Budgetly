@@ -25,7 +25,8 @@ const val TRANSACTION_SAVED_RESULT_KEY = "transaction_saved"
 @Composable
 fun AppNavGraph(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onNavigateToPin: (purpose: PinScreenPurpose) -> Unit
 ) {
     NavHost(
         navController = navController,
@@ -69,7 +70,8 @@ fun AppNavGraph(
                 rememberScreenComponent(navBackStackEntry) { it.settingsComponent().create() }
             SettingsScreen(
                 viewModel = viewModel(factory = component.viewModelFactory()),
-                navController = navController
+                navController = navController,
+                onNavigateToPin = onNavigateToPin
             )
         }
         composable<History>(

@@ -20,13 +20,15 @@ import shmr.budgetly.ui.components.AppTopBar
 import shmr.budgetly.ui.components.BaseListItem
 import shmr.budgetly.ui.navigation.ColorPicker
 import shmr.budgetly.ui.navigation.Haptics
+import shmr.budgetly.ui.navigation.PinScreenPurpose
 import shmr.budgetly.ui.util.LocalTopAppBarSetter
 
 @Composable
 fun SettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel,
-    navController: NavController
+    navController: NavController,
+    onNavigateToPin: (purpose: PinScreenPurpose) -> Unit
 ) {
     val topAppBarSetter = LocalTopAppBarSetter.current
     LaunchedEffect(Unit) {
@@ -36,6 +38,7 @@ fun SettingsScreen(
     }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isPinSet by viewModel.isPinSet.collectAsStateWithLifecycle()
 
     LazyColumn(
         modifier = modifier
@@ -58,25 +61,80 @@ fun SettingsScreen(
                         }
                     )
                 }
+
                 SettingType.PRIMARY_COLOR -> {
                     BaseListItem(
                         title = stringResource(id = item.titleRes),
                         trail = {
                             Icon(
                                 painter = painterResource(R.drawable.ic_list_item_settings_arrow_right),
-                                contentDescription = null,
+                                contentDescription = null
                             )
                         },
                         onClick = { navController.navigate(ColorPicker) }
                     )
                 }
+
+                SettingType.NAVIGATION_HAPTICS -> {
+                    BaseListItem(
+                        title = stringResource(id = item.titleRes),
+                        trail = {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_list_item_settings_arrow_right),
+                                contentDescription = null
+                            )
+                        },
+                        onClick = { navController.navigate(Haptics) }
+                    )
+                }
+
+                SettingType.NAVIGATION_PINCODE -> {
+                    // Здесь мы показываем один пункт, но с разным поведением
+                    if (isPinSet) {
+                        // Если пин-код установлен
+                        BaseListItem(
+                            title = stringResource(R.string.setting_passcode_change),
+                            subtitle = stringResource(R.string.setting_passcode_subtitle_set),
+                            trail = {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_list_item_settings_arrow_right),
+                                    contentDescription = null
+                                )
+                            },
+                            onClick = { onNavigateToPin(PinScreenPurpose.SETUP) }
+                        )
+                        BaseListItem(
+                            title = stringResource(R.string.setting_passcode_delete),
+                            trail = {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_list_item_settings_arrow_right),
+                                    contentDescription = null
+                                )
+                            },
+                            onClick = { onNavigateToPin(PinScreenPurpose.DELETE) }
+                        )
+                    } else {
+                        BaseListItem(
+                            title = stringResource(R.string.setting_passcode_set),
+                            subtitle = stringResource(R.string.setting_passcode_subtitle_not_set),
+                            trail = {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_list_item_settings_arrow_right),
+                                    contentDescription = null
+                                )
+                            },
+                            onClick = { onNavigateToPin(PinScreenPurpose.SETUP) }
+                        )
+                    }
+                }
+
                 SettingType.NAVIGATION -> {
                     BaseListItem(
                         title = stringResource(id = item.titleRes),
                         trail = {
                             Icon(
                                 painter = painterResource(R.drawable.ic_list_item_settings_arrow_right),
-                                contentDescription = null,
+                                contentDescription = null
                             )
                         },
                         onClick = { }
@@ -90,23 +148,10 @@ fun SettingsScreen(
                         trail = {
                             Icon(
                                 painter = painterResource(R.drawable.ic_list_item_settings_arrow_right),
-                                contentDescription = null,
+                                contentDescription = null
                             )
                         },
                         onClick = { }
-                    )
-                }
-
-                SettingType.NAVIGATION_HAPTICS -> {
-                    BaseListItem(
-                        title = stringResource(id = item.titleRes),
-                        trail = {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_list_item_settings_arrow_right),
-                                contentDescription = null,
-                            )
-                        },
-                        onClick = { navController.navigate(Haptics) }
                     )
                 }
             }

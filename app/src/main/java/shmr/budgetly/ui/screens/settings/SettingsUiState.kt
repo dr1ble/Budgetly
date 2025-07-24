@@ -11,7 +11,7 @@ typealias SettingId = Int
  * Тип элемента настроек, определяющий его поведение в UI.
  */
 enum class SettingType {
-    THEME_SWITCH, PRIMARY_COLOR, NAVIGATION, SYNC_INFO, NAVIGATION_HAPTICS
+    THEME_SWITCH, PRIMARY_COLOR, NAVIGATION, SYNC_INFO, NAVIGATION_HAPTICS, NAVIGATION_PINCODE
 }
 
 /**

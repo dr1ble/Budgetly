@@ -4,6 +4,7 @@ import dagger.Binds
 import dagger.Module
 import shmr.budgetly.data.repository.AccountRepositoryImpl
 import shmr.budgetly.data.repository.CategoryRepositoryImpl
+import shmr.budgetly.data.repository.SecurityRepositoryImpl
 import shmr.budgetly.data.repository.SyncRepositoryImpl
 import shmr.budgetly.data.repository.TransactionRepositoryImpl
 import shmr.budgetly.data.repository.UserPreferencesRepositoryImpl
@@ -22,6 +23,7 @@ import shmr.budgetly.data.source.remote.transaction.TransactionRemoteDataSourceI
 import shmr.budgetly.di.scope.AppScope
 import shmr.budgetly.domain.repository.AccountRepository
 import shmr.budgetly.domain.repository.CategoryRepository
+import shmr.budgetly.domain.repository.SecurityRepository
 import shmr.budgetly.domain.repository.SyncRepository
 import shmr.budgetly.domain.repository.TransactionRepository
 import shmr.budgetly.domain.repository.UserPreferencesRepository
@@ -52,6 +54,10 @@ abstract class DataModule {
     @Binds
     @AppScope
     abstract fun bindUserPreferencesRepository(impl: UserPreferencesRepositoryImpl): UserPreferencesRepository
+
+    @Binds
+    @AppScope
+    abstract fun bindSecurityRepository(impl: SecurityRepositoryImpl): SecurityRepository
 
     // Удаленные источники данных
     @Binds

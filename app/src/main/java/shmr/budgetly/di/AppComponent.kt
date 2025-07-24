@@ -13,6 +13,7 @@ import shmr.budgetly.di.features.expenses.ExpensesComponent
 import shmr.budgetly.di.features.haptics.HapticsComponent
 import shmr.budgetly.di.features.history.HistoryComponent
 import shmr.budgetly.di.features.incomes.IncomesComponent
+import shmr.budgetly.di.features.pincode.PinCodeComponent
 import shmr.budgetly.di.features.settings.SettingsComponent
 import shmr.budgetly.di.features.transactiondetails.TransactionDetailsComponent
 import shmr.budgetly.di.scope.AppScope
@@ -31,14 +32,13 @@ import shmr.budgetly.work.DaggerWorkerFactory
         DatabaseModule::class,
         ViewModelModule::class,
         AssistedViewModelModule::class,
-        ViewModelFactoryModule::class, // Добавляем модуль фабрики
-        MainViewModelModule::class     // Добавляем модуль для MainViewModel
+        ViewModelFactoryModule::class,
+        MainViewModelModule::class
     ]
 )
-interface AppComponent : ViewModelFactoryProvider { // Реализуем интерфейс провайдера
+interface AppComponent : ViewModelFactoryProvider {
 
     fun inject(app: BudgetlyApp)
-
     fun workerFactory(): DaggerWorkerFactory
 
     @Component.Factory
@@ -59,4 +59,8 @@ interface AppComponent : ViewModelFactoryProvider { // Реализуем инт
 
     fun colorPickerComponent(): ColorPickerComponent.Factory
     fun hapticsComponent(): HapticsComponent.Factory
+
+    fun pinCodeComponent(): PinCodeComponent.Factory
+
+
 }

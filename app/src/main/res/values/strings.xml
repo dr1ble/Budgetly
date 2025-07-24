@@ -85,4 +85,19 @@
     <string name="haptic_effect_tick">Тик</string>
     <string name="haptic_effect_double_click">Двойной клик</string>
     <string name="haptic_effect_is_selected_description">Выбранный эффект</string>
+
+    <string name="pincode_create_title">Создайте пин-код</string>
+    <string name="pincode_confirm_title">Подтвердите пин-код</string>
+    <string name="pincode_check_title">Введите пин-код</string>
+    <string name="pincode_error_mismatch">Пин-коды не совпадают. Попробуйте еще раз.</string>
+    <string name="pincode_error_incorrect">Неверный пин-код</string>
+    <string name="pincode_delete_button_description">Удалить символ</string>
+    <string name="pincode_check_to_change_title">Введите старый пин-код</string>
+    <string name="setting_passcode_subtitle_set">Установлен</string>
+    <string name="setting_passcode_subtitle_not_set">Не установлен</string>
+    <string name="pincode_delete_title">Введите пин-код для удаления</string>
+    <string name="setting_passcode_set">Установить пин-код</string>
+    <string name="setting_passcode_change">Изменить пин-код</string>
+    <string name="setting_passcode_delete">Удалить пин-код</string>
+
 </resources>

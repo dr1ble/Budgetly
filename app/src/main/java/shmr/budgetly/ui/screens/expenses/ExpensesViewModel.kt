@@ -46,6 +46,8 @@ class ExpensesViewModel @Inject constructor(
                             loadExpenses(isInitialLoad = true)
                         }
                     }
+                    is AppEvent.NavigateToPinSetup -> {
+                    }
                 }
             }
         }

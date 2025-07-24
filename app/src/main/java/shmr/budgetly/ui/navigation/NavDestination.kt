@@ -31,6 +31,24 @@ data object Haptics : NavDestination
 
 // --- Экраны с аргументами ---
 
+/**
+ * Определяет цель, с которой открывается экран пин-кода.
+ */
+@Serializable
+enum class PinScreenPurpose {
+    /** Ввод пин-кода для разблокировки приложения. */
+    UNLOCK,
+
+    /** Установка нового или смена существующего пин-кода. */
+    SETUP,
+
+    /** Удаление существующего пин-кода. */
+    DELETE
+}
+
+@Serializable
+data class Pin(val purpose: PinScreenPurpose) : NavDestination
+
 @Serializable
 data class History(val parentRoute: String) : NavDestination
 
