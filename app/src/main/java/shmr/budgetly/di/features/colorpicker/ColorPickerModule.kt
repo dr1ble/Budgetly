@@ -5,7 +5,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
 import shmr.budgetly.di.viewmodel.ViewModelKey
-import shmr.budgetly.ui.screens.colorpicker.ColorPickerViewModel
+import shmr.budgetly.ui.screens.settings.colorpicker.ColorPickerViewModel
 
 @Module
 abstract class ColorPickerModule {

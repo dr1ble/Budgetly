@@ -1,4 +1,4 @@
-package shmr.budgetly.ui.screens.pincode
+package shmr.budgetly.ui.screens.settings.pincode
 
 import androidx.annotation.StringRes
 import shmr.budgetly.R

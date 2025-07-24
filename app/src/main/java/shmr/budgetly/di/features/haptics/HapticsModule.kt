@@ -5,7 +5,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
 import shmr.budgetly.di.viewmodel.ViewModelKey
-import shmr.budgetly.ui.screens.haptics.HapticsViewModel
+import shmr.budgetly.ui.screens.settings.haptics.HapticsViewModel
 
 @Module
 abstract class HapticsModule {

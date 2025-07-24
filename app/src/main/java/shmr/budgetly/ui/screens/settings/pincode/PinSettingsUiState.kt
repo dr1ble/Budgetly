@@ -1,4 +1,4 @@
-package shmr.budgetly.ui.screens.pincode
+package shmr.budgetly.ui.screens.settings.pincode
 
 /**
  * Состояние UI для экрана настроек пин-кода.

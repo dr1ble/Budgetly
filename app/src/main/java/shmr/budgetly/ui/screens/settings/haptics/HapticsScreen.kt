@@ -1,4 +1,4 @@
-package shmr.budgetly.ui.screens.haptics
+package shmr.budgetly.ui.screens.settings.haptics
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

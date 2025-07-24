@@ -14,7 +14,7 @@ import androidx.navigation.compose.rememberNavController
 import shmr.budgetly.BudgetlyApp
 import shmr.budgetly.ui.di.rememberScreenComponent
 import shmr.budgetly.ui.screens.main.MainScreen
-import shmr.budgetly.ui.screens.pincode.PinCodeScreen
+import shmr.budgetly.ui.screens.settings.pincode.PinCodeScreen
 import shmr.budgetly.ui.screens.splash.SplashScreen
 import shmr.budgetly.ui.screens.splash.SplashViewModel
 
@@ -23,7 +23,6 @@ import shmr.budgetly.ui.screens.splash.SplashViewModel
 fun RootNavGraph() {
     val appComponent = (LocalContext.current.applicationContext as BudgetlyApp).appComponent
     val splashViewModel: SplashViewModel = viewModel(factory = appComponent.viewModelFactory())
-
     val navController = rememberNavController()
 
     NavHost(
@@ -33,19 +32,22 @@ fun RootNavGraph() {
         composable<Splash> {
             val uiState by splashViewModel.uiState.collectAsStateWithLifecycle()
 
-            SplashScreen(
-                onReady = splashViewModel::setReady,
-                onAnimationFinished = {}
-            )
-
-            if (uiState.isReadyToNavigate) {
+            // Переходим, когда ViewModel разрешит
+            if (uiState.isNavigationAllowed) {
                 LaunchedEffect(Unit) {
-                    val destination =
-                        if (uiState.isPinSet == true) Pin(PinScreenPurpose.UNLOCK) else Main
-                    navController.navigate(destination) {
-                        popUpTo<Splash> { inclusive = true }
+                    uiState.navigationDestination?.let { destination ->
+                        navController.navigate(destination) {
+                            popUpTo<Splash> { inclusive = true }
+                        }
                     }
                 }
+            }
+
+            // Показываем сплэш, пока навигация не разрешена
+            if (!uiState.isNavigationAllowed) {
+                SplashScreen(
+                    onAnimationFinished = splashViewModel::onAnimationFinished
+                )
             }
         }
 
@@ -55,21 +57,17 @@ fun RootNavGraph() {
             PinCodeScreen(
                 viewModel = viewModel(factory = component.viewModelFactory()),
                 onPinVerified = {
-                    navController.navigate(Main) {
-                        popUpTo<Pin> { inclusive = true }
-                    }
+                    navController.navigate(Main) { popUpTo<Pin> { inclusive = true } }
                 },
                 onPinCreated = {
                     navController.navigate(Pin(PinScreenPurpose.UNLOCK)) {
-                        popUpTo<Pin> { inclusive = true }
+                        popUpTo<Pin> {
+                            inclusive = true
+                        }
                     }
                 },
-                onPinCleared = {
-                    navController.popBackStack()
-                },
-                onCancel = {
-                    navController.popBackStack()
-                }
+                onPinCleared = { navController.popBackStack() },
+                onCancel = { navController.popBackStack() }
             )
         }
 

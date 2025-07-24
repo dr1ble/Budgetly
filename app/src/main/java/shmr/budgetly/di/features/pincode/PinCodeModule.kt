@@ -6,7 +6,7 @@ import dagger.Module
 import dagger.multibindings.IntoMap
 import shmr.budgetly.di.viewmodel.AssistedSavedStateViewModelFactory
 import shmr.budgetly.di.viewmodel.ViewModelKey
-import shmr.budgetly.ui.screens.pincode.PinCodeViewModel
+import shmr.budgetly.ui.screens.settings.pincode.PinCodeViewModel
 
 @Module
 abstract class PinCodeModule {

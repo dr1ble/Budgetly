@@ -1,4 +1,4 @@
-package shmr.budgetly.ui.screens.pincode
+package shmr.budgetly.ui.screens.settings.pincode
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween

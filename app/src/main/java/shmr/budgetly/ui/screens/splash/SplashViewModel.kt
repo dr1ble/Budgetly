@@ -1,5 +1,6 @@
 package shmr.budgetly.ui.screens.splash
 
+import SplashUiState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -7,6 +8,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import shmr.budgetly.domain.usecase.IsPinSetUseCase
+import shmr.budgetly.ui.navigation.Main
+import shmr.budgetly.ui.navigation.Pin
+import shmr.budgetly.ui.navigation.PinScreenPurpose
 import javax.inject.Inject
 
 /**
@@ -28,27 +32,15 @@ class SplashViewModel @Inject constructor(
     private fun checkPinStatus() {
         viewModelScope.launch {
             val isPinSet = isPinSetUseCase()
-            _uiState.update { it.copy(isPinSet = isPinSet) }
+            val destination = if (isPinSet) Pin(PinScreenPurpose.UNLOCK) else Main
+            _uiState.update { it.copy(isDataLoaded = true, navigationDestination = destination) }
         }
     }
 
     /**
-     * Устанавливает состояние готовности в `true`.
-     * Вызывается из UI, когда необходимые для отображения ресурсы (анимация) загружены.
+     * Вызывается из UI по завершении Lottie-анимации.
      */
-    fun setReady() {
-        _uiState.update { it.copy(isAnimationReady = true) }
+    fun onAnimationFinished() {
+        _uiState.update { it.copy(isNavigationAllowed = true) }
     }
-}
-
-data class SplashUiState(
-    val isAnimationReady: Boolean = false,
-    val isPinSet: Boolean? = null // null пока идет проверка
-) {
-    /**
-     * Готовность к переходу на следующий экран.
-     * Наступает, когда и анимация готова, и проверка пин-кода завершена.
-     */
-    val isReadyToNavigate: Boolean
-        get() = isAnimationReady && isPinSet != null
 }

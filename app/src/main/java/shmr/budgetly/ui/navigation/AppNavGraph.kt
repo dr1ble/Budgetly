@@ -11,13 +11,13 @@ import shmr.budgetly.ui.screens.account.AccountScreen
 import shmr.budgetly.ui.screens.account.edit.EditAccountScreen
 import shmr.budgetly.ui.screens.analyze.AnalyzeScreen
 import shmr.budgetly.ui.screens.articles.ArticlesScreen
-import shmr.budgetly.ui.screens.colorpicker.ColorPickerScreen
 import shmr.budgetly.ui.screens.expenses.ExpensesScreen
-import shmr.budgetly.ui.screens.haptics.HapticsScreen
 import shmr.budgetly.ui.screens.history.HistoryScreen
 import shmr.budgetly.ui.screens.incomes.IncomesScreen
-import shmr.budgetly.ui.screens.pincode.PinSettingsScreen
 import shmr.budgetly.ui.screens.settings.SettingsScreen
+import shmr.budgetly.ui.screens.settings.colorpicker.ColorPickerScreen
+import shmr.budgetly.ui.screens.settings.haptics.HapticsScreen
+import shmr.budgetly.ui.screens.settings.pincode.PinSettingsScreen
 import shmr.budgetly.ui.screens.transactiondetails.TransactionDetailsScreen
 
 const val ACCOUNT_UPDATED_RESULT_KEY = "account_updated"

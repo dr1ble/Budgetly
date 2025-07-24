@@ -1,5 +1,7 @@
-package shmr.budgetly.ui.screens.haptics
+package shmr.budgetly.ui.screens.settings.haptics
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,6 +45,7 @@ class HapticsViewModel @Inject constructor(
     /**
      * Обрабатывает переключение свитча включения/выключения вибрации.
      */
+    @RequiresApi(Build.VERSION_CODES.Q)
     fun onHapticsEnabledChanged(isEnabled: Boolean) {
         viewModelScope.launch {
             setHapticsEnabled(isEnabled)
@@ -56,6 +59,7 @@ class HapticsViewModel @Inject constructor(
     /**
      * Обрабатывает выбор нового эффекта вибрации.
      */
+    @RequiresApi(Build.VERSION_CODES.Q)
     fun onEffectSelected(effect: HapticEffect) {
         viewModelScope.launch {
             setHapticEffect(effect)

@@ -1,4 +1,4 @@
-package shmr.budgetly.ui.screens.pincode
+package shmr.budgetly.ui.screens.settings.pincode
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

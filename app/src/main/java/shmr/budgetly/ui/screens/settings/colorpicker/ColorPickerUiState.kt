@@ -1,4 +1,4 @@
-package shmr.budgetly.ui.screens.colorpicker
+package shmr.budgetly.ui.screens.settings.colorpicker
 
 import shmr.budgetly.domain.model.ThemeColor
 

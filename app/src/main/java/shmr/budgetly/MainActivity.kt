@@ -16,6 +16,11 @@ import shmr.budgetly.ui.screens.main.MainViewModel
 import shmr.budgetly.ui.screens.splash.SplashViewModel
 import shmr.budgetly.ui.theme.BudgetlyTheme
 
+/**
+ * Главная и единственная Activity в приложении.
+ * Отвечает за настройку окна, установку SplashScreen и отображение основного контента
+ * с помощью Jetpack Compose.
+ */
 class MainActivity : ComponentActivity() {
 
     private val splashViewModel: SplashViewModel by viewModels {
@@ -47,15 +52,21 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * Настраивает поведение SplashScreen.
+     */
     private fun setupSplashScreen(splashScreen: SplashScreen) {
         splashScreen.setKeepOnScreenCondition {
-            !splashViewModel.uiState.value.isReadyToNavigate
+            !splashViewModel.uiState.value.isDataLoaded
         }
         splashScreen.setOnExitAnimationListener { splashScreenView ->
             splashScreenView.remove()
         }
     }
 
+    /**
+     * Настраивает окно для отображения в режиме "edge-to-edge".
+     */
     private fun setupWindow() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
     }

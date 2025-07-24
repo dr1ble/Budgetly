@@ -1,4 +1,4 @@
-package shmr.budgetly.ui.screens.haptics
+package shmr.budgetly.ui.screens.settings.haptics
 
 import shmr.budgetly.domain.model.HapticEffect
 
