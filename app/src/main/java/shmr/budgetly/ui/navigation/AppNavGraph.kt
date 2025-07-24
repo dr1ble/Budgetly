@@ -18,6 +18,7 @@ import shmr.budgetly.ui.screens.settings.SettingsScreen
 import shmr.budgetly.ui.screens.settings.colorpicker.ColorPickerScreen
 import shmr.budgetly.ui.screens.settings.haptics.HapticsScreen
 import shmr.budgetly.ui.screens.settings.pincode.PinSettingsScreen
+import shmr.budgetly.ui.screens.settings.sync.SyncSettingsScreen
 import shmr.budgetly.ui.screens.transactiondetails.TransactionDetailsScreen
 
 const val ACCOUNT_UPDATED_RESULT_KEY = "account_updated"
@@ -153,6 +154,16 @@ fun AppNavGraph(
                 viewModel = viewModel(factory = component.viewModelFactory()),
                 navController = navController,
                 onNavigateToPin = onNavigateToPin
+            )
+        }
+
+        composable<SyncSettings> { navBackStackEntry ->
+            val component = rememberScreenComponent(navBackStackEntry) {
+                it.syncSettingsComponent().create()
+            }
+            SyncSettingsScreen(
+                viewModel = viewModel(factory = component.viewModelFactory()),
+                navController = navController
             )
         }
     }

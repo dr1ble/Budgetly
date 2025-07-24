@@ -21,6 +21,7 @@ import shmr.budgetly.ui.components.BaseListItem
 import shmr.budgetly.ui.navigation.ColorPicker
 import shmr.budgetly.ui.navigation.Haptics
 import shmr.budgetly.ui.navigation.PinSettings
+import shmr.budgetly.ui.navigation.SyncSettings
 import shmr.budgetly.ui.util.LocalTopAppBarSetter
 
 @Composable
@@ -122,7 +123,7 @@ fun SettingsScreen(
                                 contentDescription = null
                             )
                         },
-                        onClick = { }
+                        onClick = { navController.navigate(SyncSettings) }
                     )
                 }
             }

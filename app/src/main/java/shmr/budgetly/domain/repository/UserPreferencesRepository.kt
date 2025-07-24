@@ -2,6 +2,7 @@ package shmr.budgetly.domain.repository
 
 import kotlinx.coroutines.flow.Flow
 import shmr.budgetly.domain.model.HapticEffect
+import shmr.budgetly.domain.model.SyncInterval
 import shmr.budgetly.domain.model.ThemeColor
 
 /**
@@ -60,4 +61,14 @@ interface UserPreferencesRepository {
      * Сохраняет выбранный эффект тактильной обратной связи.
      */
     suspend fun setHapticEffect(effect: HapticEffect)
+
+    /**
+     * Поток с выбранным интервалом синхронизации.
+     */
+    val syncInterval: Flow<SyncInterval>
+
+    /**
+     * Сохраняет выбранный интервал синхронизации.
+     */
+    suspend fun setSyncInterval(interval: SyncInterval)
 }

@@ -32,6 +32,9 @@ data object Haptics : NavDestination
 @Serializable
 data object PinSettings : NavDestination
 
+@Serializable
+data object SyncSettings : NavDestination
+
 // --- Экраны с аргументами ---
 
 /**

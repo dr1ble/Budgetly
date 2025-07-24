@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import shmr.budgetly.di.scope.AppScope
 import shmr.budgetly.domain.model.HapticEffect
+import shmr.budgetly.domain.model.SyncInterval
 import shmr.budgetly.domain.model.ThemeColor
 import shmr.budgetly.domain.repository.UserPreferencesRepository
 import javax.inject.Inject
@@ -29,6 +30,7 @@ class UserPreferencesRepositoryImpl @Inject constructor(
         val THEME_COLOR = stringPreferencesKey("theme_color")
         val IS_HAPTICS_ENABLED = booleanPreferencesKey("is_haptics_enabled")
         val HAPTIC_EFFECT = stringPreferencesKey("haptic_effect")
+        val SYNC_INTERVAL = stringPreferencesKey("sync_interval")
     }
 
     override val lastSyncTimestamp: Flow<Long> = context.dataStore.data
@@ -72,7 +74,6 @@ class UserPreferencesRepositoryImpl @Inject constructor(
 
     override val isHapticsEnabled: Flow<Boolean> = context.dataStore.data
         .map { preferences ->
-            // По умолчанию хаптики включены
             preferences[PreferencesKeys.IS_HAPTICS_ENABLED] ?: true
         }
 
@@ -88,7 +89,6 @@ class UserPreferencesRepositoryImpl @Inject constructor(
             return@map try {
                 if (effectName != null) HapticEffect.valueOf(effectName) else HapticEffect.CLICK
             } catch (e: IllegalArgumentException) {
-                // Возвращаем значение по умолчанию, если сохранено некорректное значение
                 HapticEffect.CLICK
             }
         }
@@ -96,6 +96,17 @@ class UserPreferencesRepositoryImpl @Inject constructor(
     override suspend fun setHapticEffect(effect: HapticEffect) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.HAPTIC_EFFECT] = effect.name
+        }
+    }
+
+    override val syncInterval: Flow<SyncInterval> = context.dataStore.data
+        .map { preferences ->
+            SyncInterval.fromString(preferences[PreferencesKeys.SYNC_INTERVAL])
+        }
+
+    override suspend fun setSyncInterval(interval: SyncInterval) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SYNC_INTERVAL] = interval.name
         }
     }
 }

@@ -100,4 +100,9 @@
     <string name="setting_passcode_change">Изменить пин-код</string>
     <string name="setting_passcode_delete">Удалить пин-код</string>
 
+    <string name="sync_interval_5_minutes">Каждые 5 минут</string>
+    <string name="sync_interval_30_minutes">Каждые 30 минут</string>
+    <string name="sync_interval_1_hour">Каждый час</string>
+    <string name="sync_interval_3_hours">Каждые 3 часа</string>
+    <string name="setting_sync_frequency">Частота синхронизации</string>
 </resources>

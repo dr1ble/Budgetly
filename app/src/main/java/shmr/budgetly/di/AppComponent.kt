@@ -16,6 +16,7 @@ import shmr.budgetly.di.features.incomes.IncomesComponent
 import shmr.budgetly.di.features.pincode.PinCodeComponent
 import shmr.budgetly.di.features.pinsettings.PinSettingsComponent
 import shmr.budgetly.di.features.settings.SettingsComponent
+import shmr.budgetly.di.features.syncsettings.SyncSettingsComponent
 import shmr.budgetly.di.features.transactiondetails.TransactionDetailsComponent
 import shmr.budgetly.di.scope.AppScope
 import shmr.budgetly.di.viewmodel.AssistedViewModelModule
@@ -64,6 +65,7 @@ interface AppComponent : ViewModelFactoryProvider {
     fun pinCodeComponent(): PinCodeComponent.Factory
     fun pinSettingsComponent(): PinSettingsComponent.Factory
 
+    fun syncSettingsComponent(): SyncSettingsComponent.Factory
 
 
 }

@@ -42,6 +42,6 @@ class BudgetlyApp : Application() {
 
         // 5. Запускаем монитор и планировщик
         networkMonitor.start()
-        syncScheduler.schedulePeriodicSync()
+        syncScheduler.startObserving()
     }
 }
