@@ -14,8 +14,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import shmr.budgetly.di.viewmodel.AssistedSavedStateViewModelFactory
 import shmr.budgetly.domain.entity.Category
-import shmr.budgetly.domain.events.AppEvent
-import shmr.budgetly.domain.events.AppEventBus
 import shmr.budgetly.domain.usecase.CreateTransactionUseCase
 import shmr.budgetly.domain.usecase.DeleteTransactionUseCase
 import shmr.budgetly.domain.usecase.GetAllCategoriesUseCase
@@ -39,7 +37,6 @@ class TransactionDetailsViewModel @AssistedInject constructor(
     private val deleteTransactionUseCase: DeleteTransactionUseCase,
     private val getAllCategoriesUseCase: GetAllCategoriesUseCase,
     private val getMainAccountUseCase: GetMainAccountUseCase,
-    private val appEventBus: AppEventBus,
     @Assisted private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -224,14 +221,11 @@ class TransactionDetailsViewModel @AssistedInject constructor(
             }
 
             when (result) {
-                is Result.Success -> {
-                    appEventBus.postEvent(AppEvent.AccountUpdated)
-                    _uiState.update {
-                        it.copy(
-                            isSaving = false,
-                            isSaveSuccess = true
-                        )
-                    }
+                is Result.Success -> _uiState.update {
+                    it.copy(
+                        isSaving = false,
+                        isSaveSuccess = true
+                    )
                 }
 
                 is Result.Error -> _uiState.update {
@@ -260,14 +254,11 @@ class TransactionDetailsViewModel @AssistedInject constructor(
             }
             val result = deleteTransactionUseCase(transactionId!!)
             when (result) {
-                is Result.Success -> {
-                    appEventBus.postEvent(AppEvent.AccountUpdated)
-                    _uiState.update {
-                        it.copy(
-                            isSaving = false,
-                            isSaveSuccess = true
-                        )
-                    }
+                is Result.Success -> _uiState.update {
+                    it.copy(
+                        isSaving = false,
+                        isSaveSuccess = true
+                    )
                 }
 
                 is Result.Error -> _uiState.update {

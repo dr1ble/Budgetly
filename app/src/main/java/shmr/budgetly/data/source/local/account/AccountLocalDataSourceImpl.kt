@@ -14,6 +14,9 @@ class AccountLocalDataSourceImpl @Inject constructor(
     override fun getAccountById(id: Int): Flow<AccountEntity?> =
         accountDao.getAccountById(id)
 
+    override suspend fun getAccountByIdSync(id: Int): AccountEntity? =
+        accountDao.getAccountByIdSync(id)
+
     override suspend fun getDirtyAccounts(): List<AccountEntity> =
         accountDao.getDirtyAccounts()
 

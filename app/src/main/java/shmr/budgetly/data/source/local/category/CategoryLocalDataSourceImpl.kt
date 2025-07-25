@@ -16,4 +16,7 @@ class CategoryLocalDataSourceImpl @Inject constructor(
 
     override suspend fun upsertAll(categories: List<CategoryEntity>) =
         categoryDao.upsertAll(categories)
+
+    override suspend fun getCategoryById(id: Int): CategoryEntity? =
+        categoryDao.getCategoryById(id)
 }

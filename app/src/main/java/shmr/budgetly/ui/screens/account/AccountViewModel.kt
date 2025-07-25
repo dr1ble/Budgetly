@@ -7,8 +7,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import shmr.budgetly.domain.entity.Account
-import shmr.budgetly.domain.events.AppEvent
-import shmr.budgetly.domain.events.AppEventBus
 import shmr.budgetly.domain.usecase.GetMainAccountUseCase
 import shmr.budgetly.domain.usecase.RefreshMainAccountUseCase
 import shmr.budgetly.domain.util.Result
@@ -24,8 +22,7 @@ import javax.inject.Inject
 
 class AccountViewModel @Inject constructor(
     private val getMainAccount: GetMainAccountUseCase,
-    private val refreshMainAccount: RefreshMainAccountUseCase,
-    private val appEventBus: AppEventBus
+    private val refreshMainAccount: RefreshMainAccountUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AccountUiState())
@@ -33,7 +30,6 @@ class AccountViewModel @Inject constructor(
 
     init {
         observeAccountData()
-        observeAppEvents()
         loadAccount(isInitialLoad = true)
     }
 
@@ -41,16 +37,6 @@ class AccountViewModel @Inject constructor(
         viewModelScope.launch {
             getMainAccount().collect { result ->
                 processResult(result)
-            }
-        }
-    }
-
-    private fun observeAppEvents() {
-        viewModelScope.launch {
-            appEventBus.events.collect { event ->
-                if (event is AppEvent.AccountUpdated) {
-                    loadAccount()
-                }
             }
         }
     }
@@ -64,7 +50,7 @@ class AccountViewModel @Inject constructor(
         if (_uiState.value.isRefreshing || (_uiState.value.isLoading && isInitialLoad)) return
 
         val showLoading = isInitialLoad && _uiState.value.account == null
-        val showRefreshing = !isInitialLoad
+        val showRefreshing = !isInitialLoad || (_uiState.value.account != null && !isInitialLoad)
 
         viewModelScope.launch {
             _uiState.update {
@@ -100,7 +86,7 @@ class AccountViewModel @Inject constructor(
                         error = result.error
                     )
                 } else {
-                    it.copy(isRefreshing = false) // Скрываем индикатор, но оставляем старые данные
+                    it.copy(isRefreshing = false)
                 }
             }
         }
