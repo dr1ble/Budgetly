@@ -4,17 +4,26 @@ import android.content.Context
 import dagger.BindsInstance
 import dagger.Component
 import shmr.budgetly.BudgetlyApp
+import shmr.budgetly.di.features.about.AboutAppComponent
 import shmr.budgetly.di.features.account.AccountComponent
 import shmr.budgetly.di.features.analyze.AnalyzeComponent
 import shmr.budgetly.di.features.articles.ArticlesComponent
+import shmr.budgetly.di.features.colorpicker.ColorPickerComponent
 import shmr.budgetly.di.features.editaccount.EditAccountComponent
 import shmr.budgetly.di.features.expenses.ExpensesComponent
+import shmr.budgetly.di.features.haptics.HapticsComponent
 import shmr.budgetly.di.features.history.HistoryComponent
 import shmr.budgetly.di.features.incomes.IncomesComponent
+import shmr.budgetly.di.features.language.LanguageComponent
+import shmr.budgetly.di.features.pincode.PinCodeComponent
+import shmr.budgetly.di.features.pinsettings.PinSettingsComponent
 import shmr.budgetly.di.features.settings.SettingsComponent
+import shmr.budgetly.di.features.syncsettings.SyncSettingsComponent
 import shmr.budgetly.di.features.transactiondetails.TransactionDetailsComponent
 import shmr.budgetly.di.scope.AppScope
 import shmr.budgetly.di.viewmodel.AssistedViewModelModule
+import shmr.budgetly.di.viewmodel.ViewModelFactoryModule
+import shmr.budgetly.di.viewmodel.ViewModelFactoryProvider
 import shmr.budgetly.di.viewmodel.ViewModelModule
 import shmr.budgetly.work.DaggerWorkerFactory
 
@@ -26,13 +35,14 @@ import shmr.budgetly.work.DaggerWorkerFactory
         DataModule::class,
         DatabaseModule::class,
         ViewModelModule::class,
-        AssistedViewModelModule::class
+        AssistedViewModelModule::class,
+        ViewModelFactoryModule::class,
+        MainViewModelModule::class
     ]
 )
-interface AppComponent {
+interface AppComponent : ViewModelFactoryProvider {
 
     fun inject(app: BudgetlyApp)
-
     fun workerFactory(): DaggerWorkerFactory
 
     @Component.Factory
@@ -50,4 +60,18 @@ interface AppComponent {
     fun transactionDetailsComponent(): TransactionDetailsComponent.Factory
 
     fun analyzeComponent(): AnalyzeComponent.Factory
+
+    fun colorPickerComponent(): ColorPickerComponent.Factory
+    fun hapticsComponent(): HapticsComponent.Factory
+
+    fun pinCodeComponent(): PinCodeComponent.Factory
+    fun pinSettingsComponent(): PinSettingsComponent.Factory
+
+    fun syncSettingsComponent(): SyncSettingsComponent.Factory
+
+    fun languageComponent(): LanguageComponent.Factory
+
+    fun aboutAppComponent(): AboutAppComponent.Factory
+
+
 }

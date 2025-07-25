@@ -163,8 +163,6 @@ private fun NameItem(name: String, onNameChange: (String) -> Unit) {
             .padding(horizontal = 16.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        EmojiIcon(emoji = "💰", size = 24.dp)
-        Spacer(modifier = Modifier.width(16.dp))
         Text(
             text = stringResource(R.string.edit_account_name_label),
             style = MaterialTheme.typography.bodyLarge,
@@ -193,6 +191,8 @@ private fun BalanceItem(balance: String, onBalanceChange: (String) -> Unit) {
             .padding(horizontal = 16.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        EmojiIcon(emoji = "💰", size = 24.dp)
+        Spacer(modifier = Modifier.width(16.dp))
         Text(
             text = stringResource(R.string.edit_account_balance_label),
             style = MaterialTheme.typography.bodyLarge,

@@ -1,6 +1,7 @@
 package shmr.budgetly.ui.components
 
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
@@ -27,15 +28,20 @@ import shmr.budgetly.ui.navigation.bottomNavItems
  *
  * @param navController Контроллер навигации для выполнения переходов.
  * @param modifier Модификатор для настройки внешнего вида и поведения.
+ * @param onTabClick Лямбда, вызываемая при нажатии на любую вкладку для воспроизведения вибрации.
  */
 @Composable
 fun BottomNavBar(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onTabClick: () -> Unit
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-    NavigationBar(modifier = modifier) {
+    NavigationBar(
+        modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.surface
+    ) {
         bottomNavItems.forEach { destination ->
             val isSelected = isDestinationSelected(destination, navBackStackEntry)
             NavigationBarItem(
@@ -47,7 +53,10 @@ fun BottomNavBar(
                     )
                 },
                 selected = isSelected,
-                onClick = { handleNavigation(navController, destination, isSelected) }
+                onClick = {
+                    onTabClick()
+                    handleNavigation(navController, destination, isSelected)
+                }
             )
         }
     }
@@ -84,7 +93,7 @@ private fun isDestinationSelected(
         else -> currentRoute
     }
 
-    return destination.route::class.qualifiedName == activeTabRouteName
+    return destination::class.qualifiedName == activeTabRouteName
 }
 
 
@@ -98,12 +107,12 @@ private fun handleNavigation(
     destination: BottomNavItem,
     isSelected: Boolean
 ) {
-    val destinationRouteName = destination.route::class.qualifiedName!!
+    val destinationRouteName = destination::class.qualifiedName!!
 
     if (isSelected) {
         navController.popBackStack(destinationRouteName, inclusive = false)
     } else {
-        navController.navigate(destination.route) {
+        navController.navigate(destination) {
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
             }

@@ -26,22 +26,22 @@ class BudgetlyApp : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        // 1. Сначала создаем Dagger компонент
+        // 1. Сначала создаем Dagger компонент. Он нам нужен для получения WorkerFactory.
         appComponent = DaggerAppComponent.factory().create(this)
 
-        // 2. Создаем конфигурацию WorkManager, получая фабрику из компонента
+        // 2. Создаем конфигурацию WorkManager, получая фабрику из компонента.
         val workManagerConfig = Configuration.Builder()
             .setWorkerFactory(appComponent.workerFactory())
             .build()
 
-        // 3. Инициализируем WorkManager с этой конфигурацией
+        // 3. Инициализируем WorkManager с этой конфигурацией. Теперь он готов к работе.
         WorkManager.initialize(this, workManagerConfig)
 
-        // 4. Только теперь, когда WorkManager готов, внедряем зависимости, которые от него зависят
+        // 4. Только теперь, когда WorkManager готов, внедряем зависимости, которые от него зависят.
         appComponent.inject(this)
 
-        // 5. Запускаем монитор и планировщик
+        // 5. Запускаем остальные сервисы.
         networkMonitor.start()
-        syncScheduler.schedulePeriodicSync()
+        syncScheduler.startObserving()
     }
 }

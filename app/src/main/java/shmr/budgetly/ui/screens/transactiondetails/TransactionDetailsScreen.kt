@@ -61,6 +61,7 @@ import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionDetailsScreen(
     viewModel: TransactionDetailsViewModel,

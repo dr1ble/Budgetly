@@ -18,10 +18,17 @@ interface AccountDao {
     suspend fun upsertAccount(account: AccountEntity)
 
     /**
-     * Получает счет по ID.
+     * Получает счет по ID в виде потока.
      */
     @Query("SELECT * FROM accounts WHERE id = :id")
     fun getAccountById(id: Int): Flow<AccountEntity?>
+
+    /**
+     * Получает счет по ID один раз (не поток).
+     * Нужен для расчетов внутри транзакций.
+     */
+    @Query("SELECT * FROM accounts WHERE id = :id")
+    suspend fun getAccountByIdSync(id: Int): AccountEntity?
 
     /**
      * Получает все "грязные" счета (измененные локально).

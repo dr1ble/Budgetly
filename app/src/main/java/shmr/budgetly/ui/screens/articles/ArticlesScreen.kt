@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,7 +27,7 @@ import shmr.budgetly.ui.components.ErrorState
 import shmr.budgetly.ui.util.LocalTopAppBarSetter
 import shmr.budgetly.ui.util.getErrorMessage
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ArticlesScreen(
     modifier: Modifier = Modifier,
@@ -81,7 +82,7 @@ private fun BoxScope.ScreenContent(
                         AppSearchBar(
                             query = uiState.searchQuery,
                             onQueryChange = onSearchQueryChanged,
-                            placeholder = "Найти статью"
+                            placeholder = stringResource(R.string.articles_search_placeholder)
                         )
                     }
                 }

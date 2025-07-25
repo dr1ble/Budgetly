@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -48,6 +49,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AnalyzeScreen(
     viewModel: AnalyzeViewModel,
@@ -56,10 +58,10 @@ fun AnalyzeScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val topAppBarSetter = LocalTopAppBarSetter.current
 
-    LaunchedEffect(uiState.title) {
+    LaunchedEffect(uiState.titleRes) {
         topAppBarSetter {
             AppTopBar(
-                title = uiState.title,
+                title = stringResource(uiState.titleRes),
                 navigationIcon = { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) },
                 onNavigationClick = { navController.popBackStack() }
             )
@@ -162,19 +164,30 @@ private fun Header(
     onStartDateClick: () -> Unit,
     onEndDateClick: () -> Unit
 ) {
+    val locale = HistoryDateFormatter.currentLocale()
     Column {
         BaseListItem(
-            title = "Период: начало",
+            title = stringResource(R.string.period_start_label),
             defaultHeight = MaterialTheme.dimens.heights.small,
-            trail = { DateChip(text = HistoryDateFormatter.formatHeaderDate(startDate), onClick = onStartDateClick) }
+            trail = {
+                DateChip(
+                    text = HistoryDateFormatter.formatHeaderDate(startDate, locale),
+                    onClick = onStartDateClick
+                )
+            }
         )
         BaseListItem(
-            title = "Период: конец",
+            title = stringResource(R.string.period_end_label),
             defaultHeight = MaterialTheme.dimens.heights.small,
-            trail = { DateChip(text = HistoryDateFormatter.formatHeaderDate(endDate), onClick = onEndDateClick) }
+            trail = {
+                DateChip(
+                    text = HistoryDateFormatter.formatHeaderDate(endDate, locale),
+                    onClick = onEndDateClick
+                )
+            }
         )
         BaseListItem(
-            title = "Сумма",
+            title = stringResource(R.string.total_amount_label),
             defaultHeight = MaterialTheme.dimens.heights.small,
             trail = {
                 Text(
@@ -215,7 +228,6 @@ private fun AnalysisListItem(
         lead = { EmojiIcon(emoji = item.category.emoji) },
         title = item.category.name,
         subtitle = item.exampleComment.ifBlank { null },
-        truncateSubtitle = true,
         trail = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(horizontalAlignment = Alignment.End) {

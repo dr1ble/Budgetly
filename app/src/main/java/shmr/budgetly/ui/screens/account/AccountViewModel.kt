@@ -29,14 +29,17 @@ class AccountViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
 
     init {
+        observeAccountData()
+        loadAccount(isInitialLoad = true)
+    }
+
+    private fun observeAccountData() {
         viewModelScope.launch {
             getMainAccount().collect { result ->
                 processResult(result)
             }
         }
-        loadAccount(isInitialLoad = true)
     }
-
 
     /**
      * Инициирует загрузку данных о счете.
@@ -44,8 +47,10 @@ class AccountViewModel @Inject constructor(
      * false для фоновых обновлений.
      */
     fun loadAccount(isInitialLoad: Boolean = false) {
+        if (_uiState.value.isRefreshing || (_uiState.value.isLoading && isInitialLoad)) return
+
         val showLoading = isInitialLoad && _uiState.value.account == null
-        val showRefreshing = !isInitialLoad || _uiState.value.account != null
+        val showRefreshing = !isInitialLoad || (_uiState.value.account != null && !isInitialLoad)
 
         viewModelScope.launch {
             _uiState.update {
@@ -56,7 +61,6 @@ class AccountViewModel @Inject constructor(
                 )
             }
             refreshMainAccount()
-            _uiState.update { it.copy(isLoading = false, isRefreshing = false) }
         }
     }
 
@@ -82,7 +86,7 @@ class AccountViewModel @Inject constructor(
                         error = result.error
                     )
                 } else {
-                    it.copy(isRefreshing = false) // Скрываем индикатор, но оставляем старые данные
+                    it.copy(isRefreshing = false)
                 }
             }
         }

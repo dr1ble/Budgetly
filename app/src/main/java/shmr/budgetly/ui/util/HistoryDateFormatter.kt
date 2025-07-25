@@ -1,9 +1,10 @@
 package shmr.budgetly.ui.util
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalConfiguration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.time.format.TextStyle
 import java.util.Locale
 
 /**
@@ -12,34 +13,33 @@ import java.util.Locale
  */
 object HistoryDateFormatter {
 
-    private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-    private val russianLocale = Locale("ru")
-
-    private val monthsInGenitiveCase = mapOf(
-        1 to "января", 2 to "февраля", 3 to "марта", 4 to "апреля", 5 to "мая",
-        6 to "июня", 7 to "июля", 8 to "августа", 9 to "сентября", 10 to "октября",
-        11 to "ноября", 12 to "декабря"
-    )
-
     /**
      * Форматирует дату и время транзакции для отображения в списке.
-     * Пример: "15 августа 14:30".
+     * Пример: "15 августа 14:30" или "August 15, 2:30 PM".
+     * @param dateTime Дата и время для форматирования.
+     * @param locale Текущая локаль для корректного отображения.
      */
-    fun formatTransactionDate(dateTime: LocalDateTime): String {
-        val day = dateTime.dayOfMonth
-        val month = monthsInGenitiveCase[dateTime.monthValue] ?: ""
-        val time = dateTime.format(timeFormatter)
-        return "$day $month $time"
+    fun formatTransactionDate(dateTime: LocalDateTime, locale: Locale): String {
+        val formatter = DateTimeFormatter.ofPattern("d MMMM HH:mm", locale)
+        return dateTime.format(formatter)
     }
 
     /**
      * Форматирует дату для отображения в заголовке выбора периода.
-     * Пример: "15 августа 2023".
+     * Пример: "15 августа 2023" или "August 15, 2023".
+     * @param date Дата для форматирования.
+     * @param locale Текущая локаль для корректного отображения.
      */
-    fun formatHeaderDate(date: LocalDate): String {
-        val monthName = date.month.getDisplayName(TextStyle.FULL, russianLocale)
-        val day = date.dayOfMonth
-        val year = date.year
-        return "$day $monthName $year"
+    fun formatHeaderDate(date: LocalDate, locale: Locale): String {
+        val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy", locale)
+        return date.format(formatter)
+    }
+
+    /**
+     * Composable-функция для получения текущей локали из контекста.
+     */
+    @Composable
+    fun currentLocale(): Locale {
+        return LocalConfiguration.current.locales[0]
     }
 }

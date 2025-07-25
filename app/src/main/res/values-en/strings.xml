@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Budgetly</string>
+
+    <string name="bottom_nav_label_expenses">Expenses</string>
+    <string name="bottom_nav_label_incomes">Incomes</string>
+    <string name="bottom_nav_label_score">Account</string>
+    <string name="bottom_nav_label_articles">Articles</string>
+    <string name="bottom_nav_label_settings">Settings</string>
+
+    <string name="splash_screen_label">Splash screen</string>
+
+    <string name="expenses_top_bar_title">Expenses Today</string>
+    <string name="expenses_top_bar_action_description">History</string>
+    <string name="incomes_top_bar_title">Incomes Today</string>
+    <string name="history_top_bar_title">My History</string>
+    <string name="account_top_bar_title">My Account</string>
+    <string name="account_top_bar_action_description">Edit</string>
+    <string name="articles_top_bar_title">My Articles</string>
+    <string name="settings_top_bar_title">Settings</string>
+    <string name="fab_description">Add</string>
+    <string name="account_ic_arrow_description">Navigate</string>
+    <string name="account_currency_title">Currency</string>
+    <string name="screen_settings_dark_theme_label">Dark theme</string>
+
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="dialog_clear">Clear</string>
+    <string name="exception_no_internet">No internet connection</string>
+    <string name="error_no_internet">No internet. Please check your connection</string>
+    <string name="error_server">Server error. Please try again later</string>
+    <string name="error_unknown">Unknown error. Please try again later</string>
+    <string name="retry_button_text">Retry</string>
+    <string name="account_balance_title">Balance</string>
+    <string name="history_action_description">History</string>
+    <string name="analyze_action_description">Analyze</string>
+    <string name="edit_action_description">Edit</string>
+    <string name="back_action_description">Back</string>
+    <string name="history_start_date">Start</string>
+    <string name="history_end_date">End</string>
+    <string name="history_total_sum">Total</string>
+    <string name="navigate_action_description">Go to setting</string>
+
+    <string name="setting_dark_theme">Dark theme</string>
+    <string name="setting_primary_color">Primary color</string>
+    <string name="setting_sounds">Sounds</string>
+    <string name="setting_haptics">Haptics</string>
+    <string name="setting_passcode">Passcode</string>
+    <string name="setting_sync">Synchronization</string>
+    <string name="setting_language">Language</string>
+    <string name="setting_about">About</string>
+    <string name="edit_account_name_label">Account name</string>
+    <string name="edit_account_balance_label">Balance</string>
+    <string name="edit_account_top_bar_title">Edit Account</string>
+    <string name="save_action_description">Save</string>
+    <string name="edit_account_currency_label">Currency</string>
+    <string name="edit_account_currency_change_cancel">Cancel currency selection</string>
+    <string name="edit_account_cancel_button">Cancel account editing</string>
+    <string name="transaction_details_account">Account</string>
+    <string name="transaction_details_category">Category</string>
+    <string name="transaction_details_date">Date</string>
+    <string name="transaction_details_time">Time</string>
+    <string name="transaction_details_edit_income">My Income</string>
+    <string name="transaction_details_edit_expense">My Expense</string>
+    <string name="transaction_details_create_income">New Income</string>
+    <string name="transaction_details_create_expense">New Expense</string>
+    <string name="transaction_details_amount">Amount</string>
+    <string name="transaction_details_comment_placeholder">Comment</string>
+    <string name="transaction_details_delete_button">Delete</string>
+    <string name="dialog_error_title">Failed to save</string>
+    <string name="transaction_details_delete_confirm_title">Confirm Deletion</string>
+    <string name="transaction_details_delete_confirm_text">Are you sure you want to delete?</string>
+    <string name="dialog_delete">Delete</string>
+    <string name="transaction_details_delete_income_button">Delete income</string>
+    <string name="transaction_details_delete_expense_button">Delete expense</string>
+    <string name="transaction_details_edit_cancel_button">Cancel transaction editing</string>
+    <string name="analyze_no_data">No data</string>
+
+    <string name="color_name_green">Green (default)</string>
+    <string name="color_name_blue">Blue</string>
+    <string name="color_name_orange">Orange</string>
+    <string name="color_is_selected_description">Selected color</string>
+
+    <string name="haptics_enable_toggle">Vibration</string>
+    <string name="haptic_effect_click">Click</string>
+    <string name="haptic_effect_tick">Tick</string>
+    <string name="haptic_effect_double_click">Double click</string>
+    <string name="haptic_effect_is_selected_description">Selected effect</string>
+
+    <string name="pincode_create_title">Create a passcode</string>
+    <string name="pincode_confirm_title">Confirm your passcode</string>
+    <string name="pincode_check_title">Enter your passcode</string>
+    <string name="pincode_error_mismatch">Passcodes do not match. Please try again.</string>
+    <string name="pincode_error_incorrect">Incorrect passcode</string>
+    <string name="pincode_delete_button_description">Delete character</string>
+    <string name="pincode_check_to_change_title">Enter your old passcode</string>
+    <string name="setting_passcode_subtitle_set">Set</string>
+    <string name="setting_passcode_subtitle_not_set">Not set</string>
+    <string name="pincode_delete_title">Enter passcode to delete</string>
+    <string name="setting_passcode_set">Set passcode</string>
+    <string name="setting_passcode_change">Change passcode</string>
+    <string name="setting_passcode_delete">Delete passcode</string>
+
+    <string name="sync_interval_5_minutes">Every 5 minutes</string>
+    <string name="sync_interval_30_minutes">Every 30 minutes</string>
+    <string name="sync_interval_1_hour">Every hour</string>
+    <string name="sync_interval_3_hours">Every 3 hours</string>
+    <string name="setting_sync_frequency">Synchronization frequency</string>
+
+    <string name="language_is_selected_description">Selected language</string>
+    <string name="language_russian">Russian</string>
+    <string name="language_english">English</string>
+
+    <string name="about_app_version">App version</string>
+    <string name="about_app_last_update">Last update</string>
+    <string name="total_ammount_title">Total</string>
+
+    <string name="analysis_income_title">Income Analysis</string>
+    <string name="analysis_expenses_title">Expense Analysis</string>
+
+    <string name="default_analysis_title">Analyze</string>
+
+    <string name="period_start_label">Period: start</string>
+    <string name="period_end_label">Period: end</string>
+    <string name="total_amount_label">Total amount</string>
+    <string name="articles_search_placeholder">Find article</string>
+
+    <string name="account_name_title">Account name</string>
+    <string name="pincode_back_button_description">Back</string>
+</resources>

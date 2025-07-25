@@ -14,6 +14,7 @@ import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -47,7 +48,10 @@ import shmr.budgetly.ui.util.getErrorMessage
 /**
  * Экран "Расходы". Отображает список транзакций-расходов пользователя за текущий месяц.
  */
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
+@OptIn(
+    ExperimentalFoundationApi::class, ExperimentalMaterialApi::class,
+    ExperimentalMaterial3Api::class
+)
 @Composable
 fun ExpensesScreen(
     modifier: Modifier = Modifier,
@@ -145,7 +149,6 @@ private fun BoxScope.ScreenContent(
                                 emoji = transaction.category.emoji,
                             )
                         },
-                        truncateSubtitle = true,
                         title = transaction.category.name,
                         subtitle = transaction.comment.ifBlank { null },
                         trail = {

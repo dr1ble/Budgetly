@@ -29,7 +29,7 @@ fun BaseFAB(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.primary,
         shape = CircleShape,
-        contentColor = MaterialTheme.colorScheme.background,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
         elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp)
     ) {
         Icon(

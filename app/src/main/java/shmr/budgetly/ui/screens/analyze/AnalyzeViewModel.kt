@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import shmr.budgetly.R
 import shmr.budgetly.di.viewmodel.AssistedSavedStateViewModelFactory
 import shmr.budgetly.domain.model.TransactionFilterType
 import shmr.budgetly.domain.usecase.AnalyzeTransactionsUseCase
@@ -51,14 +52,20 @@ class AnalyzeViewModel @AssistedInject constructor(
             else -> TransactionFilterType.ALL
         }
 
-        val title = if (filterType == TransactionFilterType.INCOME) {
-            "Анализ доходов"
+        val titleResource = if (filterType == TransactionFilterType.INCOME) {
+            R.string.analysis_income_title
         } else {
-            "Анализ расходов"
+            R.string.analysis_expenses_title
         }
 
-        _uiState.update { it.copy(title = title, startDate = startDate, endDate = endDate) }
-
+        // Обновляем UiState, передавая ID ресурса и даты
+        _uiState.update {
+            it.copy(
+                titleRes = titleResource,
+                startDate = startDate,
+                endDate = endDate
+            )
+        }
         loadAnalysis()
     }
 

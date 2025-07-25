@@ -15,6 +15,12 @@ import shmr.budgetly.ui.screens.expenses.ExpensesScreen
 import shmr.budgetly.ui.screens.history.HistoryScreen
 import shmr.budgetly.ui.screens.incomes.IncomesScreen
 import shmr.budgetly.ui.screens.settings.SettingsScreen
+import shmr.budgetly.ui.screens.settings.about.AboutAppScreen
+import shmr.budgetly.ui.screens.settings.colorpicker.ColorPickerScreen
+import shmr.budgetly.ui.screens.settings.haptics.HapticsScreen
+import shmr.budgetly.ui.screens.settings.language.LanguageScreen
+import shmr.budgetly.ui.screens.settings.pincode.PinSettingsScreen
+import shmr.budgetly.ui.screens.settings.sync.SyncSettingsScreen
 import shmr.budgetly.ui.screens.transactiondetails.TransactionDetailsScreen
 
 const val ACCOUNT_UPDATED_RESULT_KEY = "account_updated"
@@ -23,7 +29,8 @@ const val TRANSACTION_SAVED_RESULT_KEY = "transaction_saved"
 @Composable
 fun AppNavGraph(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onNavigateToPin: (purpose: PinScreenPurpose) -> Unit
 ) {
     NavHost(
         navController = navController,
@@ -116,6 +123,67 @@ fun AppNavGraph(
                 it.analyzeComponent().create()
             }
             AnalyzeScreen(
+                viewModel = viewModel(factory = component.viewModelFactory()),
+                navController = navController
+            )
+        }
+
+        composable<ColorPicker> { navBackStackEntry ->
+            val component = rememberScreenComponent(navBackStackEntry) {
+                it.colorPickerComponent().create()
+            }
+            ColorPickerScreen(
+                viewModel = viewModel(factory = component.viewModelFactory()),
+                navController = navController
+            )
+        }
+
+        composable<Haptics> { navBackStackEntry ->
+            val component = rememberScreenComponent(navBackStackEntry) {
+                it.hapticsComponent().create()
+            }
+            HapticsScreen(
+                viewModel = viewModel(factory = component.viewModelFactory()),
+                navController = navController
+            )
+        }
+
+        composable<PinSettings> { navBackStackEntry ->
+            val component = rememberScreenComponent(navBackStackEntry) {
+                it.pinSettingsComponent().create()
+            }
+            PinSettingsScreen(
+                viewModel = viewModel(factory = component.viewModelFactory()),
+                navController = navController,
+                onNavigateToPin = onNavigateToPin
+            )
+        }
+
+        composable<SyncSettings> { navBackStackEntry ->
+            val component = rememberScreenComponent(navBackStackEntry) {
+                it.syncSettingsComponent().create()
+            }
+            SyncSettingsScreen(
+                viewModel = viewModel(factory = component.viewModelFactory()),
+                navController = navController
+            )
+        }
+
+        composable<Language> { navBackStackEntry ->
+            val component = rememberScreenComponent(navBackStackEntry) {
+                it.languageComponent().create()
+            }
+            LanguageScreen(
+                viewModel = viewModel(factory = component.viewModelFactory()),
+                navController = navController
+            )
+        }
+
+        composable<AboutApp> { navBackStackEntry ->
+            val component = rememberScreenComponent(navBackStackEntry) {
+                it.aboutAppComponent().create()
+            }
+            AboutAppScreen(
                 viewModel = viewModel(factory = component.viewModelFactory()),
                 navController = navController
             )

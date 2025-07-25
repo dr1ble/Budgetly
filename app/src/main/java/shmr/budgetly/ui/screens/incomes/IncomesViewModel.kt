@@ -46,6 +46,10 @@ class IncomesViewModel @Inject constructor(
                             loadIncomes(isInitialLoad = true)
                         }
                     }
+                    is AppEvent.NavigateToPinSetup -> {
+                    }
+                    is AppEvent.PinStatusChanged -> {
+                    }
                 }
             }
         }

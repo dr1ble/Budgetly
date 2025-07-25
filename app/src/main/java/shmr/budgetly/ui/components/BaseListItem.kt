@@ -17,13 +17,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import shmr.budgetly.R
 import shmr.budgetly.ui.theme.dimens
-import shmr.budgetly.ui.util.truncateWithEllipsis
 
 @Composable
 fun BaseListItem(
@@ -36,8 +38,7 @@ fun BaseListItem(
     trail: @Composable (() -> Unit)? = null,
     showDivider: Boolean = true,
     backgroundColor: Color = Color.Transparent,
-    onClick: (() -> Unit)? = null,
-    truncateSubtitle: Boolean = false
+    onClick: (() -> Unit)? = null
 ) {
 
     Box(
@@ -68,17 +69,13 @@ fun BaseListItem(
                     style = titleTextStyle.copy(lineHeight = 18.sp)
                 )
                 if (subtitle != null) {
-                    val finalSubtitle = if (truncateSubtitle) {
-                        truncateWithEllipsis(subtitle)
-                    } else {
-                        subtitle
-                    }
-
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = finalSubtitle,
+                        text = subtitle,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
@@ -138,7 +135,7 @@ fun ListItemTrailText(
 @Composable
 fun TotalHeader(totalAmount: String, textStyle: TextStyle = MaterialTheme.typography.bodyLarge) {
     BaseListItem(
-        title = "Всего",
+        title = stringResource(R.string.total_ammount_title),
         titleTextStyle = textStyle,
         defaultHeight = MaterialTheme.dimens.heights.small,
         backgroundColor = MaterialTheme.colorScheme.secondary,

@@ -5,7 +5,7 @@
     <string name="bottom_nav_label_incomes">Доходы</string>
     <string name="bottom_nav_label_score">Счет</string>
     <string name="bottom_nav_label_articles">Статьи</string>
-    <string name="bottom_nav_label_settigns">Настройки</string>
+    <string name="bottom_nav_label_settings">Настройки</string>
 
     <string name="splash_screen_label">Splash screen</string>
 
@@ -75,4 +75,55 @@
     <string name="transaction_details_edit_cancel_button">Отмена добавления/редактирования операции</string>
     <string name="analyze_no_data">Нет данных</string>
 
+    <string name="color_name_green">Зеленый (стандартный)</string>
+    <string name="color_name_blue">Синий</string>
+    <string name="color_name_orange">Оранжевый</string>
+    <string name="color_is_selected_description">Выбранный цвет</string>
+
+    <string name="haptics_enable_toggle">Вибрация</string>
+    <string name="haptic_effect_click">Клик</string>
+    <string name="haptic_effect_tick">Тик</string>
+    <string name="haptic_effect_double_click">Двойной клик</string>
+    <string name="haptic_effect_is_selected_description">Выбранный эффект</string>
+
+    <string name="pincode_create_title">Создайте пин-код</string>
+    <string name="pincode_confirm_title">Подтвердите пин-код</string>
+    <string name="pincode_check_title">Введите пин-код</string>
+    <string name="pincode_error_mismatch">Пин-коды не совпадают. Попробуйте еще раз.</string>
+    <string name="pincode_error_incorrect">Неверный пин-код</string>
+    <string name="pincode_delete_button_description">Удалить символ</string>
+    <string name="pincode_check_to_change_title">Введите старый пин-код</string>
+    <string name="setting_passcode_subtitle_set">Установлен</string>
+    <string name="setting_passcode_subtitle_not_set">Не установлен</string>
+    <string name="pincode_delete_title">Введите пин-код для удаления</string>
+    <string name="setting_passcode_set">Установить пин-код</string>
+    <string name="setting_passcode_change">Изменить пин-код</string>
+    <string name="setting_passcode_delete">Удалить пин-код</string>
+
+    <string name="sync_interval_5_minutes">Каждые 5 минут</string>
+    <string name="sync_interval_30_minutes">Каждые 30 минут</string>
+    <string name="sync_interval_1_hour">Каждый час</string>
+    <string name="sync_interval_3_hours">Каждые 3 часа</string>
+    <string name="setting_sync_frequency">Частота синхронизации</string>
+
+    <string name="language_is_selected_description">Выбранный язык</string>
+    <string name="language_russian">Русский</string>
+    <string name="language_english">Английский</string>
+
+    <string name="about_app_version">Версия приложения</string>
+    <string name="about_app_last_update">Последнее обновление</string>
+    <string name="total_ammount_title">Всего</string>
+
+    <string name="analysis_income_title">Анализ доходов</string>
+    <string name="analysis_expenses_title">Анализ расходов</string>
+
+    <string name="default_analysis_title">Анализ</string>
+
+    <string name="period_start_label">Период: начало</string>
+    <string name="period_end_label">Период: конец</string>
+    <string name="total_amount_label">Сумма</string>
+    <string name="articles_search_placeholder">Найти статью</string>
+
+    <string name="account_name_title">Название счета</string>
+    <string name="pincode_back_button_description">Назад</string>
 </resources>
