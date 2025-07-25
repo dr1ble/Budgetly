@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -41,6 +42,7 @@ import shmr.budgetly.ui.theme.defaultDimens
 import shmr.budgetly.ui.theme.getBudgetlyApplicationScheme
 import shmr.budgetly.ui.util.LocalTopAppBarSetter
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ColorPickerScreen(
     viewModel: ColorPickerViewModel,

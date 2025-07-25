@@ -123,5 +123,8 @@
     <string name="period_start_label">Period: start</string>
     <string name="period_end_label">Period: end</string>
     <string name="total_amount_label">Total amount</string>
+    <string name="articles_search_placeholder">Find article</string>
 
+    <string name="account_name_title">Account name</string>
+    <string name="pincode_back_button_description">Back</string>
 </resources>

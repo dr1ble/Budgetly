@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -51,6 +52,7 @@ import java.time.ZoneId
  * Экран "История", отображающий список транзакций за выбранный период.
  * Позволяет пользователю выбирать начальную и конечную даты.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
     viewModel: HistoryViewModel,
@@ -183,17 +185,18 @@ private fun HistoryHeader(
     onStartDateClick: () -> Unit,
     onEndDateClick: () -> Unit
 ) {
+    val locale = HistoryDateFormatter.currentLocale()
     Column(modifier = Modifier.background(MaterialTheme.colorScheme.secondary)) {
         BaseListItem(
             title = stringResource(R.string.history_start_date),
             defaultHeight = MaterialTheme.dimens.heights.small,
-            trail = { Text(text = HistoryDateFormatter.formatHeaderDate(startDate)) },
+            trail = { Text(text = HistoryDateFormatter.formatHeaderDate(startDate, locale)) },
             onClick = onStartDateClick
         )
         BaseListItem(
             title = stringResource(R.string.history_end_date),
             defaultHeight = MaterialTheme.dimens.heights.small,
-            trail = { Text(text = HistoryDateFormatter.formatHeaderDate(endDate)) },
+            trail = { Text(text = HistoryDateFormatter.formatHeaderDate(endDate, locale)) },
             onClick = onEndDateClick
         )
         BaseListItem(
@@ -236,6 +239,7 @@ private fun TransactionItem(
     transaction: Transaction,
     onClick: () -> Unit
 ) {
+    val locale = HistoryDateFormatter.currentLocale()
     BaseListItem(
         lead = { EmojiIcon(emoji = transaction.category.emoji) },
         title = transaction.category.name,
@@ -252,7 +256,10 @@ private fun TransactionItem(
                     style = MaterialTheme.typography.bodyLarge
                 )
                 Text(
-                    text = HistoryDateFormatter.formatTransactionDate(transaction.transactionDate),
+                    text = HistoryDateFormatter.formatTransactionDate(
+                        transaction.transactionDate,
+                        locale
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

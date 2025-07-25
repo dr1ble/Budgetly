@@ -19,9 +19,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
@@ -36,10 +39,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import shmr.budgetly.R
+import shmr.budgetly.ui.components.AppTopBar
 import kotlin.math.roundToInt
 
 private const val PIN_LENGTH = 4
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PinCodeScreen(
     viewModel: PinCodeViewModel,
@@ -86,51 +91,60 @@ fun PinCodeScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(80.dp)
-        ) {
-            if (uiState.mode.isCancellable) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .padding(top = 32.dp)
-                        .clickable { onCancel() }
-                )
-            }
-        }
+        AppTopBar(
+            title = "",
+            navigationIcon = {
+                if (uiState.mode.isCancellable) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.pincode_back_button_description)
+                    )
+                }
+            },
+            onNavigationClick = {
+                if (uiState.mode.isCancellable) {
+                    onCancel()
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = Color.Transparent,
+                navigationIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        )
 
-        Text(
-            text = stringResource(id = uiState.mode.titleRes),
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        PinIndicators(
-            count = uiState.enteredPin.length,
-            isError = uiState.error != null,
-            modifier = Modifier.offset { IntOffset(shake.value.roundToInt(), 0) }
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = uiState.error?.let { stringResource(id = it.messageRes) } ?: "",
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.height(40.dp)
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        PinKeyboard(
-            onNumberClick = viewModel::onNumberClick,
-            onDeleteClick = viewModel::onDeleteClick
-        )
-        Spacer(modifier = Modifier.height(48.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = stringResource(id = uiState.mode.titleRes),
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            PinIndicators(
+                count = uiState.enteredPin.length,
+                isError = uiState.error != null,
+                modifier = Modifier.offset { IntOffset(shake.value.roundToInt(), 0) }
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = uiState.error?.let { stringResource(id = it.messageRes) } ?: "",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.height(40.dp)
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            PinKeyboard(
+                onNumberClick = viewModel::onNumberClick,
+                onDeleteClick = viewModel::onDeleteClick
+            )
+            Spacer(modifier = Modifier.height(48.dp))
+        }
     }
 }
 

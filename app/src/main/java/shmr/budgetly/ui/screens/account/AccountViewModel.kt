@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import shmr.budgetly.domain.entity.Account
+import shmr.budgetly.domain.events.AppEvent
+import shmr.budgetly.domain.events.AppEventBus
 import shmr.budgetly.domain.usecase.GetMainAccountUseCase
 import shmr.budgetly.domain.usecase.RefreshMainAccountUseCase
 import shmr.budgetly.domain.util.Result
@@ -22,21 +24,36 @@ import javax.inject.Inject
 
 class AccountViewModel @Inject constructor(
     private val getMainAccount: GetMainAccountUseCase,
-    private val refreshMainAccount: RefreshMainAccountUseCase
+    private val refreshMainAccount: RefreshMainAccountUseCase,
+    private val appEventBus: AppEventBus
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AccountUiState())
     val uiState = _uiState.asStateFlow()
 
     init {
+        observeAccountData()
+        observeAppEvents()
+        loadAccount(isInitialLoad = true)
+    }
+
+    private fun observeAccountData() {
         viewModelScope.launch {
             getMainAccount().collect { result ->
                 processResult(result)
             }
         }
-        loadAccount(isInitialLoad = true)
     }
 
+    private fun observeAppEvents() {
+        viewModelScope.launch {
+            appEventBus.events.collect { event ->
+                if (event is AppEvent.AccountUpdated) {
+                    loadAccount()
+                }
+            }
+        }
+    }
 
     /**
      * Инициирует загрузку данных о счете.
@@ -44,8 +61,10 @@ class AccountViewModel @Inject constructor(
      * false для фоновых обновлений.
      */
     fun loadAccount(isInitialLoad: Boolean = false) {
+        if (_uiState.value.isRefreshing || (_uiState.value.isLoading && isInitialLoad)) return
+
         val showLoading = isInitialLoad && _uiState.value.account == null
-        val showRefreshing = !isInitialLoad || _uiState.value.account != null
+        val showRefreshing = !isInitialLoad
 
         viewModelScope.launch {
             _uiState.update {
@@ -56,7 +75,6 @@ class AccountViewModel @Inject constructor(
                 )
             }
             refreshMainAccount()
-            _uiState.update { it.copy(isLoading = false, isRefreshing = false) }
         }
     }
 

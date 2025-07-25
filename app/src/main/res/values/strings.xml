@@ -122,4 +122,8 @@
     <string name="period_start_label">Период: начало</string>
     <string name="period_end_label">Период: конец</string>
     <string name="total_amount_label">Сумма</string>
+    <string name="articles_search_placeholder">Найти статью</string>
+
+    <string name="account_name_title">Название счета</string>
+    <string name="pincode_back_button_description">Назад</string>
 </resources>

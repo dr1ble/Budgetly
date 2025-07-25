@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -48,6 +49,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AnalyzeScreen(
     viewModel: AnalyzeViewModel,
@@ -162,29 +164,30 @@ private fun Header(
     onStartDateClick: () -> Unit,
     onEndDateClick: () -> Unit
 ) {
+    val locale = HistoryDateFormatter.currentLocale()
     Column {
         BaseListItem(
-            title = stringResource(R.string.period_start_label), // Используем ресурс
+            title = stringResource(R.string.period_start_label),
             defaultHeight = MaterialTheme.dimens.heights.small,
             trail = {
                 DateChip(
-                    text = HistoryDateFormatter.formatHeaderDate(startDate),
+                    text = HistoryDateFormatter.formatHeaderDate(startDate, locale),
                     onClick = onStartDateClick
                 )
             }
         )
         BaseListItem(
-            title = stringResource(R.string.period_end_label), // Используем ресурс
+            title = stringResource(R.string.period_end_label),
             defaultHeight = MaterialTheme.dimens.heights.small,
             trail = {
                 DateChip(
-                    text = HistoryDateFormatter.formatHeaderDate(endDate),
+                    text = HistoryDateFormatter.formatHeaderDate(endDate, locale),
                     onClick = onEndDateClick
                 )
             }
         )
         BaseListItem(
-            title = stringResource(R.string.total_amount_label), // Используем ресурс
+            title = stringResource(R.string.total_amount_label),
             defaultHeight = MaterialTheme.dimens.heights.small,
             trail = {
                 Text(
@@ -225,7 +228,6 @@ private fun AnalysisListItem(
         lead = { EmojiIcon(emoji = item.category.emoji) },
         title = item.category.name,
         subtitle = item.exampleComment.ifBlank { null },
-        truncateSubtitle = true,
         trail = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(horizontalAlignment = Alignment.End) {

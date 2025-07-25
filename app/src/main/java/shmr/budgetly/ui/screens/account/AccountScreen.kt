@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,10 +41,11 @@ import shmr.budgetly.ui.util.LocalTopAppBarSetter
 import shmr.budgetly.ui.util.formatCurrencySymbol
 
 private object AccountScreenDefaults {
+
     val balanceCategoryEmoji = "💰"
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AccountScreen(
     modifier: Modifier = Modifier,
@@ -55,12 +57,8 @@ fun AccountScreen(
 
     LaunchedEffect(uiState.isRefreshing, uiState.account) {
         topAppBarSetter {
-            val title = if (uiState.isLoading) "" else {
-                uiState.account?.name ?: stringResource(R.string.account_top_bar_title)
-            }
-
             AppTopBar(
-                title = title,
+                title = stringResource(R.string.account_top_bar_title),
                 actions = {
                     if (uiState.isRefreshing) {
                         CircularProgressIndicator(
@@ -127,6 +125,24 @@ private fun AccountContent(account: Account) {
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
+        item {
+            BaseListItem(
+
+                defaultHeight = MaterialTheme.dimens.heights.small,
+                title = stringResource(id = R.string.account_name_title),
+                titleTextStyle = MaterialTheme.typography.bodyLarge,
+                backgroundColor = MaterialTheme.colorScheme.secondary,
+                trail = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = account.name,
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                        Spacer(Modifier.width(16.dp))
+                    }
+                }
+            )
+        }
         item {
             BaseListItem(
                 lead = {
