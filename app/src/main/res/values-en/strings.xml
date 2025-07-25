@@ -113,5 +113,15 @@
 
     <string name="about_app_version">App version</string>
     <string name="about_app_last_update">Last update</string>
+    <string name="total_ammount_title">Total</string>
+
+    <string name="analysis_income_title">Income Analysis</string>
+    <string name="analysis_expenses_title">Expense Analysis</string>
+
+    <string name="default_analysis_title">Analyze</string>
+
+    <string name="period_start_label">Period: start</string>
+    <string name="period_end_label">Period: end</string>
+    <string name="total_amount_label">Total amount</string>
 
 </resources>

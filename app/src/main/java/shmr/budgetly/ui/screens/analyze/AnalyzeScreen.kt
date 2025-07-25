@@ -56,10 +56,10 @@ fun AnalyzeScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val topAppBarSetter = LocalTopAppBarSetter.current
 
-    LaunchedEffect(uiState.title) {
+    LaunchedEffect(uiState.titleRes) {
         topAppBarSetter {
             AppTopBar(
-                title = uiState.title,
+                title = stringResource(uiState.titleRes),
                 navigationIcon = { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) },
                 onNavigationClick = { navController.popBackStack() }
             )
@@ -164,17 +164,27 @@ private fun Header(
 ) {
     Column {
         BaseListItem(
-            title = "Период: начало",
+            title = stringResource(R.string.period_start_label), // Используем ресурс
             defaultHeight = MaterialTheme.dimens.heights.small,
-            trail = { DateChip(text = HistoryDateFormatter.formatHeaderDate(startDate), onClick = onStartDateClick) }
+            trail = {
+                DateChip(
+                    text = HistoryDateFormatter.formatHeaderDate(startDate),
+                    onClick = onStartDateClick
+                )
+            }
         )
         BaseListItem(
-            title = "Период: конец",
+            title = stringResource(R.string.period_end_label), // Используем ресурс
             defaultHeight = MaterialTheme.dimens.heights.small,
-            trail = { DateChip(text = HistoryDateFormatter.formatHeaderDate(endDate), onClick = onEndDateClick) }
+            trail = {
+                DateChip(
+                    text = HistoryDateFormatter.formatHeaderDate(endDate),
+                    onClick = onEndDateClick
+                )
+            }
         )
         BaseListItem(
-            title = "Сумма",
+            title = stringResource(R.string.total_amount_label), // Используем ресурс
             defaultHeight = MaterialTheme.dimens.heights.small,
             trail = {
                 Text(

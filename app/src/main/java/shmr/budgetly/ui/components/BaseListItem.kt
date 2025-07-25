@@ -17,11 +17,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import shmr.budgetly.R
 import shmr.budgetly.ui.theme.dimens
 import shmr.budgetly.ui.util.truncateWithEllipsis
 
@@ -138,7 +140,7 @@ fun ListItemTrailText(
 @Composable
 fun TotalHeader(totalAmount: String, textStyle: TextStyle = MaterialTheme.typography.bodyLarge) {
     BaseListItem(
-        title = "Всего",
+        title = stringResource(R.string.total_ammount_title),
         titleTextStyle = textStyle,
         defaultHeight = MaterialTheme.dimens.heights.small,
         backgroundColor = MaterialTheme.colorScheme.secondary,
